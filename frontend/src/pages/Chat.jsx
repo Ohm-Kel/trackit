@@ -2,13 +2,13 @@ import { Send } from 'lucide-react';
 
 export default function Chat() {
   return (
-    <div className="h-full flex flex-col pt-7 animate-[fadeIn_0.2s_ease]">
-      <div className="px-8 mb-4">
-        <h1 className="text-[22px] font-bold text-text-1 tracking-[-0.3px]">AI Workload Chat</h1>
-        <p className="text-[13px] text-text-3 mt-[3px]">Ask anything about your schedule, exams, or what to do next</p>
+    <div className="h-full flex flex-col pt-5 md:pt-7 animate-[fadeIn_0.2s_ease]">
+      <div className="px-4 md:px-8 mb-4">
+        <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">AI Workload Chat</h1>
+        <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Ask anything about your schedule, exams, or what to do next</p>
       </div>
 
-      <div className="flex-1 px-8 pb-6 grid grid-cols-[1fr_256px] gap-5 min-h-0 overflow-hidden">
+      <div className="flex-1 px-4 md:px-8 pb-4 md:pb-6 grid grid-cols-1 md:grid-cols-[1fr_256px] gap-5 min-h-0 overflow-hidden">
         
         {/* Chat Main Area */}
         <div className="flex flex-col min-h-0">
@@ -73,7 +73,7 @@ export default function Chat() {
         </div>
 
         {/* Context Sidebar */}
-        <div className="flex flex-col gap-3.5 py-1 pb-3.5 overflow-y-auto custom-scrollbar">
+        <div className="hidden md:flex flex-col gap-3.5 py-1 pb-3.5 overflow-y-auto custom-scrollbar">
           
           <div className="bg-white border border-border rounded-r p-[15px] shadow-xs">
             <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-text-3 mb-2.5">Tasks in Context</div>

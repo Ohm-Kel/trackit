@@ -6,23 +6,23 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
-      <div className="pt-7 px-8 pb-0 flex items-center justify-between mb-6">
+      <div className="pt-5 md:pt-7 px-4 md:px-8 pb-0 flex items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-[22px] font-bold text-text-1 tracking-[-0.3px]">Good morning, Kwame ☀️</h1>
-          <p className="text-[13px] text-text-3 mt-[3px]">Tuesday, March 10 · 3 urgent tasks · 2 exams coming up</p>
+          <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Good morning, Kwame ☀️</h1>
+          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Tuesday, March 10 · 3 urgent tasks · 2 exams coming up</p>
         </div>
         <button 
           onClick={() => navigate('/add')}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
         >
           <Plus className="w-[13px] h-[13px]" />
-          Add Task
+          <span className="hidden sm:inline">Add Task</span>
         </button>
       </div>
 
-      <div className="px-8 pb-9">
+      <div className="px-4 md:px-8 pb-9">
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3.5 mb-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 mb-5">
           <div className="bg-white border border-border rounded-r p-[18px] px-5 shadow-xs hover:shadow-sm transition-shadow flex items-center gap-3.5">
             <div className="w-[38px] h-[38px] rounded-[10px] bg-primary-light flex items-center justify-center shrink-0 text-primary">
               <ListTodo className="w-[18px] h-[18px]" strokeWidth={1.6} />
@@ -53,22 +53,22 @@ export default function Dashboard() {
         </div>
 
         {/* Focus Plan Banner */}
-        <div className="bg-primary rounded-r p-5 px-6 mb-5 flex justify-between items-center shadow-sm">
+        <div className="bg-primary rounded-r p-5 px-6 mb-5 flex flex-col md:flex-row gap-4 justify-between md:items-center shadow-sm">
           <div>
             <div className="text-[10px] font-semibold tracking-[0.08em] uppercase text-primary-mid mb-1.5">Today's Focus Plan</div>
-            <div className="text-[18px] font-bold text-white mb-1">3 hours of work recommended</div>
-            <div className="text-[12.5px] text-primary-mid">Morning: Data Structures (2hr) · Evening: MIS reading (1hr)</div>
+            <div className="text-[16px] md:text-[18px] font-bold text-white mb-1">3 hours of work recommended</div>
+            <div className="text-[12px] md:text-[12.5px] text-primary-mid">Morning: Data Structures (2hr) · Evening: MIS reading (1hr)</div>
           </div>
           <button 
             onClick={() => navigate('/chat')}
-            className="bg-white/15 hover:bg-white/25 text-white border border-white/25 rounded-rs px-[18px] py-2 text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap"
+            className="bg-white/15 hover:bg-white/25 text-white border border-white/25 rounded-rs px-[18px] py-2 text-[13px] font-semibold cursor-pointer transition-colors whitespace-nowrap self-start md:self-auto"
           >
             Chat about my plan →
           </button>
         </div>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-[1fr_290px] gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_290px] gap-5 md:gap-7">
           
           {/* Main List */}
           <div>

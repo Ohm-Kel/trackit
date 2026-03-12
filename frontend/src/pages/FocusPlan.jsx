@@ -3,39 +3,39 @@ import { RefreshCw, CheckCircle2, Circle } from 'lucide-react';
 export default function FocusPlan() {
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
-      <div className="pt-7 px-8 pb-0 flex items-center justify-between mb-6">
+      <div className="pt-5 md:pt-7 px-4 md:px-8 pb-0 flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 md:mb-6">
         <div>
-          <h1 className="text-[22px] font-bold text-text-1 tracking-[-0.3px]">Today's Focus Plan</h1>
-          <p className="text-[13px] text-text-3 mt-[3px]">AI-generated plan based on your tasks, exams, and free time</p>
+          <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Today's Focus Plan</h1>
+          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">AI-generated plan based on your tasks, exams, and free time</p>
         </div>
-        <button className="inline-flex items-center gap-[7px] px-3.5 py-[9px] bg-white border border-border2 text-text-2 hover:border-primary hover:text-primary hover:bg-primary-faint rounded-rs text-[12px] font-semibold transition-all shadow-xs cursor-pointer">
+        <button className="inline-flex items-center justify-center gap-[7px] px-3.5 py-[9px] bg-white border border-border2 text-text-2 hover:border-primary hover:text-primary hover:bg-primary-faint rounded-rs text-[12px] font-semibold transition-all shadow-xs cursor-pointer w-full md:w-auto">
           <RefreshCw className="w-3.5 h-3.5" />
           Regenerate Plan
         </button>
       </div>
 
-      <div className="px-8 pb-9">
+      <div className="px-4 md:px-8 pb-9">
         
         {/* Day Banner */}
-        <div className="bg-primary rounded-r p-[22px] px-[26px] mb-6 flex justify-between items-center shadow-md relative overflow-hidden text-white">
-          <div className="relative z-10 w-full flex justify-between">
-            <div className="max-w-[60%]">
+        <div className="bg-primary rounded-r p-[18px] md:p-[22px] px-5 md:px-[26px] mb-6 flex flex-col justify-between items-start shadow-md relative overflow-hidden text-white">
+          <div className="relative z-10 w-full flex flex-col md:flex-row justify-between gap-5">
+            <div className="max-w-full md:max-w-[60%]">
               <div className="text-[11px] font-bold uppercase tracking-[0.08em] text-primary-light mb-1.5 opacity-90">Thursday, March 12 — Study Day</div>
-              <div className="text-[22px] font-bold mb-1.5 drop-shadow-sm">You have 5.5 free hours today</div>
-              <div className="text-[13px] text-primary-light font-medium">Trackit has planned <strong className="text-white font-bold">3.5hrs</strong> of focused work + <strong className="text-white font-bold">2hrs</strong> buffer</div>
+              <div className="text-[18px] md:text-[22px] font-bold mb-1.5 drop-shadow-sm">You have 5.5 free hours today</div>
+              <div className="text-[12px] md:text-[13px] text-primary-light font-medium leading-relaxed">Trackit has planned <strong className="text-white font-bold">3.5hrs</strong> of focused work + <strong className="text-white font-bold">2hrs</strong> buffer</div>
             </div>
-            <div className="flex gap-9 justify-end flex-1 pl-8 items-center border-l border-white/20">
+            <div className="flex gap-4 md:gap-9 justify-start md:justify-end flex-1 pl-0 md:pl-8 items-center border-l-0 md:border-l border-white/20 pt-4 md:pt-0 border-t md:border-t-0 mt-2 md:mt-0">
               <div className="text-center">
-                <div className="text-[28px] font-bold leading-none mb-1">3</div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.05em] text-primary-light">Sessions</div>
+                <div className="text-[22px] md:text-[28px] font-bold leading-none mb-1">3</div>
+                <div className="text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.05em] text-primary-light">Sessions</div>
               </div>
               <div className="text-center">
-                <div className="text-[28px] font-bold leading-none mb-1">3.5</div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.05em] text-primary-light">Hours Planned</div>
+                <div className="text-[22px] md:text-[28px] font-bold leading-none mb-1">3.5</div>
+                <div className="text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.05em] text-primary-light">Hours</div>
               </div>
               <div className="text-center">
-                <div className="text-[28px] font-bold leading-none mb-1">2</div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.05em] text-primary-light">Tasks Targeted</div>
+                <div className="text-[22px] md:text-[28px] font-bold leading-none mb-1">2</div>
+                <div className="text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.05em] text-primary-light">Tasks</div>
               </div>
             </div>
           </div>
@@ -44,7 +44,7 @@ export default function FocusPlan() {
           <div className="absolute right-32 -bottom-16 w-32 h-32 bg-white opacity-[0.04] rounded-full blur-xl pointer-events-none"></div>
         </div>
 
-        <div className="grid grid-cols-[1fr_300px] gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6">
           
           {/* Timeline */}
           <div>

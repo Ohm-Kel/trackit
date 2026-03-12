@@ -6,22 +6,22 @@ export default function Exams() {
 
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
-      <div className="pt-7 px-8 pb-0 flex items-center justify-between mb-6">
+      <div className="pt-5 md:pt-7 px-4 md:px-8 pb-0 flex items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-[22px] font-bold text-text-1 tracking-[-0.3px]">Exam Countdown</h1>
-          <p className="text-[13px] text-text-3 mt-[3px]">2 exams tracked · revision plans active</p>
+          <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Exam Countdown</h1>
+          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">2 exams tracked · revision plans active</p>
         </div>
         <button 
           onClick={() => navigate('/add?tab=exam')}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
         >
           <Plus className="w-[13px] h-[13px]" />
-          Add Exam
+          <span className="hidden sm:inline">Add Exam</span>
         </button>
       </div>
 
-      <div className="px-8 pb-9">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4">
+      <div className="px-4 md:px-8 pb-9">
+        <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4">
           
           {/* Card 1 */}
           <div className="bg-white border border-border rounded-r p-5.5 shadow-xs hover:shadow-md transition-shadow">

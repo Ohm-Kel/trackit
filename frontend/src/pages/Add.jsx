@@ -24,31 +24,31 @@ export default function Add() {
 
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
-      <div className="pt-7 px-8 pb-0 flex items-center justify-between mb-6">
+      <div className="pt-5 md:pt-7 px-4 md:px-8 pb-0 flex items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-[22px] font-bold text-text-1 tracking-[-0.3px]">Add New</h1>
-          <p className="text-[13px] text-text-3 mt-[3px]">Describe your task or exam, or fill in the form manually</p>
+          <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Add New</h1>
+          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Describe your task or exam, or fill in the form manually</p>
         </div>
       </div>
 
-      <div className="px-8 pb-9">
-        <div className="flex gap-1 bg-bg p-1 rounded-[10px] mb-5.5 w-max border border-border">
+      <div className="px-4 md:px-8 pb-9">
+        <div className="flex flex-col sm:flex-row gap-1 bg-bg p-1 rounded-[10px] mb-5.5 w-full sm:w-max border border-border">
           <button 
             onClick={() => setActiveTab('task')}
-            className={`px-5 py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'task' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
+            className={`px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'task' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
           >
             📋 Assignment / Task
           </button>
           <button 
             onClick={() => setActiveTab('exam')}
-            className={`px-5 py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'exam' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
+            className={`px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'exam' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
           >
             📝 Exam
           </button>
         </div>
 
         {activeTab === 'task' && (
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <div className="bg-white border-[1.5px] border-border rounded-r p-4 mb-4.5 transition-colors focus-within:border-primary shadow-xs">
                 <div className="text-[11px] font-semibold text-primary mb-2 uppercase tracking-[0.06em]">✦ Describe in plain English</div>
@@ -82,7 +82,7 @@ export default function Add() {
                 <input type="text" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3" placeholder="e.g. Statistics Assignment 2" />
               </div>
               
-              <div className="grid grid-cols-2 gap-3 mb-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
                 <div>
                   <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Due Date</label>
                   <input type="date" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary" />
@@ -93,7 +93,7 @@ export default function Add() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-3 mb-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
                 <div>
                   <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Grade Weight (%)</label>
                   <input type="number" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3" placeholder="25" />
@@ -138,14 +138,14 @@ export default function Add() {
         )}
 
         {activeTab === 'exam' && (
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
              <div>
               <div className="mb-3.5">
                 <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Subject / Course Name</label>
                 <input type="text" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3" placeholder="e.g. Calculus II" />
               </div>
               
-              <div className="grid grid-cols-2 gap-3 mb-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
                 <div>
                   <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Exam Date</label>
                   <input type="date" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary" />
@@ -216,14 +216,14 @@ export default function Add() {
           </div>
         )}
 
-        <div className="flex gap-2.5 mt-5.5 pt-5 border-t border-border">
-          <button className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-rs text-[13px] font-semibold shadow-xs border-none cursor-pointer transition-colors">
+        <div className="flex flex-col sm:flex-row gap-2.5 mt-5.5 pt-5 border-t border-border">
+          <button className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-rs text-[13px] font-semibold shadow-xs border-none cursor-pointer transition-colors w-full sm:w-auto">
             {activeTab === 'task' ? 'Save Task' : 'Save & Generate Plan'}
           </button>
           {activeTab === 'task' && (
-            <button className="bg-white text-text-2 border border-border2 px-4 py-2 rounded-rs text-[13px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Save & Add Another</button>
+            <button className="bg-white text-text-2 border border-border2 px-4 py-2 rounded-rs text-[13px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all w-full sm:w-auto">Save & Add Another</button>
           )}
-          <button onClick={() => navigate('/dashboard')} className="bg-white text-text-2 border border-border2 px-4 py-2 rounded-rs text-[13px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Cancel</button>
+          <button onClick={() => navigate('/dashboard')} className="bg-white text-text-2 border border-border2 px-4 py-2 rounded-rs text-[13px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all w-full sm:w-auto mt-2 sm:mt-0">Cancel</button>
         </div>
 
       </div>

@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, GraduationCap, MessageSquare, Upload, CheckSquare, Target, BarChart2, PlusCircle, Settings } from 'lucide-react';
+import { LayoutDashboard, GraduationCap, MessageSquare, Upload, CheckSquare, Target, BarChart2, PlusCircle, Settings, X } from 'lucide-react';
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
 
   const navItems = [
@@ -23,13 +23,16 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-[220px] min-w-[220px] bg-white border-r border-border flex flex-col p-0 h-full">
+    <aside className={`fixed inset-y-0 left-0 z-40 w-[240px] md:w-[220px] md:min-w-[220px] bg-white border-r border-border flex flex-col p-0 h-full transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} md:relative`}>
       <div className="flex items-center gap-2.5 px-5 pt-5.5 pb-5 border-b border-border">
         <div className="w-[30px] h-[30px] bg-primary rounded-lg flex items-center justify-center shrink-0">
           <svg viewBox="0 0 16 16" className="w-[15px] h-[15px] fill-white"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/></svg>
         </div>
         <span className="text-base font-bold text-text-1 tracking-[-0.3px]">Trackit</span>
         <span className="text-[9px] font-semibold tracking-[0.05em] bg-primary-light text-primary rounded px-1.5 py-0.5 ml-0.5">BETA</span>
+        <button onClick={onClose} className="md:hidden ml-auto p-1 text-text-3 border-none bg-transparent">
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       <nav className="flex-1 p-3 pb-4 overflow-y-auto">
@@ -48,6 +51,7 @@ export default function Sidebar() {
             <Link 
               key={item.path} 
               to={item.path}
+              onClick={onClose}
               className={`flex items-center gap-[9px] px-2.5 py-2 rounded-rs cursor-pointer transition-all duration-150 text-[13.5px] font-medium mb-[1px] no-underline border border-transparent ${isActive ? 'bg-primary-light text-primary' : 'text-text-2 hover:bg-bg hover:text-text-1'}`}
             >
               <Icon className={`w-4 h-4 shrink-0 transition-colors duration-150 ${isActive ? 'text-primary' : 'text-text-3 group-hover:text-text-2'}`} />
