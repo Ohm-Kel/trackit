@@ -1,13 +1,34 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #4F46E5;
+  --color-primary-hover: #4338CA;
+  --color-primary-light: #EEF2FF;
+  --color-primary-mid: #C7D2FE;
+  --color-primary-faint: #F5F3FF;
+
+  --color-bg: #F8FAFC;
+  --color-border: #E8ECF0;
+  --color-border2: #D1D9E0;
+
+  --color-text-1: #0F172A;
+  --color-text-2: #475569;
+  --color-text-3: #94A3B8;
+
+  --shadow-xs: 0 1px 3px rgba(15,23,42,0.06);
+  --shadow-sm: 0 2px 8px rgba(15,23,42,0.08);
+  --shadow-md: 0 4px 16px rgba(15,23,42,0.10);
+
+  --radius-r: 12px;
+  --radius-rs: 8px;
+}
 
 @layer base {
   html, body {
     height: 100%;
     font-family: 'Inter', sans-serif;
-    background: theme('colors.bg');
-    color: theme('colors.text-1');
+    background: var(--color-bg);
+    color: var(--color-text-1);
     font-size: 14px;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
