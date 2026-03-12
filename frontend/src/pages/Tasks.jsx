@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Search, Filter, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2, SlidersHorizontal } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
 
@@ -42,7 +42,6 @@ export default function Tasks() {
   const [expandedRow, setExpandedRow] = useState(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
-  const [showFilters, setShowFilters] = useState(false);
 
   const statuses = ['All', 'In Progress', 'Not started', 'Done'];
 

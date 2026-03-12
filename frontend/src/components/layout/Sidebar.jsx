@@ -1,18 +1,37 @@
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, GraduationCap, MessageSquare, Upload, CheckSquare, Target, BarChart2, PlusCircle, Settings, X } from 'lucide-react';
+import { useTasks } from '../../hooks/useTasks';
+import { useExams } from '../../hooks/useExams';
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
+  const { data: tasks = [] } = useTasks();
+  const { data: exams = [] } = useExams();
+
+  const profile = JSON.parse(localStorage.getItem('trackit_profile') || '{}');
+  const name = profile.name || 'Student';
+  const course = profile.course || 'Add your course →';
+  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
+
+  const activeTasks = tasks.filter(t => {
+    const s = (t.status || '').toLowerCase();
+    return !s.includes('done') && !s.includes('complet');
+  });
+  const upcomingExams = exams.filter(e => {
+    if (!e.exam_date) return false;
+    const diff = Math.ceil((new Date(e.exam_date).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
+    return diff >= 0;
+  });
 
   const navItems = [
     { section: 'Workspace' },
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard, badge: 3 },
-    { name: 'Exams', path: '/exams', icon: GraduationCap },
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Exams', path: '/exams', icon: GraduationCap, badge: upcomingExams.length || null },
     { name: 'AI Chat', path: '/chat', icon: MessageSquare },
     { name: 'Upload Timetable', path: '/upload', icon: Upload },
     { divider: true },
     { section: 'Planning' },
-    { name: 'All Tasks', path: '/tasks', icon: CheckSquare, badge: 7 },
+    { name: 'All Tasks', path: '/tasks', icon: CheckSquare, badge: activeTasks.length || null },
     { name: 'Focus Plan', path: '/focus', icon: Target },
     { name: 'Analytics', path: '/analytics', icon: BarChart2 },
     { divider: true },
@@ -35,7 +54,7 @@ export default function Sidebar({ isOpen, onClose }) {
         </button>
       </div>
 
-      <nav className="flex-1 p-3 pb-4 overflow-y-auto">
+      <nav className="flex-1 p-3 pb-4 overflow-y-auto custom-scrollbar">
         {navItems.map((item, i) => {
           if (item.section) {
             return <div key={i} className="text-[10px] font-semibold text-text-3 tracking-[0.08em] uppercase px-2 mb-1 mt-3 first:mt-0">{item.section}</div>;
@@ -43,36 +62,43 @@ export default function Sidebar({ isOpen, onClose }) {
           if (item.divider) {
             return <div key={i} className="h-px bg-border mx-3 my-2"></div>;
           }
-          
-          const isActive = location.pathname === item.path;
+
+          const isActive = item.path === '/'
+            ? location.pathname === '/'
+            : location.pathname.startsWith(item.path);
           const Icon = item.icon;
-          
+
           return (
-            <Link 
-              key={item.path} 
+            <Link
+              key={item.path}
               to={item.path}
               onClick={onClose}
               className={`flex items-center gap-[9px] px-2.5 py-2 rounded-rs cursor-pointer transition-all duration-150 text-[13.5px] font-medium mb-[1px] no-underline border border-transparent ${isActive ? 'bg-primary-light text-primary' : 'text-text-2 hover:bg-bg hover:text-text-1'}`}
             >
-              <Icon className={`w-4 h-4 shrink-0 transition-colors duration-150 ${isActive ? 'text-primary' : 'text-text-3 group-hover:text-text-2'}`} />
+              <Icon className={`w-4 h-4 shrink-0 transition-colors duration-150 ${isActive ? 'text-primary' : 'text-text-3'}`} />
               {item.name}
-              {item.badge && (
+              {item.badge ? (
                 <span className="ml-auto text-[10px] font-semibold bg-primary text-white rounded-[10px] px-1.5 py-[1px] min-w-[18px] text-center">{item.badge}</span>
-              )}
+              ) : null}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-3 pb-4">
-        <div className="flex items-center gap-[9px] px-2.5 py-2 rounded-rs cursor-pointer transition-colors duration-150 hover:bg-bg">
-          <div className="w-7 h-7 rounded-full bg-primary-light text-primary flex items-center justify-center text-[11px] font-bold shrink-0">KO</div>
-          <div>
-            <div className="text-[13px] font-semibold text-text-1">Kwame O.</div>
-            <div className="text-[11px] text-text-3">Computer Science</div>
+      {/* User Footer */}
+      <Link
+        to="/settings"
+        onClick={onClose}
+        className="p-3 pb-4 border-t border-border no-underline block hover:bg-bg transition-colors"
+      >
+        <div className="flex items-center gap-[9px] px-2.5 py-2 rounded-rs">
+          <div className="w-7 h-7 rounded-full bg-primary-light text-primary flex items-center justify-center text-[11px] font-bold shrink-0">{initials}</div>
+          <div className="min-w-0">
+            <div className="text-[13px] font-semibold text-text-1 truncate">{name}</div>
+            <div className="text-[11px] text-text-3 truncate max-w-[130px]">{course}</div>
           </div>
         </div>
-      </div>
+      </Link>
     </aside>
   );
 }

@@ -136,7 +136,7 @@ export default function Dashboard() {
             <div className="text-[15px] md:text-[17px] font-bold text-white mb-1">
               {priorityQueue.length > 0
                 ? `${priorityQueue.length} task${priorityQueue.length !== 1 ? 's' : ''} recommended today`
-                : 'You're all caught up! 🎉'}
+                : "You're all caught up! 🎉"}
             </div>
             <div className="text-[12px] text-primary-mid leading-relaxed">
               {priorityQueue.length > 0
@@ -172,7 +172,7 @@ export default function Dashboard() {
                   <div className="text-[32px] mb-2">✅</div>
                   <div className="text-[13.5px] font-semibold text-text-1 mb-1">No active tasks</div>
                   <div className="text-[12px] text-text-3 mb-3">Add your first task to get started</div>
-                  <button onClick={() => navigate('/add')} className="inline-flex items-center gap-1. px-3 py-1.5 bg-primary text-white rounded-rs text-[12px] font-semibold border-none cursor-pointer">
+                  <button onClick={() => navigate('/add')} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-rs text-[12px] font-semibold border-none cursor-pointer">
                     <Plus className="w-3 h-3 mr-1" /> Add Task
                   </button>
                 </div>
