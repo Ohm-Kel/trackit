@@ -23,6 +23,12 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Trackit API is running' });
 });
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
+// Export the app for Vercel Serverless Functions
+module.exports = app;
+
+// Only listen locally if not running in Vercel production
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
+}
