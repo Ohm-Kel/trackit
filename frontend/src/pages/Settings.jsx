@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2 } from 'lucide-react';
+import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2, Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 const PROFILE_KEY = 'trackit_profile';
 const NOTIF_KEY = 'trackit_notif';
@@ -40,6 +41,7 @@ function Toggle({ label, description, checked, onChange }) {
 }
 
 export default function Settings() {
+  const { theme, setTheme, accent, setAccent, ACCENTS } = useTheme();
   const [profile, setProfile] = useState({
     name: '', university: '', course: '', year: '', email: ''
   });
@@ -215,48 +217,55 @@ export default function Settings() {
             {/* Appearance */}
             {activeSection === 'appearance' && (
               <Section icon={Palette} title="Appearance" description="Customise how Trackit looks">
-                <div className="mb-5">
+                <div className="mb-6">
                   <div className="text-[13px] font-semibold text-text-2 mb-3">Theme</div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {[
-                      { id: 'light', label: 'Light', preview: 'bg-white border border-border', dot: 'bg-primary' },
-                      { id: 'dark', label: 'Dark (Coming Soon)', preview: 'bg-[#1E1E2E] border border-[#333]', dot: 'bg-[#6C6EF7]', disabled: true },
-                      { id: 'auto', label: 'System (Coming Soon)', preview: 'bg-gradient-to-br from-white to-[#1E1E2E] border border-border', dot: 'bg-text-3', disabled: true },
-                    ].map(({ id, label, preview, dot, disabled }) => (
-                      <button
-                        key={id}
-                        disabled={disabled}
-                        className={`flex flex-col items-center gap-2 p-4 border-[1.5px] rounded-r cursor-pointer transition-all font-sans ${id === 'light' ? 'border-primary bg-primary-faint' : 'border-border bg-white'} ${disabled ? 'opacity-40 cursor-not-allowed' : 'hover:border-primary'}`}
-                      >
-                        <div className={`w-full h-[50px] rounded-[6px] ${preview} flex items-center gap-2 px-3`}>
-                          <div className={`w-2 h-2 rounded-full ${dot}`}></div>
-                          <div className="flex-1 h-1.5 bg-border rounded-full"></div>
-                        </div>
-                        <div className="text-[12px] font-semibold text-text-2 text-center">{label}</div>
-                        {id === 'light' && <div className="text-[10px] text-primary font-bold">Active</div>}
-                      </button>
-                    ))}
+                      { id: 'light', label: 'Light', icon: Sun, previewBg: '#FFFFFF', previewBorder: '#E8ECF0', dotColor: 'var(--color-primary)', barColor: '#E8ECF0' },
+                      { id: 'dark', label: 'Dark', icon: Moon, previewBg: '#161929', previewBorder: '#2A2F45', dotColor: '#818CF8', barColor: '#2A2F45' },
+                      { id: 'system', label: 'System', icon: Monitor, previewBg: 'linear-gradient(135deg, #FFFFFF 50%, #161929 50%)', previewBorder: '#CCC', dotColor: '#94A3B8', barColor: '#CBD5E1' },
+                    ].map(({ id, label, icon: Icon, previewBg, previewBorder, dotColor, barColor }) => {
+                      const isActive = theme === id;
+                      return (
+                        <button
+                          key={id}
+                          onClick={() => setTheme(id)}
+                          className={`flex flex-col items-center gap-2.5 p-4 border-[1.5px] rounded-r cursor-pointer transition-all font-sans ${isActive ? 'border-primary bg-primary-faint' : 'border-border bg-white hover:border-primary-mid'}`}
+                        >
+                          <div
+                            className="w-full h-[50px] rounded-[6px] flex items-center gap-2 px-3"
+                            style={{ background: previewBg, border: `1px solid ${previewBorder}` }}
+                          >
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: dotColor }}></div>
+                            <div className="flex-1 h-1.5 rounded-full" style={{ backgroundColor: barColor }}></div>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Icon className="w-3.5 h-3.5 text-text-3" />
+                            <span className="text-[12px] font-semibold text-text-2">{label}</span>
+                          </div>
+                          {isActive && <div className="text-[10px] text-primary font-bold flex items-center gap-1"><Check className="w-3 h-3" /> Active</div>}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <div>
                   <div className="text-[13px] font-semibold text-text-2 mb-3">Accent Colour</div>
                   <div className="flex gap-3 flex-wrap">
-                    {[
-                      { color: '#5B6EF7', label: 'Indigo (Default)', active: true },
-                      { color: '#8B5CF6', label: 'Purple', active: false },
-                      { color: '#0EA5E9', label: 'Blue', active: false },
-                      { color: '#10B981', label: 'Emerald', active: false },
-                    ].map(({ color, label, active }) => (
+                    {Object.entries(ACCENTS).map(([key, colors]) => (
                       <button
-                        key={color}
-                        title={label}
-                        className={`w-8 h-8 rounded-full border-2 cursor-pointer transition-transform hover:scale-110 ${active ? 'border-text-1 scale-110' : 'border-transparent'}`}
-                        style={{ backgroundColor: color }}
-                      />
+                        key={key}
+                        title={key.charAt(0).toUpperCase() + key.slice(1)}
+                        onClick={() => setAccent(key)}
+                        className={`w-9 h-9 rounded-full border-[2.5px] cursor-pointer transition-all hover:scale-110 flex items-center justify-center ${accent === key ? 'border-text-1 scale-110 shadow-sm' : 'border-transparent'}`}
+                        style={{ backgroundColor: colors.primary }}
+                      >
+                        {accent === key && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
+                      </button>
                     ))}
                   </div>
-                  <div className="mt-2 text-[11.5px] text-text-3">Custom colour theming coming soon.</div>
+                  <div className="mt-2.5 text-[11.5px] text-text-3">Changes apply instantly across the entire app.</div>
                 </div>
               </Section>
             )}
