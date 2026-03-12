@@ -1,0 +1,74 @@
+import { Link, useLocation } from 'react-router-dom';
+import { LayoutDashboard, GraduationCap, MessageSquare, Upload, CheckSquare, Target, BarChart2, PlusCircle, Settings } from 'lucide-react';
+
+export default function Sidebar() {
+  const location = useLocation();
+
+  const navItems = [
+    { section: 'Workspace' },
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard, badge: 3 },
+    { name: 'Exams', path: '/exams', icon: GraduationCap },
+    { name: 'AI Chat', path: '/chat', icon: MessageSquare },
+    { name: 'Upload Timetable', path: '/upload', icon: Upload },
+    { divider: true },
+    { section: 'Planning' },
+    { name: 'All Tasks', path: '/tasks', icon: CheckSquare, badge: 7 },
+    { name: 'Focus Plan', path: '/focus', icon: Target },
+    { name: 'Analytics', path: '/analytics', icon: BarChart2 },
+    { divider: true },
+    { section: 'Add New' },
+    { name: 'Add Task / Exam', path: '/add', icon: PlusCircle },
+    { divider: true },
+    { name: 'Settings', path: '/settings', icon: Settings }
+  ];
+
+  return (
+    <aside className="w-[220px] min-w-[220px] bg-white border-r border-border flex flex-col p-0 h-full">
+      <div className="flex items-center gap-2.5 px-5 pt-5.5 pb-5 border-b border-border">
+        <div className="w-[30px] h-[30px] bg-primary rounded-lg flex items-center justify-center shrink-0">
+          <svg viewBox="0 0 16 16" className="w-[15px] h-[15px] fill-white"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/></svg>
+        </div>
+        <span className="text-base font-bold text-text-1 tracking-[-0.3px]">Trackit</span>
+        <span className="text-[9px] font-semibold tracking-[0.05em] bg-primary-light text-primary rounded px-1.5 py-0.5 ml-0.5">BETA</span>
+      </div>
+
+      <nav className="flex-1 p-3 pb-4 overflow-y-auto">
+        {navItems.map((item, i) => {
+          if (item.section) {
+            return <div key={i} className="text-[10px] font-semibold text-text-3 tracking-[0.08em] uppercase px-2 mb-1 mt-3 first:mt-0">{item.section}</div>;
+          }
+          if (item.divider) {
+            return <div key={i} className="h-px bg-border mx-3 my-2"></div>;
+          }
+          
+          const isActive = location.pathname === item.path;
+          const Icon = item.icon;
+          
+          return (
+            <Link 
+              key={item.path} 
+              to={item.path}
+              className={`flex items-center gap-[9px] px-2.5 py-2 rounded-rs cursor-pointer transition-all duration-150 text-[13.5px] font-medium mb-[1px] no-underline border border-transparent ${isActive ? 'bg-primary-light text-primary' : 'text-text-2 hover:bg-bg hover:text-text-1'}`}
+            >
+              <Icon className={`w-4 h-4 shrink-0 transition-colors duration-150 ${isActive ? 'text-primary' : 'text-text-3 group-hover:text-text-2'}`} />
+              {item.name}
+              {item.badge && (
+                <span className="ml-auto text-[10px] font-semibold bg-primary text-white rounded-[10px] px-1.5 py-[1px] min-w-[18px] text-center">{item.badge}</span>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="p-3 pb-4">
+        <div className="flex items-center gap-[9px] px-2.5 py-2 rounded-rs cursor-pointer transition-colors duration-150 hover:bg-bg">
+          <div className="w-7 h-7 rounded-full bg-primary-light text-primary flex items-center justify-center text-[11px] font-bold shrink-0">KO</div>
+          <div>
+            <div className="text-[13px] font-semibold text-text-1">Kwame O.</div>
+            <div className="text-[11px] text-text-3">Computer Science</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
