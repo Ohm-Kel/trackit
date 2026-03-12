@@ -10,11 +10,27 @@ import Analytics from './pages/Analytics';
 import Add from './pages/Add';
 import Settings from './pages/Settings';
 
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        {/* Public Auth Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
+        {/* Protected Application Routes */}
+        <Route 
+          path="/" 
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Dashboard />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="exams" element={<Exams />} />

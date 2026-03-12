@@ -1,15 +1,24 @@
-import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, GraduationCap, MessageSquare, Upload, CheckSquare, Target, BarChart2, PlusCircle, Settings, X } from 'lucide-react';
 import { useTasks } from '../../hooks/useTasks';
 import { useExams } from '../../hooks/useExams';
+import { useAuth } from '../../context/AuthContext';
+import { LogOut } from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
+  const { user, signOut } = useAuth();
   const { data: tasks = [] } = useTasks();
   const { data: exams = [] } = useExams();
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
   const profile = JSON.parse(localStorage.getItem('trackit_profile') || '{}');
-  const name = profile.name || 'Student';
+  const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || profile.name || 'Student';
   const course = profile.course || 'Add your course →';
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
 
@@ -86,19 +95,28 @@ export default function Sidebar({ isOpen, onClose }) {
       </nav>
 
       {/* User Footer */}
-      <Link
-        to="/settings"
-        onClick={onClose}
-        className="p-3 pb-4 border-t border-border no-underline block hover:bg-bg transition-colors"
-      >
-        <div className="flex items-center gap-[9px] px-2.5 py-2 rounded-rs">
-          <div className="w-7 h-7 rounded-full bg-primary-light text-primary flex items-center justify-center text-[11px] font-bold shrink-0">{initials}</div>
-          <div className="min-w-0">
-            <div className="text-[13px] font-semibold text-text-1 truncate">{name}</div>
-            <div className="text-[11px] text-text-3 truncate max-w-[130px]">{course}</div>
+      <div className="mt-auto border-t border-border bg-white dark:bg-gray-900">
+        <Link
+          to="/settings"
+          onClick={onClose}
+          className="p-3 no-underline block hover:bg-bg transition-colors"
+        >
+          <div className="flex items-center gap-[9px] px-2.5 py-2 rounded-rs">
+            <div className="w-7 h-7 rounded-full bg-primary-light text-primary flex items-center justify-center text-[11px] font-bold shrink-0">{initials}</div>
+            <div className="min-w-0">
+              <div className="text-[13px] font-semibold text-text-1 truncate">{name}</div>
+              <div className="text-[11px] text-text-3 truncate max-w-[100px]">{course}</div>
+            </div>
           </div>
-        </div>
-      </Link>
+        </Link>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-[9px] px-5.5 py-3 hover:bg-red-50 dark:hover:bg-red-900/10 text-red-500 transition-colors border-none bg-transparent cursor-pointer group"
+        >
+          <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          <span className="text-[13px] font-semibold text-text-1 group-hover:text-red-500 transition-colors">Log out</span>
+        </button>
+      </div>
     </aside>
   );
 }

@@ -1,21 +1,15 @@
 const supabase = require('../supabaseClient');
 
-// Get all tasks (filtered by user if user_id is provided)
+// Get all tasks for the authenticated user
 exports.getTasks = async (req, res) => {
   try {
-    const { user_id } = req.query;
+    const userId = req.user.id;
     
-    let query = supabase
+    const { data, error } = await supabase
       .from('tasks')
       .select('*')
+      .eq('user_id', userId)
       .order('due_date', { ascending: true });
-      
-    // If we have auth, we would get user_id from token
-    if (user_id) {
-      query = query.eq('user_id', user_id);
-    }
-
-    const { data, error } = await query;
 
     if (error) throw error;
     res.json(data);
@@ -24,19 +18,21 @@ exports.getTasks = async (req, res) => {
   }
 };
 
-// Get a single task by ID
+// Get a single task by ID for the authenticated user
 exports.getTaskById = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
     
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
       .eq('id', id)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
-    if (!data) return res.status(404).json({ error: 'Task not found' });
+    if (!data) return res.status(404).json({ error: 'Task not found or unauthorized' });
     
     res.json(data);
   } catch (error) {
@@ -44,11 +40,11 @@ exports.getTaskById = async (req, res) => {
   }
 };
 
-// Create a new task
+// Create a new task for the authenticated user
 exports.createTask = async (req, res) => {
   try {
+    const userId = req.user.id;
     const { 
-      user_id, 
       title, 
       description, 
       due_date, 
@@ -67,7 +63,7 @@ exports.createTask = async (req, res) => {
       .from('tasks')
       .insert([
         { 
-          user_id, // Should eventually come from authenticated user context
+          user_id: userId,
           title, 
           description, 
           due_date, 
@@ -87,20 +83,25 @@ exports.createTask = async (req, res) => {
   }
 };
 
-// Update an existing task
+// Update an existing task for the authenticated user
 exports.updateTask = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
     const updates = req.body;
+
+    // Remove user_id from updates to prevent hijacking
+    delete updates.user_id;
 
     const { data, error } = await supabase
       .from('tasks')
       .update(updates)
       .eq('id', id)
+      .eq('user_id', userId)
       .select();
 
     if (error) throw error;
-    if (data.length === 0) return res.status(404).json({ error: 'Task not found' });
+    if (data.length === 0) return res.status(404).json({ error: 'Task not found or unauthorized' });
     
     res.json(data[0]);
   } catch (error) {
@@ -108,19 +109,21 @@ exports.updateTask = async (req, res) => {
   }
 };
 
-// Delete a task
+// Delete a task for the authenticated user
 exports.deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
 
     const { data, error } = await supabase
       .from('tasks')
       .delete()
       .eq('id', id)
+      .eq('user_id', userId)
       .select();
 
     if (error) throw error;
-    if (data.length === 0) return res.status(404).json({ error: 'Task not found' });
+    if (data.length === 0) return res.status(404).json({ error: 'Task not found or unauthorized' });
     
     res.json({ message: 'Task deleted successfully', task: data[0] });
   } catch (error) {

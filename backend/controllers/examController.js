@@ -1,20 +1,16 @@
 const supabase = require('../supabaseClient');
 
-// Get all exams (filtered by user if user_id is provided)
+// Get all exams for the authenticated user
 exports.getExams = async (req, res) => {
   try {
-    const { user_id } = req.query;
+    const userId = req.user.id;
 
-    let query = supabase
+    const { data, error } = await supabase
       .from('exams')
       .select('*')
+      .eq('user_id', userId)
       .order('exam_date', { ascending: true });
 
-    if (user_id) {
-      query = query.eq('user_id', user_id);
-    }
-
-    const { data, error } = await query;
     if (error) throw error;
     res.json(data);
   } catch (error) {
@@ -22,19 +18,21 @@ exports.getExams = async (req, res) => {
   }
 };
 
-// Get a single exam by ID
+// Get a single exam by ID for the authenticated user
 exports.getExamById = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
 
     const { data, error } = await supabase
       .from('exams')
       .select('*')
       .eq('id', id)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
-    if (!data) return res.status(404).json({ error: 'Exam not found' });
+    if (!data) return res.status(404).json({ error: 'Exam not found or unauthorized' });
 
     res.json(data);
   } catch (error) {
@@ -42,11 +40,11 @@ exports.getExamById = async (req, res) => {
   }
 };
 
-// Create a new exam
+// Create a new exam for the authenticated user
 exports.createExam = async (req, res) => {
   try {
+    const userId = req.user.id;
     const {
-      user_id,
       subject,
       course_code,
       exam_date,
@@ -64,7 +62,7 @@ exports.createExam = async (req, res) => {
     const { data, error } = await supabase
       .from('exams')
       .insert([{
-        user_id,
+        user_id: userId,
         subject,
         course_code,
         exam_date,
@@ -83,20 +81,25 @@ exports.createExam = async (req, res) => {
   }
 };
 
-// Update an existing exam
+// Update an existing exam for the authenticated user
 exports.updateExam = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
     const updates = req.body;
+
+    // Prevent hijacking
+    delete updates.user_id;
 
     const { data, error } = await supabase
       .from('exams')
       .update(updates)
       .eq('id', id)
+      .eq('user_id', userId)
       .select();
 
     if (error) throw error;
-    if (data.length === 0) return res.status(404).json({ error: 'Exam not found' });
+    if (data.length === 0) return res.status(404).json({ error: 'Exam not found or unauthorized' });
 
     res.json(data[0]);
   } catch (error) {
@@ -104,19 +107,21 @@ exports.updateExam = async (req, res) => {
   }
 };
 
-// Delete an exam
+// Delete an exam for the authenticated user
 exports.deleteExam = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
 
     const { data, error } = await supabase
       .from('exams')
       .delete()
       .eq('id', id)
+      .eq('user_id', userId)
       .select();
 
     if (error) throw error;
-    if (data.length === 0) return res.status(404).json({ error: 'Exam not found' });
+    if (data.length === 0) return res.status(404).json({ error: 'Exam not found or unauthorized' });
 
     res.json({ message: 'Exam deleted successfully', exam: data[0] });
   } catch (error) {
