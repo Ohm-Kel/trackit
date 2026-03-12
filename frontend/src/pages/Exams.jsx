@@ -1,17 +1,43 @@
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useExams, useDeleteExam } from '../hooks/useExams';
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const diff = Math.ceil((new Date(dateStr).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
+  return diff;
+}
+
+function confidenceStyle(level) {
+  const l = (level || '').toLowerCase();
+  if (l === 'high') return { badge: 'bg-[#F0FDF4] text-[#16A34A]', label: '😊 High' };
+  if (l === 'low') return { badge: 'bg-[#FEF2F2] text-[#EF4444]', label: '😰 Low' };
+  return { badge: 'bg-[#FFFBEB] text-[#D97706]', label: '😐 Medium' };
+}
 
 export default function Exams() {
   const navigate = useNavigate();
+  const { data: exams = [], isLoading } = useExams();
+  const deleteExam = useDeleteExam();
+
+  const upcoming = exams.filter(e => daysUntil(e.exam_date) >= 0);
+  const past = exams.filter(e => daysUntil(e.exam_date) < 0);
+
+  function handleDelete(e, id) {
+    e.stopPropagation();
+    if (window.confirm('Remove this exam?')) deleteExam.mutate(id);
+  }
 
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
       <div className="pt-5 md:pt-7 px-4 md:px-8 pb-0 flex items-center justify-between mb-4 md:mb-6">
         <div>
           <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Exam Countdown</h1>
-          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">2 exams tracked · revision plans active</p>
+          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">
+            {isLoading ? 'Loading…' : `${upcoming.length} exam${upcoming.length !== 1 ? 's' : ''} tracked${upcoming.length > 0 ? ' · revision plans active' : ''}`}
+          </p>
         </div>
-        <button 
+        <button
           onClick={() => navigate('/add?tab=exam')}
           className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
         >
@@ -21,130 +47,112 @@ export default function Exams() {
       </div>
 
       <div className="px-4 md:px-8 pb-9">
-        <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4">
-          
-          {/* Card 1 */}
-          <div className="bg-white border border-border rounded-r p-5.5 shadow-xs hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <div className="text-[18px] font-bold text-text-1">Data Structures</div>
-                <div className="text-[12px] text-text-3 mt-[3px]">CS 301 · April 2nd, 2026</div>
-              </div>
-              <div className="text-right">
-                <div className="text-[30px] font-bold text-primary leading-none">23</div>
-                <div className="text-[10.5px] text-text-3 mt-0.5">days left</div>
-              </div>
-            </div>
-            
-            <div className="h-[5px] bg-bg rounded-[3px] overflow-hidden my-2.5">
-              <div className="h-full rounded-[3px] bg-primary w-[35%]"></div>
-            </div>
-            <div className="flex justify-between text-[11px] text-text-3 mb-3.5">
-              <span>35% prepared</span>
-              <span>Exam day</span>
-            </div>
-            
-            <div className="flex items-center justify-between mb-3.5 pb-3.5 border-b border-border">
-              <span className="text-[12px] font-semibold text-text-2">Confidence</span>
-              <span className="bg-[#FFFBEB] text-[#D97706] inline-flex items-center text-[11px] font-semibold px-2 py-[2px] rounded-[20px] tracking-[0.01em]">Medium</span>
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-text-3 mb-2.5">Revision Plan</div>
-              
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-text-3 w-[50px] shrink-0 pt-[1px] font-medium line-through">Day 1–3</div>
-                <div className="text-text-3 line-through leading-relaxed">Arrays, linked lists, stacks & queues</div>
-              </div>
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-text-3 w-[50px] shrink-0 pt-[1px] font-medium line-through">Day 4–6</div>
-                <div className="text-text-3 line-through leading-relaxed">Binary trees and BST operations</div>
-              </div>
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-primary w-[50px] shrink-0 pt-[1px] font-bold">Day 7–9</div>
-                <div className="text-text-1 font-semibold leading-relaxed">Graph traversal: BFS, DFS, Dijkstra's algorithm</div>
-              </div>
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-text-3 w-[50px] shrink-0 pt-[1px] font-medium">Day 10–14</div>
-                <div className="text-text-2 leading-relaxed">Sorting & searching algorithms</div>
-              </div>
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-text-3 w-[50px] shrink-0 pt-[1px] font-medium">Day 15–20</div>
-                <div className="text-text-2 leading-relaxed">Past papers & timed practice sessions</div>
-              </div>
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-text-3 w-[50px] shrink-0 pt-[1px] font-medium">Day 21–23</div>
-                <div className="text-text-2 leading-relaxed">Final review and rest before exam</div>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-              <button onClick={() => navigate('/chat')} className="flex-1 bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Ask Claude</button>
-              <button className="flex-1 bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors">Mark Today Done ✓</button>
-            </div>
+        {isLoading ? (
+          <div className="flex flex-col items-center gap-3 py-12 text-text-3">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <span className="text-[13px]">Loading your exams…</span>
           </div>
+        ) : upcoming.length === 0 && past.length === 0 ? (
+          <div className="bg-white border border-border rounded-r shadow-xs p-10 flex flex-col items-center gap-2 text-center">
+            <div className="text-[48px]">🎓</div>
+            <div className="text-[15px] font-bold text-text-1">No exams tracked yet</div>
+            <div className="text-[13px] text-text-3 max-w-[280px]">Add your upcoming exams and Trackit will build you a personalised revision plan.</div>
+            <button onClick={() => navigate('/add?tab=exam')} className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-rs text-[13px] font-semibold border-none cursor-pointer">
+              <Plus className="w-3.5 h-3.5" /> Add Your First Exam
+            </button>
+          </div>
+        ) : (
+          <>
+            {upcoming.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 mb-6">
+                {upcoming.map(exam => {
+                  const days = daysUntil(exam.exam_date);
+                  const prep = exam.preparation_percent ?? 0;
+                  const { badge, label } = confidenceStyle(exam.confidence_level);
+                  const topics = Array.isArray(exam.topics) ? exam.topics : [];
 
-          {/* Card 2 */}
-          <div className="bg-white border border-border rounded-r p-5.5 shadow-xs hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <div className="text-[18px] font-bold text-text-1">Business Law</div>
-                <div className="text-[12px] text-text-3 mt-[3px]">BL 202 · April 14th, 2026</div>
+                  return (
+                    <div key={exam.id} className="bg-white border border-border rounded-r p-5 md:p-5.5 shadow-xs hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <div className="text-[17px] md:text-[18px] font-bold text-text-1">{exam.subject}</div>
+                          <div className="text-[12px] text-text-3 mt-[3px]">
+                            {exam.course_code && `${exam.course_code} · `}
+                            {exam.exam_date ? new Date(exam.exam_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Date TBD'}
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0 ml-3">
+                          <div className="text-[26px] md:text-[30px] font-bold text-primary leading-none">{days}</div>
+                          <div className="text-[10.5px] text-text-3 mt-0.5">days left</div>
+                        </div>
+                      </div>
+
+                      <div className="h-[5px] bg-bg rounded-[3px] overflow-hidden my-2.5">
+                        <div className="h-full rounded-[3px] bg-primary transition-[width] duration-300" style={{ width: `${prep}%` }}></div>
+                      </div>
+                      <div className="flex justify-between text-[11px] text-text-3 mb-3.5">
+                        <span>{prep}% prepared</span>
+                        <span>Exam day</span>
+                      </div>
+
+                      <div className="flex items-center justify-between mb-3.5 pb-3.5 border-b border-border">
+                        <span className="text-[12px] font-semibold text-text-2">Confidence</span>
+                        <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-[2px] rounded-[20px] tracking-[0.01em] ${badge}`}>{label}</span>
+                      </div>
+
+                      {topics.length > 0 && (
+                        <div className="mb-4">
+                          <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-text-3 mb-2.5">Topics to Revise</div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {topics.map((topic, i) => (
+                              <span key={i} className="bg-primary-light text-primary text-[11px] font-medium px-2 py-0.5 rounded-[12px]">{topic}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+                        <button onClick={() => navigate('/chat')} className="flex-1 bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Ask AI</button>
+                        <button
+                          onClick={() => {
+                            const newPrep = Math.min(100, prep + 10);
+                            // In a real app this would call updateExam
+                          }}
+                          className="flex-1 bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors"
+                        >
+                          Mark Today Done ✓
+                        </button>
+                      </div>
+
+                      <button onClick={e => handleDelete(e, exam.id)} className="mt-2 w-full text-[11.5px] text-text-3 hover:text-[#EF4444] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="text-right">
-                <div className="text-[30px] font-bold text-primary leading-none">35</div>
-                <div className="text-[10.5px] text-text-3 mt-0.5">days left</div>
-              </div>
-            </div>
-            
-            <div className="h-[5px] bg-bg rounded-[3px] overflow-hidden my-2.5">
-              <div className="h-full rounded-[3px] bg-primary w-[15%]"></div>
-            </div>
-            <div className="flex justify-between text-[11px] text-text-3 mb-3.5">
-              <span>15% prepared</span>
-              <span>Exam day</span>
-            </div>
-            
-            <div className="flex items-center justify-between mb-3.5 pb-3.5 border-b border-border">
-              <span className="text-[12px] font-semibold text-text-2">Confidence</span>
-              <span className="bg-[#FEF2F2] text-[#EF4444] inline-flex items-center text-[11px] font-semibold px-2 py-[2px] rounded-[20px] tracking-[0.01em]">Low</span>
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-text-3 mb-2.5">Revision Plan</div>
-              
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-primary w-[50px] shrink-0 pt-[1px] font-bold">Day 1–3</div>
-                <div className="text-text-1 font-semibold leading-relaxed">Contract fundamentals (Ch. 1–3)</div>
-              </div>
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-text-3 w-[50px] shrink-0 pt-[1px] font-medium">Day 4–7</div>
-                <div className="text-text-2 leading-relaxed">Offer, acceptance, and consideration</div>
-              </div>
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-text-3 w-[50px] shrink-0 pt-[1px] font-medium">Day 8–12</div>
-                <div className="text-text-2 leading-relaxed">Tort law and negligence principles</div>
-              </div>
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-text-3 w-[50px] shrink-0 pt-[1px] font-medium">Day 13–18</div>
-                <div className="text-text-2 leading-relaxed">Corporate law, agency, partnerships</div>
-              </div>
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-text-3 w-[50px] shrink-0 pt-[1px] font-medium">Day 19–28</div>
-                <div className="text-text-2 leading-relaxed">Case study analysis & essay practice</div>
-              </div>
-              <div className="flex gap-2.5 text-[12.5px] items-start">
-                <div className="text-[11px] text-text-3 w-[50px] shrink-0 pt-[1px] font-medium">Day 29–35</div>
-                <div className="text-text-2 leading-relaxed">Final review, past papers, exam strategy</div>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-              <button onClick={() => navigate('/chat')} className="flex-1 bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Ask Claude</button>
-              <button className="flex-1 bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors">Mark Today Done ✓</button>
-            </div>
-          </div>
-        </div>
+            )}
+
+            {past.length > 0 && (
+              <>
+                <div className="text-[12px] font-bold uppercase tracking-[0.06em] text-text-3 mb-3">Past Exams</div>
+                <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 opacity-60">
+                  {past.map(exam => (
+                    <div key={exam.id} className="bg-white border border-border rounded-r p-4 shadow-xs">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="text-[14px] font-bold text-text-1 line-through">{exam.subject}</div>
+                          <div className="text-[11.5px] text-text-3 mt-0.5">
+                            {exam.exam_date ? new Date(exam.exam_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}
+                          </div>
+                        </div>
+                        <span className="bg-[#F0FDF4] text-[#16A34A] text-[11px] font-semibold px-2 py-0.5 rounded-full">Done</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

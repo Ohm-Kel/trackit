@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Loader2, Check } from 'lucide-react';
+import { useCreateTask } from '../hooks/useTasks';
+import { useCreateExam } from '../hooks/useExams';
 
 export default function Add() {
   const navigate = useNavigate();
@@ -7,9 +10,33 @@ export default function Add() {
   const initialTab = searchParams.get('tab') === 'exam' ? 'exam' : 'task';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [confidence, setConfidence] = useState('medium');
-  const [topics, setTopics] = useState(['Differentiation', 'Integration', 'Limits']);
+  const [topics, setTopics] = useState([]);
   const [topicInput, setTopicInput] = useState('');
   const [showParsed, setShowParsed] = useState(false);
+  const [savedOk, setSavedOk] = useState(false);
+
+  const createTask = useCreateTask();
+  const createExam = useCreateExam();
+
+  // Task form state
+  const [taskForm, setTaskForm] = useState({
+    title: '', due_date: '', course_code: '', grade_weight: '', estimated_hours: '', status: 'Not started', description: ''
+  });
+
+  // Exam form state
+  const [examForm, setExamForm] = useState({
+    subject: '', course_code: '', exam_date: '', daily_study_hours: ''
+  });
+
+  // Mock NLP parse from plain-text description
+  const [nlpText, setNlpText] = useState('');
+  const parsedData = nlpText ? {
+    title: nlpText.split(' ').slice(0, 6).join(' '),
+    due: 'Detected from description',
+    weight: nlpText.toLowerCase().includes('%') ? nlpText.match(/(\d+)%/)?.[1] + '%' : '—',
+    effort: nlpText.toLowerCase().includes('hour') ? nlpText.match(/(\d+(\.\d+)?)\s*hour/)?.[1] + ' hrs' : '—',
+    status: nlpText.toLowerCase().includes('started') ? 'Not started' : 'In Progress'
+  } : null;
 
   const handleAddTopic = () => {
     if (topicInput.trim()) {
@@ -18,28 +45,66 @@ export default function Add() {
     }
   };
 
-  const handleRemoveTopic = (indexToRemove) => {
-    setTopics(topics.filter((_, index) => index !== indexToRemove));
-  };
+  const handleRemoveTopic = (i) => setTopics(topics.filter((_, idx) => idx !== i));
+
+  async function handleSaveTask() {
+    if (!taskForm.title.trim()) return alert('Task name is required');
+    await createTask.mutateAsync({
+      ...taskForm,
+      grade_weight: taskForm.grade_weight ? Number(taskForm.grade_weight) : undefined,
+      estimated_hours: taskForm.estimated_hours ? Number(taskForm.estimated_hours) : undefined,
+    });
+    setSavedOk(true);
+    setTimeout(() => navigate('/tasks'), 800);
+  }
+
+  async function handleSaveExam() {
+    if (!examForm.subject.trim()) return alert('Subject is required');
+    await createExam.mutateAsync({
+      ...examForm,
+      confidence_level: confidence,
+      topics,
+      daily_study_hours: examForm.daily_study_hours ? Number(examForm.daily_study_hours) : undefined,
+    });
+    setSavedOk(true);
+    setTimeout(() => navigate('/exams'), 800);
+  }
+
+  const isLoading = createTask.isPending || createExam.isPending;
+
+  if (savedOk) {
+    return (
+      <div className="min-h-full flex flex-col items-center justify-center gap-4 animate-[fadeIn_0.2s_ease]">
+        <div className="w-14 h-14 rounded-full bg-[#F0FDF4] border-2 border-[#16A34A] flex items-center justify-center">
+          <Check className="w-7 h-7 text-[#16A34A]" strokeWidth={2.5} />
+        </div>
+        <div className="text-[16px] font-bold text-text-1">Saved successfully!</div>
+        <div className="text-[13px] text-text-3">Redirecting…</div>
+      </div>
+    );
+  }
+
+  const inputClass = "w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3";
 
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
       <div className="pt-5 md:pt-7 px-4 md:px-8 pb-0 flex items-center justify-between mb-4 md:mb-6">
         <div>
           <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Add New</h1>
-          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Describe your task or exam, or fill in the form manually</p>
+          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Describe your task or exam, or fill in the form below</p>
         </div>
       </div>
 
       <div className="px-4 md:px-8 pb-9">
+        {/* Tabs */}
         <div className="flex flex-col sm:flex-row gap-1 bg-bg p-1 rounded-[10px] mb-5.5 w-full sm:w-max border border-border">
-          <button 
+          <button
             onClick={() => setActiveTab('task')}
             className={`px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'task' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
           >
             📋 Assignment / Task
           </button>
-          <button 
+          <button
             onClick={() => setActiveTab('exam')}
             className={`px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'exam' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
           >
@@ -50,65 +115,87 @@ export default function Add() {
         {activeTab === 'task' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
+              {/* NLP Input */}
               <div className="bg-white border-[1.5px] border-border rounded-r p-4 mb-4.5 transition-colors focus-within:border-primary shadow-xs">
                 <div className="text-[11px] font-semibold text-primary mb-2 uppercase tracking-[0.06em]">✦ Describe in plain English</div>
-                <textarea 
-                  className="w-full border-none outline-none resize-none font-sans text-[13.5px] text-text-1 bg-transparent leading-relaxed min-h-[64px] placeholder:text-text-3" 
+                <textarea
+                  value={nlpText}
+                  onChange={e => { setNlpText(e.target.value); setShowParsed(false); }}
+                  className="w-full border-none outline-none resize-none font-sans text-[13.5px] text-text-1 bg-transparent leading-relaxed min-h-[64px] placeholder:text-text-3"
                   placeholder="e.g. 'Stats assignment due this Friday, worth 30%, about 4 hours of work, haven't started yet…'"
-                ></textarea>
+                />
                 <div className="flex justify-between items-center mt-2.5 pt-2.5 border-t border-border">
-                  <span className="text-[11px] text-text-3">Claude parses all details automatically</span>
-                  <button onClick={() => setShowParsed(true)} className="bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors">Parse with AI</button>
+                  <span className="text-[11px] text-text-3">AI parses all details automatically</span>
+                  <button
+                    onClick={() => { if (nlpText.trim()) setShowParsed(true); }}
+                    className="bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors"
+                  >Parse with AI</button>
                 </div>
               </div>
 
-              {showParsed && (
+              {showParsed && parsedData && (
                 <div className="bg-primary-faint border border-primary-mid rounded-rs p-3 mb-4.5">
-                  <div className="text-[11px] font-semibold text-primary mb-2">✓ Claude parsed this as:</div>
+                  <div className="text-[11px] font-semibold text-primary mb-2">✓ Parsed as:</div>
                   <div className="flex flex-wrap gap-1.5">
-                    <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Task:</b> Statistics Assignment</div>
-                    <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Due:</b> Friday Mar 14</div>
-                    <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Weight:</b> 30%</div>
-                    <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Est:</b> 4 hrs</div>
-                    <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Status:</b> Not started</div>
+                    <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Task:</b> {parsedData.title}</div>
+                    {parsedData.weight !== '—' && <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Weight:</b> {parsedData.weight}</div>}
+                    {parsedData.effort !== '—' && <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Est:</b> {parsedData.effort}</div>}
+                    <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Status:</b> {parsedData.status}</div>
                   </div>
+                  <button
+                    onClick={() => setTaskForm(f => ({
+                      ...f,
+                      title: parsedData.title,
+                      grade_weight: parsedData.weight.replace('%', ''),
+                      estimated_hours: parsedData.effort.replace(' hrs', ''),
+                      status: parsedData.status
+                    }))}
+                    className="mt-2 text-[12px] text-primary underline cursor-pointer bg-transparent border-none"
+                  >
+                    Use this → fill form
+                  </button>
                 </div>
               )}
 
               <div className="text-center text-[11.5px] text-text-3 my-3 mb-4.5 relative before:content-[''] before:absolute before:top-1/2 before:w-[42%] before:h-px before:bg-border before:left-0 after:content-[''] after:absolute after:top-1/2 after:w-[42%] after:h-px after:bg-border after:right-0">or fill in manually</div>
-              
+
               <div className="mb-3.5">
-                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Task Name</label>
-                <input type="text" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3" placeholder="e.g. Statistics Assignment 2" />
+                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Task Name *</label>
+                <input type="text" className={inputClass} placeholder="e.g. Statistics Assignment 2" value={taskForm.title} onChange={e => setTaskForm(f => ({ ...f, title: e.target.value }))} />
               </div>
-              
+
+              <div className="mb-3.5">
+                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Description</label>
+                <textarea className={`${inputClass} resize-none min-h-[60px]`} placeholder="Additional notes or context…" value={taskForm.description} onChange={e => setTaskForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
                 <div>
                   <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Due Date</label>
-                  <input type="date" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary" />
+                  <input type="date" className={inputClass} value={taskForm.due_date} onChange={e => setTaskForm(f => ({ ...f, due_date: e.target.value }))} />
                 </div>
                 <div>
                   <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course Code</label>
-                  <input type="text" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3" placeholder="e.g. STAT 201" />
+                  <input type="text" className={inputClass} placeholder="e.g. STAT 201" value={taskForm.course_code} onChange={e => setTaskForm(f => ({ ...f, course_code: e.target.value }))} />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
                 <div>
                   <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Grade Weight (%)</label>
-                  <input type="number" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3" placeholder="25" />
+                  <input type="number" className={inputClass} placeholder="25" value={taskForm.grade_weight} onChange={e => setTaskForm(f => ({ ...f, grade_weight: e.target.value }))} />
                 </div>
                 <div>
                   <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Estimated Hours</label>
-                  <input type="number" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3" placeholder="4" step="0.5" />
+                  <input type="number" className={inputClass} placeholder="4" step="0.5" value={taskForm.estimated_hours} onChange={e => setTaskForm(f => ({ ...f, estimated_hours: e.target.value }))} />
                 </div>
               </div>
 
               <div className="mb-3.5">
                 <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Status</label>
-                <select className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary">
+                <select className={inputClass} value={taskForm.status} onChange={e => setTaskForm(f => ({ ...f, status: e.target.value }))}>
                   <option>Not started</option>
-                  <option>In progress</option>
+                  <option>In Progress</option>
                   <option>Stuck / blocked</option>
                 </select>
               </div>
@@ -117,19 +204,22 @@ export default function Add() {
             <div>
               <div className="bg-white border border-border rounded-r p-4.5 mb-3.5 shadow-xs">
                 <div className="text-[12px] font-bold text-text-2 mb-2.5 uppercase tracking-[0.05em]">Priority Preview</div>
-                <div className="text-[13px] text-text-2 leading-relaxed mb-3">Fill in the details and Claude will rank this task in your current queue.</div>
+                <div className="text-[13px] text-text-2 leading-relaxed mb-3">Fill in the due date and grade weight — Trackit will rank this against your existing tasks.</div>
                 <div className="bg-bg rounded-rs p-3 border border-border">
-                  <div className="text-[12px] font-semibold text-text-2 mb-1.5">Current #1 Priority</div>
-                  <div className="text-[13.5px] font-bold text-text-1">Data Structures — Due Tomorrow</div>
-                  <div className="text-[11.5px] text-text-3 mt-1">Your new task slots in after AI analysis</div>
+                  <div className="text-[12px] font-semibold text-text-2 mb-1">This task will:</div>
+                  <div className="text-[13.5px] font-bold text-text-1">{taskForm.title || 'New Task'}</div>
+                  <div className="text-[11.5px] text-text-3 mt-1">
+                    {taskForm.due_date ? `Due: ${new Date(taskForm.due_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}` : 'No due date set'}
+                    {taskForm.grade_weight ? ` · ${taskForm.grade_weight}% weight` : ''}
+                  </div>
                 </div>
               </div>
-              
-              <div className="bg-white border border-border rounded-r p-4.5 mb-3.5 shadow-xs">
-                <div className="text-[12px] font-bold text-text-2 mb-2.5 uppercase tracking-[0.05em]">Tips for Better Prioritisation</div>
+
+              <div className="bg-white border border-border rounded-r p-4.5 shadow-xs">
+                <div className="text-[12px] font-bold text-text-2 mb-2.5 uppercase tracking-[0.05em]">Tips</div>
                 <div className="text-[13px] text-text-2 leading-[1.9]">
                   <div>· Grade weight matters — 5% quiz ranks below 40% exam</div>
-                  <div>· Mark "stuck" to get Claude's specific help</div>
+                  <div>· Mark "stuck" to get AI-specific help in Chat</div>
                   <div>· More detail = smarter priority reasoning</div>
                 </div>
               </div>
@@ -139,76 +229,84 @@ export default function Add() {
 
         {activeTab === 'exam' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-             <div>
+            <div>
               <div className="mb-3.5">
-                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Subject / Course Name</label>
-                <input type="text" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3" placeholder="e.g. Calculus II" />
+                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Subject / Course Name *</label>
+                <input type="text" className={inputClass} placeholder="e.g. Calculus II" value={examForm.subject} onChange={e => setExamForm(f => ({ ...f, subject: e.target.value }))} />
               </div>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
                 <div>
                   <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Exam Date</label>
-                  <input type="date" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary" />
+                  <input type="date" className={inputClass} value={examForm.exam_date} onChange={e => setExamForm(f => ({ ...f, exam_date: e.target.value }))} />
                 </div>
                 <div>
                   <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course Code</label>
-                  <input type="text" className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3" placeholder="e.g. MATH 201" />
+                  <input type="text" className={inputClass} placeholder="e.g. MATH 201" value={examForm.course_code} onChange={e => setExamForm(f => ({ ...f, course_code: e.target.value }))} />
                 </div>
               </div>
 
               <div className="mb-3.5">
                 <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Confidence Level</label>
                 <div className="flex gap-2">
-                  <button onClick={() => setConfidence('low')} className={`flex-1 p-[9px] border-[1.5px] rounded-rs text-center cursor-pointer text-[13px] font-semibold transition-all font-sans ${confidence === 'low' ? 'bg-primary-light border-primary text-primary' : 'bg-white border-border text-text-2 hover:border-primary-mid hover:text-primary'}`}>😰 Low</button>
-                  <button onClick={() => setConfidence('medium')} className={`flex-1 p-[9px] border-[1.5px] rounded-rs text-center cursor-pointer text-[13px] font-semibold transition-all font-sans ${confidence === 'medium' ? 'bg-primary-light border-primary text-primary' : 'bg-white border-border text-text-2 hover:border-primary-mid hover:text-primary'}`}>😐 Medium</button>
-                  <button onClick={() => setConfidence('high')} className={`flex-1 p-[9px] border-[1.5px] rounded-rs text-center cursor-pointer text-[13px] font-semibold transition-all font-sans ${confidence === 'high' ? 'bg-primary-light border-primary text-primary' : 'bg-white border-border text-text-2 hover:border-primary-mid hover:text-primary'}`}>😊 High</button>
+                  {['low', 'medium', 'high'].map(c => (
+                    <button
+                      key={c}
+                      onClick={() => setConfidence(c)}
+                      className={`flex-1 p-[9px] border-[1.5px] rounded-rs text-center cursor-pointer text-[13px] font-semibold transition-all font-sans capitalize ${confidence === c ? 'bg-primary-light border-primary text-primary' : 'bg-white border-border text-text-2 hover:border-primary-mid hover:text-primary'}`}
+                    >
+                      {c === 'low' ? '😰' : c === 'medium' ? '😐' : '😊'} {c.charAt(0).toUpperCase() + c.slice(1)}
+                    </button>
+                  ))}
                 </div>
               </div>
 
               <div className="mb-3.5">
                 <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Topics to Revise</label>
                 <div className="flex gap-2 mb-2">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={topicInput}
-                    onChange={(e) => setTopicInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleAddTopic(); }}
-                    className="flex-1 p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3" 
-                    placeholder="e.g. Integration by parts" 
+                    onChange={e => setTopicInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddTopic(); } }}
+                    className={inputClass + ' flex-1'}
+                    placeholder="e.g. Integration by parts"
                   />
                   <button onClick={handleAddTopic} className="bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Add</button>
                 </div>
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {topics.map((topic, idx) => (
-                    <span key={idx} className="bg-primary-light rounded-[20px] px-2.5 py-[3px] text-[12px] text-primary flex items-center gap-1.5 font-medium">
-                      {topic} 
-                      <span onClick={() => handleRemoveTopic(idx)} className="cursor-pointer text-primary-mid text-[14px] leading-none font-normal hover:text-primary">×</span>
-                    </span>
-                  ))}
-                </div>
+                {topics.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {topics.map((topic, idx) => (
+                      <span key={idx} className="bg-primary-light rounded-[20px] px-2.5 py-[3px] text-[12px] text-primary flex items-center gap-1.5 font-medium">
+                        {topic}
+                        <span onClick={() => handleRemoveTopic(idx)} className="cursor-pointer text-primary-mid text-[14px] leading-none font-normal hover:text-primary">×</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="mb-3.5">
-                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Daily Study Time Available</label>
-                <select className="w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary">
-                  <option>30 minutes</option>
-                  <option>1 hour</option>
-                  <option>1–2 hours</option>
-                  <option>2–3 hours</option>
-                  <option>3+ hours</option>
-                </select>
+                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Daily Study Time Available (hours)</label>
+                <input type="number" className={inputClass} placeholder="e.g. 2" step="0.5" value={examForm.daily_study_hours} onChange={e => setExamForm(f => ({ ...f, daily_study_hours: e.target.value }))} />
               </div>
             </div>
-            
+
             <div>
               <div className="bg-white border border-border rounded-r p-4.5 mb-3.5 shadow-xs">
                 <div className="text-[12px] font-bold text-text-2 mb-2.5 uppercase tracking-[0.05em]">Revision Plan Preview</div>
-                <div className="text-[13px] text-text-2 leading-relaxed mb-3.5">Claude generates a day-by-day revision schedule counting back from your exam date.</div>
+                <div className="text-[13px] text-text-2 leading-relaxed mb-3.5">Trackit generates a day-by-day revision schedule counting back from your exam date.</div>
                 <div className="bg-bg rounded-rs p-3 border border-border">
                   <div className="text-[13px] text-text-2 leading-[2.0]">
-                    <div><span className="font-bold text-primary">Week 1:</span> Core concepts — Differentiation, Limits</div>
-                    <div><span className="font-bold text-primary">Week 2:</span> Problem solving — Integration</div>
-                    <div><span className="font-bold text-primary">Week 3:</span> Past papers + weak area review</div>
+                    {examForm.exam_date ? (
+                      <>
+                        <div><span className="font-bold text-primary">Week 1:</span> Core concepts — {topics[0] || 'Topic 1'}</div>
+                        <div><span className="font-bold text-primary">Week 2:</span> Problem solving — {topics[1] || 'Topic 2'}</div>
+                        <div><span className="font-bold text-primary">Final week:</span> Past papers + weak area review</div>
+                      </>
+                    ) : (
+                      <span className="text-text-3 italic">Set an exam date to preview your revision plan</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -216,16 +314,18 @@ export default function Add() {
           </div>
         )}
 
+        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-2.5 mt-5.5 pt-5 border-t border-border">
-          <button className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-rs text-[13px] font-semibold shadow-xs border-none cursor-pointer transition-colors w-full sm:w-auto">
+          <button
+            onClick={activeTab === 'task' ? handleSaveTask : handleSaveExam}
+            disabled={isLoading}
+            className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-rs text-[13px] font-semibold shadow-xs border-none cursor-pointer transition-colors w-full sm:w-auto disabled:opacity-60"
+          >
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             {activeTab === 'task' ? 'Save Task' : 'Save & Generate Plan'}
           </button>
-          {activeTab === 'task' && (
-            <button className="bg-white text-text-2 border border-border2 px-4 py-2 rounded-rs text-[13px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all w-full sm:w-auto">Save & Add Another</button>
-          )}
-          <button onClick={() => navigate('/dashboard')} className="bg-white text-text-2 border border-border2 px-4 py-2 rounded-rs text-[13px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all w-full sm:w-auto mt-2 sm:mt-0">Cancel</button>
+          <button onClick={() => navigate(-1)} className="bg-white text-text-2 border border-border2 px-4 py-2 rounded-rs text-[13px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all w-full sm:w-auto">Cancel</button>
         </div>
-
       </div>
     </div>
   );

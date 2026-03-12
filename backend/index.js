@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 
 const taskRoutes = require('./routes/tasks');
+const examRoutes = require('./routes/exams');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -15,6 +16,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/tasks', taskRoutes);
+app.use('/api/exams', examRoutes);
 
 // Basic health check endpoint
 app.get('/health', (req, res) => {
