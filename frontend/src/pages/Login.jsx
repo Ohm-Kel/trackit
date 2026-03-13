@@ -29,6 +29,13 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     try {
+      // Clear any existing error params in the URL before starting a new flow
+      // This prevents 'bad_oauth_state' errors on second attempts
+      if (window.location.search || window.location.hash) {
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+      
       const { error } = await signInWithGoogle();
       if (error) throw error;
     } catch (err) {
