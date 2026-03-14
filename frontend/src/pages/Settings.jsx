@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
+import { useProfile, useUpdateProfile } from '../hooks/useProfile';
 import { requestNotificationPermission } from '../components/NotificationManager';
 import { useToast } from '../components/Toast';
 import { exportTasksCSV, exportExamsCSV } from '../utils/export';
@@ -61,85 +62,55 @@ export default function Settings() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [showExport]);
+  const { data: profileData, isLoading: loadingProfile } = useProfile();
+  const updateProfileMutation = useUpdateProfile();
   const { addToast } = useToast();
-  const [profile, setProfile] = useState({
+
+  const [localProfile, setLocalProfile] = useState({
     name: '', university: '', course: '', year: '', email: '', avatar_url: ''
   });
   const [notif, setNotif] = useState({
     browser: false, deadlineReminder: true, weeklyDigest: false, focusPlanAlert: true
   });
   const [saved, setSaved] = useState(false);
-  const [savingProfile, setSavingProfile] = useState(false);
-  const [loadingProfile, setLoadingProfile] = useState(true);
   const [activeSection, setActiveSection] = useState('profile');
 
   useEffect(() => {
-    // Load notifications from localStorage (still local preference)
+    // Load notifications from localStorage
     const n = localStorage.getItem(NOTIF_KEY);
     if (n) setNotif(JSON.parse(n));
+  }, []);
 
-    // Load profile from Supabase if user is logged in
-    async function loadProfile() {
-      if (!user) {
-        setLoadingProfile(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('display_name, email, avatar_url, university, course, year')
-          .eq('id', user.id)
-          .single();
-
-        if (error) throw error;
-
-        if (data) {
-          setProfile({
-            name: data.display_name || '',
-            email: data.email || '',
-            avatar_url: data.avatar_url || '',
-            university: data.university || '',
-            course: data.course || '',
-            year: data.year || ''
-          });
-        }
-      } catch (err) {
-        console.error('Error loading profile:', err);
-      } finally {
-        setLoadingProfile(false);
-      }
+  useEffect(() => {
+    if (profileData) {
+      setLocalProfile({
+        name: profileData.display_name || '',
+        email: profileData.email || '',
+        avatar_url: profileData.avatar_url || '',
+        university: profileData.university || '',
+        course: profileData.course || '',
+        year: profileData.year || ''
+      });
     }
+  }, [profileData]);
 
-    loadProfile();
-  }, [user]);
-
-  async function saveProfile() {
-    if (!user) return;
-    setSavingProfile(true);
-
-    try {
-      const { error } = await supabase
-        .from('users')
-        .update({
-          display_name: profile.name,
-          email: profile.email,
-          university: profile.university,
-          course: profile.course,
-          year: profile.year
-        })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      console.error('Error saving profile:', err);
-      alert('Failed to save profile. Please try again.');
-    } finally {
-      setSavingProfile(false);
-    }
+  async function handleSaveProfile() {
+    updateProfileMutation.mutate({
+      display_name: localProfile.name,
+      university: localProfile.university,
+      course: localProfile.course,
+      year: localProfile.year
+    }, {
+      onSuccess: () => {
+        setSaved(true);
+        addToast('Profile updated successfully!', { type: 'success' });
+        setTimeout(() => setSaved(false), 2000);
+      },
+      onError: (err) => {
+        console.error('Error saving profile:', err);
+        addToast('Failed to save profile. Please try again.', { type: 'error' });
+      }
+    });
   }
 
   async function updateNotif(key, value) {
@@ -204,20 +175,20 @@ export default function Settings() {
               <Section icon={User} title="Profile" description="Your personal information displayed in the app">
                 {/* Avatar */}
                 <div className="flex items-center gap-4 mb-5 pb-5 border-b border-border">
-                  {profile.avatar_url ? (
+                  {localProfile.avatar_url ? (
                     <img 
-                      src={profile.avatar_url} 
-                      alt={profile.name} 
+                      src={localProfile.avatar_url} 
+                      alt={localProfile.name} 
                       className="w-[52px] h-[52px] rounded-full object-cover shrink-0 border border-border"
                     />
                   ) : (
                     <div className="w-[52px] h-[52px] rounded-full bg-primary-light flex items-center justify-center text-primary font-bold text-[20px] shrink-0">
-                      {profile.name ? profile.name.charAt(0).toUpperCase() : 'U'}
+                      {(localProfile.name || user?.email || 'U').charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div>
-                    <div className="text-[14px] font-bold text-text-1">{profile.name || 'Your Name'}</div>
-                    <div className="text-[12px] text-text-3">{profile.email || 'Set your email below'}</div>
+                    <div className="text-[14px] font-bold text-text-1">{localProfile.name || user?.email?.split('@')[0] || 'Your Name'}</div>
+                    <div className="text-[12px] text-text-3">{localProfile.email || 'Set your email below'}</div>
                   </div>
                 </div>
 
@@ -229,24 +200,24 @@ export default function Settings() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Full Name</label>
-                      <input type="text" className={inputClass} placeholder="e.g. Kwame Mensah" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} />
+                      <input type="text" className={inputClass} placeholder="e.g. Kwame Mensah" value={localProfile.name} onChange={e => setLocalProfile(p => ({ ...p, name: e.target.value }))} />
                     </div>
                     <div>
                       <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Email Address</label>
-                      <input type="email" disabled className={`${inputClass} opacity-60 cursor-not-allowed`} placeholder="you@university.edu" value={profile.email} />
+                      <input type="email" disabled className={`${inputClass} opacity-60 cursor-not-allowed`} placeholder="you@university.edu" value={localProfile.email} />
                       <p className="text-[10px] text-text-3 mt-1 italic">Email is managed via your login provider</p>
                     </div>
                     <div>
                       <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">University / Institution</label>
-                      <input type="text" className={inputClass} placeholder="e.g. University of Ghana" value={profile.university} onChange={e => setProfile(p => ({ ...p, university: e.target.value}))} />
+                      <input type="text" className={inputClass} placeholder="e.g. University of Ghana" value={localProfile.university} onChange={e => setLocalProfile(p => ({ ...p, university: e.target.value}))} />
                     </div>
                     <div>
                       <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course / Program</label>
-                      <input type="text" className={inputClass} placeholder="e.g. BSc Computer Science" value={profile.course} onChange={e => setProfile(p => ({ ...p, course: e.target.value }))} />
+                      <input type="text" className={inputClass} placeholder="e.g. BSc Computer Science" value={localProfile.course} onChange={e => setLocalProfile(p => ({ ...p, course: e.target.value }))} />
                     </div>
                     <div>
                       <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Year / Level</label>
-                      <select className={inputClass} value={profile.year} onChange={e => setProfile(p => ({ ...p, year: e.target.value }))}>
+                      <select className={inputClass} value={localProfile.year} onChange={e => setLocalProfile(p => ({ ...p, year: e.target.value }))}>
                         <option value="">Select year…</option>
                         <option>Year 1 / Freshman</option>
                         <option>Year 2 / Sophomore</option>
@@ -261,11 +232,11 @@ export default function Settings() {
 
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={saveProfile}
-                    disabled={savingProfile}
+                    onClick={handleSaveProfile}
+                    disabled={updateProfileMutation.isPending}
                     className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-rs text-[13px] font-semibold border-none cursor-pointer shadow-xs transition-colors disabled:opacity-60"
                   >
-                    {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    {updateProfileMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Save Profile
                   </button>
                   {saved && (
@@ -440,7 +411,7 @@ export default function Settings() {
                         if (window.confirm('Clear all local settings? This cannot be undone.')) {
                           localStorage.removeItem(PROFILE_KEY);
                           localStorage.removeItem(NOTIF_KEY);
-                          setProfile({ name: '', university: '', course: '', year: '', email: '' });
+                          setLocalProfile({ name: '', university: '', course: '', year: '', email: '' });
                           setNotif({ browser: false, deadlineReminder: true, weeklyDigest: false, focusPlanAlert: true });
                         }
                       }}

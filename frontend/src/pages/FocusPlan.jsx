@@ -94,7 +94,7 @@ export default function FocusPlan() {
   const navigate = useNavigate();
   const { data: tasks = [], isLoading } = useTasks();
   const { data: exams = [] } = useExams();
-  const { profile } = useProfile();
+  const { data: profile } = useProfile();
   const updateTask = useUpdateTask();
 
   const now = new Date();

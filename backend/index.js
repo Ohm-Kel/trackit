@@ -7,6 +7,7 @@ const examRoutes = require('./routes/exams');
 const chatRoutes = require('./routes/chat');
 const subtaskRoutes = require('./routes/subtasks');
 const uploadRoutes = require('./routes/upload');
+const userRoutes = require('./routes/users');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -23,6 +24,7 @@ app.use('/api/exams', examRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/subtasks', subtaskRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/users', userRoutes);
 
 // Basic health check endpoint
 app.get('/health', (req, res) => {

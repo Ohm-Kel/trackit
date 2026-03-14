@@ -11,7 +11,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { data: tasks = [], isLoading: tasksLoading } = useTasks();
   const { data: exams = [], isLoading: examsLoading } = useExams();
-  const { profile } = useProfile();
+  const { data: profile } = useProfile();
 
   const firstName = profile?.display_name ? profile.display_name.split(' ')[0] : 'there';
 
