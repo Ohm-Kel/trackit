@@ -5,6 +5,7 @@ import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Lazy-loaded pages
+const Landing = lazy(() => import('./pages/Landing'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Exams = lazy(() => import('./pages/Exams'));
 const Chat = lazy(() => import('./pages/Chat'));
@@ -33,7 +34,8 @@ function App() {
       <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            {/* Public Auth Routes */}
+            {/* Public Routes */}
+            <Route path="/landing"         element={<Landing />} />
             <Route path="/login"           element={<Login />} />
             <Route path="/signup"          element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
