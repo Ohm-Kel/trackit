@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
-import { Plus, Search, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2, AlertTriangle, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
 import { formatRelativeDate, getDueBadgeClass, formatStatus, daysUntil } from '../utils/dates';
+import { exportTasksCSV, exportTasksPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
 
 function getStatusClass(status) {
@@ -21,6 +22,7 @@ export default function Tasks() {
   const [expandedRow, setExpandedRow] = useState(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
+  const [showExport, setShowExport] = useState(false);
 
   const statuses = [
     { label: 'All', value: 'All' },
@@ -72,13 +74,32 @@ export default function Tasks() {
             {isLoading ? 'Loading…' : `${totalCount} task${totalCount !== 1 ? 's' : ''} tracked${inProgressCount > 0 ? ` · ${inProgressCount} in progress` : ''}`}
           </p>
         </div>
-        <button
-          onClick={() => navigate('/add')}
-          className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
-        >
-          <Plus className="w-[13px] h-[13px]" />
-          <span className="hidden sm:inline">Add Task</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {tasks.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => setShowExport(!showExport)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
+              >
+                <Download className="w-[13px] h-[13px]" />
+                <span className="hidden sm:inline">Export</span>
+              </button>
+              {showExport && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-rs shadow-md z-10 py-1 min-w-[140px]">
+                  <button onClick={() => { exportTasksCSV(tasks); setShowExport(false); }} className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium">Export as CSV</button>
+                  <button onClick={() => { exportTasksPDF(tasks); setShowExport(false); }} className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium">Export as PDF</button>
+                </div>
+              )}
+            </div>
+          )}
+          <button
+            onClick={() => navigate('/add')}
+            className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
+          >
+            <Plus className="w-[13px] h-[13px]" />
+            <span className="hidden sm:inline">Add Task</span>
+          </button>
+        </div>
       </div>
 
       <div className="px-4 md:px-8 pb-9">

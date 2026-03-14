@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import Sidebar from './Sidebar';
 import NotificationManager from '../NotificationManager';
+import OnboardingTour from '../OnboardingTour';
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -37,6 +38,7 @@ export default function Layout() {
       </main>
 
       <NotificationManager />
+      <OnboardingTour />
     </div>
   );
 }

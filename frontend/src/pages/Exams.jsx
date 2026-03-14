@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Plus, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Loader2, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useExams, useUpdateExam, useDeleteExam } from '../hooks/useExams';
 import { daysUntil } from '../utils/dates';
+import { exportExamsCSV, exportExamsPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
 
 function confidenceStyle(level) {
@@ -19,6 +20,7 @@ export default function Exams() {
   const deleteExam = useDeleteExam();
 
   const [expandedExam, setExpandedExam] = useState(null);
+  const [showExport, setShowExport] = useState(false);
 
   const upcoming = exams.filter(e => daysUntil(e.exam_date) >= 0);
   const past = exams.filter(e => daysUntil(e.exam_date) < 0);
@@ -37,13 +39,32 @@ export default function Exams() {
             {isLoading ? 'Loading…' : `${upcoming.length} exam${upcoming.length !== 1 ? 's' : ''} tracked${upcoming.length > 0 ? ' · revision plans active' : ''}`}
           </p>
         </div>
-        <button
-          onClick={() => navigate('/add?tab=exam')}
-          className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
-        >
-          <Plus className="w-[13px] h-[13px]" />
-          <span className="hidden sm:inline">Add Exam</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {exams.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => setShowExport(!showExport)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
+              >
+                <Download className="w-[13px] h-[13px]" />
+                <span className="hidden sm:inline">Export</span>
+              </button>
+              {showExport && (
+                <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-rs shadow-md z-10 py-1 min-w-[140px]">
+                  <button onClick={() => { exportExamsCSV(exams); setShowExport(false); }} className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium">Export as CSV</button>
+                  <button onClick={() => { exportExamsPDF(exams); setShowExport(false); }} className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium">Export as PDF</button>
+                </div>
+              )}
+            </div>
+          )}
+          <button
+            onClick={() => navigate('/add?tab=exam')}
+            className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
+          >
+            <Plus className="w-[13px] h-[13px]" />
+            <span className="hidden sm:inline">Add Exam</span>
+          </button>
+        </div>
       </div>
 
       <div className="px-4 md:px-8 pb-9">
