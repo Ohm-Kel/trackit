@@ -35,3 +35,24 @@ export async function sendChatMessage(message, history = []) {
 
   return res.json();
 }
+
+/**
+ * Load persisted chat history from the database.
+ * @returns {Promise<Array<{role: string, content: string, created_at: string}>>}
+ */
+export async function fetchChatHistory() {
+  const headers = await getAuthHeader();
+  const res = await fetch(`${API_URL}/chat/history`, { headers });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+/**
+ * Clear all persisted chat history.
+ */
+export async function clearChatHistory() {
+  const headers = await getAuthHeader();
+  const res = await fetch(`${API_URL}/chat/history`, { method: 'DELETE', headers });
+  if (!res.ok) throw new Error('Failed to clear history');
+  return res.json();
+}

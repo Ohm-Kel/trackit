@@ -1,9 +1,9 @@
-import { Send, Loader2 } from 'lucide-react';
-import { useRef, useState, useCallback } from 'react';
+import { Send, Loader2, Trash2 } from 'lucide-react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
 import { daysUntil } from '../utils/dates';
-import { sendChatMessage } from '../api/chat';
+import { sendChatMessage, fetchChatHistory, clearChatHistory } from '../api/chat';
 
 function daysLabel(dateStr) {
   const diff = daysUntil(dateStr);
@@ -21,17 +21,44 @@ function dotColor(task) {
   return '#22C55E';
 }
 
-const INITIAL_MESSAGES = [
-  { role: 'ai', text: 'Hey! I can see your full schedule and workload.\n\nAsk me anything about your tasks, exams, or what to work on next — I\'ll give you the most strategic advice based on deadlines and grade weights.' }
-];
+const INITIAL_GREETING = { role: 'ai', text: 'Hey! I can see your full schedule and workload.\n\nAsk me anything about your tasks, exams, or what to work on next — I\'ll give you the most strategic advice based on deadlines and grade weights.' };
 
 export default function Chat() {
   const { data: tasks = [], isLoading: tasksLoading } = useTasks();
   const { data: exams = [], isLoading: examsLoading } = useExams();
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState([INITIAL_GREETING]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Load persisted history on mount
+  useEffect(() => {
+    let cancelled = false;
+    fetchChatHistory().then(history => {
+      if (cancelled || !history.length) {
+        setHistoryLoaded(true);
+        return;
+      }
+      const loaded = history.map(m => ({
+        role: m.role === 'assistant' ? 'ai' : 'user',
+        text: m.content,
+        time: new Date(m.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+      }));
+      setMessages([INITIAL_GREETING, ...loaded]);
+      setHistoryLoaded(true);
+    }).catch(() => {
+      if (!cancelled) setHistoryLoaded(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Auto-scroll on new messages
+  useEffect(() => {
+    if (historyLoaded) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, historyLoaded]);
 
   const activeTasks = tasks.filter(t => t.status !== 'done');
   const upcomingExams = exams.filter(e => {
@@ -42,27 +69,37 @@ export default function Chat() {
   const sendMessage = useCallback(async () => {
     if (!input.trim() || sending) return;
     const userMsg = input;
+    const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     setInput('');
-    const userEntry = { role: 'user', text: userMsg };
+    const userEntry = { role: 'user', text: userMsg, time: now };
     setMessages(m => [...m, userEntry]);
     setSending(true);
 
     try {
-      // Build history from existing messages (skip the initial greeting)
       const history = messages
         .filter((_, i) => i > 0)
         .concat(userEntry)
         .map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text }));
 
       const { reply } = await sendChatMessage(userMsg, history);
-      setMessages(m => [...m, { role: 'ai', text: reply }]);
+      const replyTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      setMessages(m => [...m, { role: 'ai', text: reply, time: replyTime }]);
     } catch (err) {
-      setMessages(m => [...m, { role: 'ai', text: `Sorry, I couldn't get a response right now. ${err.message}` }]);
+      setMessages(m => [...m, { role: 'ai', text: `Sorry, I couldn't get a response right now. ${err.message}`, time: now }]);
     } finally {
       setSending(false);
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
     }
   }, [input, sending, messages]);
+
+  async function handleClearHistory() {
+    if (!window.confirm('Clear all chat history? This cannot be undone.')) return;
+    try {
+      await clearChatHistory();
+      setMessages([INITIAL_GREETING]);
+    } catch {
+      // silently fail
+    }
+  }
 
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -80,9 +117,20 @@ export default function Chat() {
 
   return (
     <div className="h-full flex flex-col pt-5 md:pt-7 animate-[fadeIn_0.2s_ease]">
-      <div className="px-4 md:px-8 mb-4">
-        <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">AI Workload Chat</h1>
-        <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Ask anything about your schedule, exams, or what to do next</p>
+      <div className="px-4 md:px-8 mb-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">AI Workload Chat</h1>
+          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Ask anything about your schedule, exams, or what to do next</p>
+        </div>
+        {messages.length > 1 && (
+          <button
+            onClick={handleClearHistory}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border2 text-text-3 hover:text-[#EF4444] hover:border-[#FCA5A5] rounded-rs text-[11px] font-semibold cursor-pointer transition-all"
+            title="Clear chat history"
+          >
+            <Trash2 className="w-3 h-3" /> Clear
+          </button>
+        )}
       </div>
 
       <div className="flex-1 px-4 md:px-8 pb-4 md:pb-6 grid grid-cols-1 md:grid-cols-[1fr_256px] gap-5 min-h-0 overflow-hidden">
@@ -100,7 +148,7 @@ export default function Chat() {
                     {msg.text}
                   </div>
                   <div className={`text-[10px] text-text-3 mt-1 ${msg.role === 'user' ? 'text-right' : ''}`}>
-                    {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                    {msg.time || ''}
                   </div>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import Sidebar from './Sidebar';
+import NotificationManager from '../NotificationManager';
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -34,6 +35,8 @@ export default function Layout() {
       <main className="flex-1 overflow-y-auto custom-scrollbar pt-[60px] md:pt-0">
         <Outlet />
       </main>
+
+      <NotificationManager />
     </div>
   );
 }

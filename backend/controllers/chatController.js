@@ -88,9 +88,58 @@ exports.chat = async (req, res) => {
     });
 
     const reply = response.content[0]?.text || 'Sorry, I could not generate a response.';
+
+    // Persist both the user message and AI reply to chat_history
+    await supabase.from('chat_history').insert([
+      { user_id: userId, role: 'user', content: message.trim() },
+      { user_id: userId, role: 'assistant', content: reply },
+    ]);
+
     res.json({ reply });
   } catch (err) {
     console.error('Chat controller error:', err);
     res.status(500).json({ error: 'Failed to generate AI response. Please try again.' });
+  }
+};
+
+/**
+ * GET /api/chat/history
+ * Returns the user's persisted chat messages, ordered chronologically.
+ */
+exports.getHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { data, error } = await supabase
+      .from('chat_history')
+      .select('role, content, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .limit(100);
+
+    if (error) throw error;
+    res.json(data || []);
+  } catch (err) {
+    console.error('Get chat history error:', err);
+    res.status(500).json({ error: 'Failed to load chat history.' });
+  }
+};
+
+/**
+ * DELETE /api/chat/history
+ * Clears the user's chat history.
+ */
+exports.clearHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { error } = await supabase
+      .from('chat_history')
+      .delete()
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Clear chat history error:', err);
+    res.status(500).json({ error: 'Failed to clear chat history.' });
   }
 };

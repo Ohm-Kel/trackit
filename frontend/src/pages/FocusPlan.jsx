@@ -51,9 +51,12 @@ export default function FocusPlan() {
           <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Today's Focus Plan</h1>
           <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">AI-generated plan based on your tasks, exams, and free time</p>
         </div>
-        <button className="inline-flex items-center justify-center gap-[7px] px-3.5 py-[9px] bg-white border border-border2 text-text-2 hover:border-primary hover:text-primary hover:bg-primary-faint rounded-rs text-[12px] font-semibold transition-all shadow-xs cursor-pointer w-full md:w-auto">
+        <button
+          onClick={() => navigate('/chat')}
+          className="inline-flex items-center justify-center gap-[7px] px-3.5 py-[9px] bg-white border border-border2 text-text-2 hover:border-primary hover:text-primary hover:bg-primary-faint rounded-rs text-[12px] font-semibold transition-all shadow-xs cursor-pointer w-full md:w-auto"
+        >
           <RefreshCw className="w-3.5 h-3.5" />
-          Regenerate Plan
+          Ask AI for Better Plan
         </button>
       </div>
 

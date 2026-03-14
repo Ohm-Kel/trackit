@@ -5,6 +5,8 @@ const cors = require('cors');
 const taskRoutes = require('./routes/tasks');
 const examRoutes = require('./routes/exams');
 const chatRoutes = require('./routes/chat');
+const subtaskRoutes = require('./routes/subtasks');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -13,12 +15,14 @@ const port = process.env.PORT || 3001;
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173'
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Routes
 app.use('/api/tasks', taskRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/subtasks', subtaskRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Basic health check endpoint
 app.get('/health', (req, res) => {

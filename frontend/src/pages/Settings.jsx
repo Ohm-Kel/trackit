@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
-import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2, Sun, Moon, Monitor } from 'lucide-react';
+import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2, Sun, Moon, Monitor, Download } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import { useTasks } from '../hooks/useTasks';
+import { useExams } from '../hooks/useExams';
+import { requestNotificationPermission } from '../components/NotificationManager';
+import { useToast } from '../components/Toast';
 
 const PROFILE_KEY = 'trackit_profile';
 const NOTIF_KEY = 'trackit_notif';
@@ -45,6 +49,9 @@ function Toggle({ label, description, checked, onChange }) {
 export default function Settings() {
   const { theme, setTheme, accent, setAccent, ACCENTS } = useTheme();
   const { user } = useAuth();
+  const { data: allTasks = [] } = useTasks();
+  const { data: allExams = [] } = useExams();
+  const { addToast } = useToast();
   const [profile, setProfile] = useState({
     name: '', university: '', course: '', year: '', email: '', avatar_url: ''
   });
@@ -125,7 +132,17 @@ export default function Settings() {
     }
   }
 
-  function updateNotif(key, value) {
+  async function updateNotif(key, value) {
+    // If enabling browser notifications, request permission first
+    if (key === 'browser' && value) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        addToast('Browser notifications were denied. Please enable them in your browser settings.', { type: 'warning', title: 'Permission Denied' });
+        return; // Don't toggle on if permission denied
+      }
+      addToast('Browser notifications enabled! You\'ll get alerts for upcoming deadlines.', { type: 'success', title: 'Notifications On' });
+    }
+
     const updated = { ...notif, [key]: value };
     setNotif(updated);
     localStorage.setItem(NOTIF_KEY, JSON.stringify(updated));
@@ -279,7 +296,13 @@ export default function Settings() {
                 />
                 <div className="mt-4 p-3.5 bg-bg border border-border rounded-rs">
                   <div className="text-[12px] text-text-3 leading-relaxed">
-                    💡 Notification settings are stored on this device. Enabling browser notifications will trigger a browser permission prompt the next time you visit.
+                    💡 Notification settings are stored on this device. Browser notifications require your browser's permission — you'll be prompted when you enable them.
+                    {typeof Notification !== 'undefined' && Notification.permission === 'granted' && (
+                      <span className="block mt-1 text-[#16A34A] font-semibold">✓ Browser notification permission granted</span>
+                    )}
+                    {typeof Notification !== 'undefined' && Notification.permission === 'denied' && (
+                      <span className="block mt-1 text-[#EF4444] font-semibold">✗ Browser notifications blocked — update in browser settings</span>
+                    )}
                   </div>
                 </div>
               </Section>
@@ -347,13 +370,15 @@ export default function Settings() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3.5 bg-bg border border-border rounded-r">
                     <div>
-                      <div className="text-[13.5px] font-semibold text-text-1">Export local settings</div>
-                      <div className="text-[12px] text-text-3 mt-0.5">Download your local app preferences as JSON</div>
+                      <div className="text-[13.5px] font-semibold text-text-1">Export all data</div>
+                      <div className="text-[12px] text-text-3 mt-0.5">Download your profile, tasks, exams, and preferences as JSON</div>
                     </div>
                     <button
                       onClick={() => {
                         const data = {
-                          profile: JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}'),
+                          profile,
+                          tasks: allTasks,
+                          exams: allExams,
                           notifications: JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}'),
                           exported_at: new Date().toISOString()
                         };
@@ -363,8 +388,9 @@ export default function Settings() {
                         a.href = url; a.download = 'trackit-data.json'; a.click();
                         URL.revokeObjectURL(url);
                       }}
-                      className="px-3 py-1.5 bg-white border border-border2 text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all shrink-0 ml-3"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border2 text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all shrink-0 ml-3"
                     >
+                      <Download className="w-3 h-3" />
                       Export
                     </button>
                   </div>

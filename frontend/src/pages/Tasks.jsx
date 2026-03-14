@@ -3,6 +3,7 @@ import { Plus, Search, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2 
 import { useNavigate } from 'react-router-dom';
 import { useTasks, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
 import { formatRelativeDate, getDueBadgeClass, formatStatus } from '../utils/dates';
+import SubtaskList from '../components/SubtaskList';
 
 function getStatusClass(status) {
   if (status === 'in_progress') return 'bg-primary-light text-primary';
@@ -25,6 +26,7 @@ export default function Tasks() {
     { label: 'All', value: 'All' },
     { label: 'In Progress', value: 'in_progress' },
     { label: 'Not Started', value: 'not_started' },
+    { label: 'Stuck', value: 'stuck' },
     { label: 'Done', value: 'done' },
   ];
 
@@ -222,6 +224,7 @@ export default function Tasks() {
                         <button onClick={() => navigate(`/add?edit=${task.id}`)} className="flex-1 bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Edit</button>
                         <button onClick={e => handleDelete(e, task.id)} className="flex-1 bg-white text-[#EF4444] border border-[#FCA5A5] px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all">Delete</button>
                       </div>
+                      <SubtaskList parentId={task.id} parentType="task" />
                     </div>
                   )}
                 </div>

@@ -3,15 +3,16 @@ import { Plus, ListTodo, CalendarDays, GraduationCap, ArrowRight, Loader2 } from
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
+import { useProfile } from '../hooks/useProfile';
 import { daysUntil, formatRelativeDate, getDueBadgeClass, formatStatus } from '../utils/dates';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { data: tasks = [], isLoading: tasksLoading } = useTasks();
   const { data: exams = [], isLoading: examsLoading } = useExams();
+  const { profile } = useProfile();
 
-  const profile = JSON.parse(localStorage.getItem('trackit_profile') || '{}');
-  const firstName = profile.name ? profile.name.split(' ')[0] : 'there';
+  const firstName = profile?.display_name ? profile.display_name.split(' ')[0] : 'there';
 
   const now = new Date();
   const hour = now.getHours();

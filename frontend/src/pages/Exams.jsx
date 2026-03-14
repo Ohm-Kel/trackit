@@ -1,12 +1,7 @@
 import { Plus, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useExams, useDeleteExam } from '../hooks/useExams';
-
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  const diff = Math.ceil((new Date(dateStr).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
-  return diff;
-}
+import { useExams, useUpdateExam, useDeleteExam } from '../hooks/useExams';
+import { daysUntil } from '../utils/dates';
 
 function confidenceStyle(level) {
   const l = (level || '').toLowerCase();
@@ -18,6 +13,7 @@ function confidenceStyle(level) {
 export default function Exams() {
   const navigate = useNavigate();
   const { data: exams = [], isLoading } = useExams();
+  const updateExam = useUpdateExam();
   const deleteExam = useDeleteExam();
 
   const upcoming = exams.filter(e => daysUntil(e.exam_date) >= 0);
@@ -112,11 +108,11 @@ export default function Exams() {
                       )}
 
                       <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-                        <button onClick={() => navigate('/chat')} className="flex-1 bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Ask AI</button>
+                        <button onClick={() => navigate(`/add?editExam=${exam.id}`)} className="flex-1 bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Edit</button>
                         <button
                           onClick={() => {
                             const newPrep = Math.min(100, prep + 10);
-                            // In a real app this would call updateExam
+                            updateExam.mutate({ id: exam.id, updates: { preparation_percent: newPrep } });
                           }}
                           className="flex-1 bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors"
                         >

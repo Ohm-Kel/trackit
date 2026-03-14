@@ -1,23 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, Check } from 'lucide-react';
-import { useCreateTask } from '../hooks/useTasks';
-import { useCreateExam } from '../hooks/useExams';
+import { useCreateTask, useUpdateTask, useTasks } from '../hooks/useTasks';
+import { useCreateExam, useUpdateExam, useExams } from '../hooks/useExams';
 
 export default function Add() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'exam' ? 'exam' : 'task';
+
+  const editTaskId = searchParams.get('edit');
+  const editExamId = searchParams.get('editExam');
+  const isEditMode = !!(editTaskId || editExamId);
+
+  const initialTab = editExamId ? 'exam' : searchParams.get('tab') === 'exam' ? 'exam' : 'task';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [confidence, setConfidence] = useState('medium');
   const [topics, setTopics] = useState([]);
   const [topicInput, setTopicInput] = useState('');
   const [savedOk, setSavedOk] = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(isEditMode);
 
   const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
   const createExam = useCreateExam();
+  const updateExam = useUpdateExam();
 
-  // Task form state — status uses snake_case to match the DB constraint
+  // Fetch existing data for edit mode
+  const { data: allTasks = [] } = useTasks();
+  const { data: allExams = [] } = useExams();
+
+  // Task form state
   const [taskForm, setTaskForm] = useState({
     title: '', due_date: '', course_code: '', grade_weight: '',
     estimated_hours: '', status: 'not_started', description: '',
@@ -28,7 +40,45 @@ export default function Add() {
     subject: '', course_code: '', exam_date: '', daily_study_hours: '',
   });
 
-  // Plain-text quick-fill (client-side regex parse — not AI)
+  // Populate form when editing
+  useEffect(() => {
+    if (editTaskId && allTasks.length > 0) {
+      const task = allTasks.find(t => t.id === editTaskId);
+      if (task) {
+        setTaskForm({
+          title: task.title || '',
+          due_date: task.due_date ? task.due_date.split('T')[0] : '',
+          course_code: task.course_code || '',
+          grade_weight: task.grade_weight ?? '',
+          estimated_hours: task.estimated_hours ?? '',
+          status: task.status || 'not_started',
+          description: task.description || '',
+        });
+        setLoadingEdit(false);
+      }
+    }
+    if (editExamId && allExams.length > 0) {
+      const exam = allExams.find(e => e.id === editExamId);
+      if (exam) {
+        setExamForm({
+          subject: exam.subject || '',
+          course_code: exam.course_code || '',
+          exam_date: exam.exam_date ? exam.exam_date.split('T')[0] : '',
+          daily_study_hours: exam.daily_study_hours ?? '',
+        });
+        setConfidence(exam.confidence_level || 'medium');
+        setTopics(Array.isArray(exam.topics) ? exam.topics : []);
+        setLoadingEdit(false);
+      }
+    }
+    if (!editTaskId && !editExamId) setLoadingEdit(false);
+
+    // If data loaded but item not found, stop loading (invalid ID in URL)
+    if (editTaskId && allTasks.length > 0 && !allTasks.find(t => t.id === editTaskId)) setLoadingEdit(false);
+    if (editExamId && allExams.length > 0 && !allExams.find(e => e.id === editExamId)) setLoadingEdit(false);
+  }, [editTaskId, editExamId, allTasks, allExams]);
+
+  // Plain-text quick-fill
   const [nlpText, setNlpText] = useState('');
   const [showParsed, setShowParsed] = useState(false);
 
@@ -51,28 +101,48 @@ export default function Add() {
 
   async function handleSaveTask() {
     if (!taskForm.title.trim()) return alert('Task name is required');
-    await createTask.mutateAsync({
+    const payload = {
       ...taskForm,
       grade_weight:    taskForm.grade_weight    ? Number(taskForm.grade_weight)    : undefined,
       estimated_hours: taskForm.estimated_hours ? Number(taskForm.estimated_hours) : undefined,
-    });
+    };
+
+    if (editTaskId) {
+      await updateTask.mutateAsync({ id: editTaskId, updates: payload });
+    } else {
+      await createTask.mutateAsync(payload);
+    }
     setSavedOk(true);
     setTimeout(() => navigate('/tasks'), 800);
   }
 
   async function handleSaveExam() {
     if (!examForm.subject.trim()) return alert('Subject is required');
-    await createExam.mutateAsync({
+    const payload = {
       ...examForm,
       confidence_level:   confidence,
       topics,
       daily_study_hours:  examForm.daily_study_hours ? Number(examForm.daily_study_hours) : undefined,
-    });
+    };
+
+    if (editExamId) {
+      await updateExam.mutateAsync({ id: editExamId, updates: payload });
+    } else {
+      await createExam.mutateAsync(payload);
+    }
     setSavedOk(true);
     setTimeout(() => navigate('/exams'), 800);
   }
 
-  const isLoading = createTask.isPending || createExam.isPending;
+  const isLoading = createTask.isPending || createExam.isPending || updateTask.isPending || updateExam.isPending;
+
+  if (loadingEdit) {
+    return (
+      <div className="min-h-full flex items-center justify-center">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   if (savedOk) {
     return (
@@ -80,7 +150,7 @@ export default function Add() {
         <div className="w-14 h-14 rounded-full bg-[#F0FDF4] border-2 border-[#16A34A] flex items-center justify-center">
           <Check className="w-7 h-7 text-[#16A34A]" strokeWidth={2.5} />
         </div>
-        <div className="text-[16px] font-bold text-text-1">Saved successfully!</div>
+        <div className="text-[16px] font-bold text-text-1">{isEditMode ? 'Updated successfully!' : 'Saved successfully!'}</div>
         <div className="text-[13px] text-text-3">Redirecting…</div>
       </div>
     );
@@ -88,7 +158,6 @@ export default function Add() {
 
   const inputClass = "w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3";
 
-  // Maps select option values to human-readable labels
   const STATUS_OPTIONS = [
     { value: 'not_started', label: 'Not Started' },
     { value: 'in_progress', label: 'In Progress' },
@@ -99,77 +168,85 @@ export default function Add() {
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
       <div className="pt-5 md:pt-7 px-4 md:px-8 pb-0 flex items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Add New</h1>
-          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Describe your task or exam, or fill in the form below</p>
+          <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">{isEditMode ? 'Edit' : 'Add New'}</h1>
+          <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">
+            {isEditMode ? 'Update the details below' : 'Describe your task or exam, or fill in the form below'}
+          </p>
         </div>
       </div>
 
       <div className="px-4 md:px-8 pb-9">
-        {/* Tabs */}
-        <div className="flex flex-col sm:flex-row gap-1 bg-bg p-1 rounded-[10px] mb-5.5 w-full sm:w-max border border-border">
-          <button
-            onClick={() => setActiveTab('task')}
-            className={`px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'task' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
-          >
-            📋 Assignment / Task
-          </button>
-          <button
-            onClick={() => setActiveTab('exam')}
-            className={`px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'exam' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
-          >
-            📝 Exam
-          </button>
-        </div>
+        {/* Tabs — disabled in edit mode */}
+        {!isEditMode && (
+          <div className="flex flex-col sm:flex-row gap-1 bg-bg p-1 rounded-[10px] mb-5.5 w-full sm:w-max border border-border">
+            <button
+              onClick={() => setActiveTab('task')}
+              className={`px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'task' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
+            >
+              📋 Assignment / Task
+            </button>
+            <button
+              onClick={() => setActiveTab('exam')}
+              className={`px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'exam' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
+            >
+              📝 Exam
+            </button>
+          </div>
+        )}
 
         {activeTab === 'task' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              {/* Quick-fill from plain text (client-side regex, not AI) */}
-              <div className="bg-white border-[1.5px] border-border rounded-r p-4 mb-4.5 transition-colors focus-within:border-primary shadow-xs">
-                <div className="text-[11px] font-semibold text-primary mb-2 uppercase tracking-[0.06em]">✦ Quick fill from description</div>
-                <textarea
-                  value={nlpText}
-                  onChange={e => { setNlpText(e.target.value); setShowParsed(false); }}
-                  className="w-full border-none outline-none resize-none font-sans text-[13.5px] text-text-1 bg-transparent leading-relaxed min-h-[64px] placeholder:text-text-3"
-                  placeholder="e.g. 'Stats assignment due this Friday, worth 30%, about 4 hours of work, haven't started yet…'"
-                />
-                <div className="flex justify-between items-center mt-2.5 pt-2.5 border-t border-border">
-                  <span className="text-[11px] text-text-3">Extracts title, weight, and effort from your text</span>
-                  <button
-                    onClick={() => { if (nlpText.trim()) setShowParsed(true); }}
-                    className="bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors"
-                  >
-                    Parse Text
-                  </button>
-                </div>
-              </div>
-
-              {showParsed && parsedData && (
-                <div className="bg-primary-faint border border-primary-mid rounded-rs p-3 mb-4.5">
-                  <div className="text-[11px] font-semibold text-primary mb-2">✓ Parsed as:</div>
-                  <div className="flex flex-wrap gap-1.5">
-                    <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Task:</b> {parsedData.title}</div>
-                    {parsedData.weight !== '—' && <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Weight:</b> {parsedData.weight}</div>}
-                    {parsedData.effort !== '—' && <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Est:</b> {parsedData.effort}</div>}
+              {/* Quick-fill — only in create mode */}
+              {!isEditMode && (
+                <>
+                  <div className="bg-white border-[1.5px] border-border rounded-r p-4 mb-4.5 transition-colors focus-within:border-primary shadow-xs">
+                    <div className="text-[11px] font-semibold text-primary mb-2 uppercase tracking-[0.06em]">✦ Quick fill from description</div>
+                    <textarea
+                      value={nlpText}
+                      onChange={e => { setNlpText(e.target.value); setShowParsed(false); }}
+                      className="w-full border-none outline-none resize-none font-sans text-[13.5px] text-text-1 bg-transparent leading-relaxed min-h-[64px] placeholder:text-text-3"
+                      placeholder="e.g. 'Stats assignment due this Friday, worth 30%, about 4 hours of work, haven't started yet…'"
+                    />
+                    <div className="flex justify-between items-center mt-2.5 pt-2.5 border-t border-border">
+                      <span className="text-[11px] text-text-3">Extracts title, weight, and effort from your text</span>
+                      <button
+                        onClick={() => { if (nlpText.trim()) setShowParsed(true); }}
+                        className="bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors"
+                      >
+                        Parse Text
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => setTaskForm(f => ({
-                      ...f,
-                      title:           parsedData.title,
-                      grade_weight:    parsedData.weight !== '—' ? parsedData.weight.replace('%', '') : f.grade_weight,
-                      estimated_hours: parsedData.effort !== '—' ? parsedData.effort.replace(' hrs', '') : f.estimated_hours,
-                      status:          parsedData.status,
-                    }))}
-                    className="mt-2 text-[12px] text-primary underline cursor-pointer bg-transparent border-none"
-                  >
-                    Use this → fill form
-                  </button>
-                </div>
-              )}
 
-              <div className="text-center text-[11.5px] text-text-3 my-3 mb-4.5 relative before:content-[''] before:absolute before:top-1/2 before:w-[42%] before:h-px before:bg-border before:left-0 after:content-[''] after:absolute after:top-1/2 after:w-[42%] after:h-px after:bg-border after:right-0">
-                or fill in manually
-              </div>
+                  {showParsed && parsedData && (
+                    <div className="bg-primary-faint border border-primary-mid rounded-rs p-3 mb-4.5">
+                      <div className="text-[11px] font-semibold text-primary mb-2">✓ Parsed as:</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Task:</b> {parsedData.title}</div>
+                        {parsedData.weight !== '—' && <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Weight:</b> {parsedData.weight}</div>}
+                        {parsedData.effort !== '—' && <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Est:</b> {parsedData.effort}</div>}
+                      </div>
+                      <button
+                        onClick={() => setTaskForm(f => ({
+                          ...f,
+                          title:           parsedData.title,
+                          grade_weight:    parsedData.weight !== '—' ? parsedData.weight.replace('%', '') : f.grade_weight,
+                          estimated_hours: parsedData.effort !== '—' ? parsedData.effort.replace(' hrs', '') : f.estimated_hours,
+                          status:          parsedData.status,
+                        }))}
+                        className="mt-2 text-[12px] text-primary underline cursor-pointer bg-transparent border-none"
+                      >
+                        Use this → fill form
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="text-center text-[11.5px] text-text-3 my-3 mb-4.5 relative before:content-[''] before:absolute before:top-1/2 before:w-[42%] before:h-px before:bg-border before:left-0 after:content-[''] after:absolute after:top-1/2 after:w-[42%] after:h-px after:bg-border after:right-0">
+                    or fill in manually
+                  </div>
+                </>
+              )}
 
               <div className="mb-3.5">
                 <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Task Name *</label>
@@ -338,7 +415,10 @@ export default function Add() {
             className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-rs text-[13px] font-semibold shadow-xs border-none cursor-pointer transition-colors w-full sm:w-auto disabled:opacity-60"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-            {activeTab === 'task' ? 'Save Task' : 'Save & Generate Plan'}
+            {isEditMode
+              ? (activeTab === 'task' ? 'Update Task' : 'Update Exam')
+              : (activeTab === 'task' ? 'Save Task' : 'Save & Generate Plan')
+            }
           </button>
           <button onClick={() => navigate(-1)} className="bg-white text-text-2 border border-border2 px-4 py-2 rounded-rs text-[13px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all w-full sm:w-auto">
             Cancel
