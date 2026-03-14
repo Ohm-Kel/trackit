@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, LogIn, Chrome, AlertCircle, Loader2 } from 'lucide-react';
@@ -15,7 +15,6 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       const { error } = await signIn(email, password);
       if (error) throw error;
@@ -29,13 +28,10 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      // Clear any existing error params in the URL before starting a new flow
-      // This prevents 'bad_oauth_state' errors on second attempts
+      // Clear any stale OAuth params before starting a new flow
       if (window.location.search || window.location.hash) {
-        const cleanUrl = window.location.origin + window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
+        window.history.replaceState({}, document.title, window.location.origin + window.location.pathname);
       }
-      
       const { error } = await signInWithGoogle();
       if (error) throw error;
     } catch (err) {
@@ -46,7 +42,6 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] dark:bg-gray-950 p-4 transition-colors duration-300">
       <div className="max-w-md w-full">
-        {/* Logo Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
             <LogIn className="w-8 h-8 text-primary" />
@@ -84,7 +79,10 @@ const Login = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                <Link to="/forgot-password" name="forgot-password-link" className="text-xs font-semibold text-primary hover:text-primary-hover transition-colors">
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-semibold text-primary hover:text-primary-hover transition-colors"
+                >
                   Forgot Password?
                 </Link>
               </div>
@@ -108,20 +106,13 @@ const Login = () => {
               disabled={loading}
               className="w-full flex items-center justify-center gap-3 py-4 bg-primary hover:bg-primary-hover disabled:bg-primary/50 text-white font-bold rounded-2xl shadow-lg shadow-primary/25 transform active:scale-[0.98] transition-all"
             >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <LogIn className="w-5 h-5" />
-                  Sign In
-                </>
-              )}
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><LogIn className="w-5 h-5" /> Sign In</>}
             </button>
           </form>
 
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-100 dark:border-gray-800"></div>
+              <div className="w-full border-t border-gray-100 dark:border-gray-800" />
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 bg-white dark:bg-gray-900 text-gray-400">Or continue with</span>
@@ -131,14 +122,14 @@ const Login = () => {
           <button
             onClick={handleGoogleLogin}
             type="button"
-            className="w-full flex items-center justify-center gap-3 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 font-semibold rounded-2xl transition-all"
+            className="w-full flex items-center justify-center gap-3 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 hover:bg-gray-50 text-gray-700 dark:text-gray-300 font-semibold rounded-2xl transition-all"
           >
             <Chrome className="w-5 h-5 text-red-500" />
             Google
           </button>
 
           <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link to="/signup" className="font-bold text-primary hover:text-primary-hover underline underline-offset-4 decoration-primary/30">
               Create an account
             </Link>

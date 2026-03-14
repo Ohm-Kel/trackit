@@ -3,34 +3,7 @@ import { Plus, ListTodo, CalendarDays, GraduationCap, ArrowRight, Loader2 } from
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
-
-function formatRelativeDate(dateStr) {
-  if (!dateStr) return '—';
-  const due = new Date(dateStr);
-  const now = new Date();
-  const diffDays = Math.ceil((due.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / 86400000);
-  if (diffDays < 0) return 'Overdue';
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Tomorrow';
-  if (diffDays <= 6) return `${diffDays} days`;
-  return due.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-}
-
-function getDueBadgeClass(dateStr) {
-  if (!dateStr) return 'bg-bg border border-border text-text-3';
-  const due = new Date(dateStr);
-  const diff = Math.ceil((due.setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
-  if (diff < 0) return 'bg-[#FEF2F2] text-[#EF4444]';
-  if (diff <= 1) return 'bg-[#FEF2F2] text-[#EF4444]';
-  if (diff <= 4) return 'bg-[#FFFBEB] text-[#D97706]';
-  return 'bg-[#F0FDF4] text-[#16A34A]';
-}
-
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  const diff = Math.ceil((new Date(dateStr).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
-  return diff;
-}
+import { daysUntil, formatRelativeDate, getDueBadgeClass, formatStatus } from '../utils/dates';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -44,7 +17,7 @@ export default function Dashboard() {
   const hour = now.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
-  const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'Done' && t.status !== 'Completed'), [tasks]);
+  const activeTasks = useMemo(() => tasks.filter(t => t.status !== 'done'), [tasks]);
   const dueThisWeek = useMemo(() => activeTasks.filter(t => {
     const d = daysUntil(t.due_date);
     return d !== null && d >= 0 && d <= 7;
@@ -179,7 +152,7 @@ export default function Dashboard() {
               ) : priorityQueue.map((task, idx) => {
                 const rel = formatRelativeDate(task.due_date);
                 const badgeClass = getDueBadgeClass(task.due_date);
-                const statusColor = task.status === 'In Progress' ? 'bg-primary-light text-primary' : 'bg-bg text-text-3 border border-border';
+                const statusColor = task.status === 'in_progress' ? 'bg-primary-light text-primary' : task.status === 'stuck' ? 'bg-[#FEF2F2] text-[#EF4444]' : 'bg-bg text-text-3 border border-border';
                 return (
                   <div key={task.id} className={`flex items-start gap-3 p-3.5 px-4 ${idx < priorityQueue.length - 1 ? 'border-b border-border' : ''} hover:bg-bg transition-colors cursor-pointer group`} onClick={() => navigate('/tasks')}>
                     <div className="w-[17px] h-[17px] rounded-full border-[1.5px] border-border2 bg-white shrink-0 mt-0.5 group-hover:border-primary group-hover:bg-primary-light transition-colors"></div>
@@ -194,7 +167,7 @@ export default function Dashboard() {
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full tracking-[0.01em] ${badgeClass}`}>{rel}</span>
-                      <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full tracking-[0.01em] ${statusColor}`}>{task.status || 'Not started'}</span>
+                      <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full tracking-[0.01em] ${statusColor}`}>{formatStatus(task.status)}</span>
                     </div>
                   </div>
                 );

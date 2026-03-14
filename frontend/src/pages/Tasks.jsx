@@ -2,34 +2,12 @@ import { useState, useMemo } from 'react';
 import { Plus, Search, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
-
-function formatRelativeDate(dateStr) {
-  if (!dateStr) return '—';
-  const due = new Date(dateStr);
-  const now = new Date();
-  const diffDays = Math.ceil((due.setHours(0,0,0,0) - now.setHours(0,0,0,0)) / 86400000);
-  if (diffDays < 0) return 'Overdue';
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Tomorrow';
-  if (diffDays <= 6) return `${diffDays} days`;
-  return due.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-}
-
-function getDueBadgeClass(dateStr) {
-  if (!dateStr) return 'bg-bg text-text-3 border border-border';
-  const due = new Date(dateStr);
-  const diff = Math.ceil((due.setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
-  if (diff < 0) return 'bg-[#FEF2F2] text-[#EF4444]';
-  if (diff <= 1) return 'bg-[#FEF2F2] text-[#EF4444]';
-  if (diff <= 4) return 'bg-[#FFFBEB] text-[#D97706]';
-  return 'bg-[#F0FDF4] text-[#16A34A]';
-}
+import { formatRelativeDate, getDueBadgeClass, formatStatus } from '../utils/dates';
 
 function getStatusClass(status) {
-  const s = (status || '').toLowerCase();
-  if (s.includes('progress')) return 'bg-primary-light text-primary';
-  if (s.includes('done') || s.includes('complet')) return 'bg-[#F0FDF4] text-[#16A34A]';
-  if (s.includes('stuck') || s.includes('blocked')) return 'bg-[#FEF2F2] text-[#EF4444]';
+  if (status === 'in_progress') return 'bg-primary-light text-primary';
+  if (status === 'done') return 'bg-[#F0FDF4] text-[#16A34A]';
+  if (status === 'stuck') return 'bg-[#FEF2F2] text-[#EF4444]';
   return 'bg-bg text-text-3 border border-border';
 }
 
@@ -43,28 +21,27 @@ export default function Tasks() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
 
-  const statuses = ['All', 'In Progress', 'Not started', 'Done'];
+  const statuses = [
+    { label: 'All', value: 'All' },
+    { label: 'In Progress', value: 'in_progress' },
+    { label: 'Not Started', value: 'not_started' },
+    { label: 'Done', value: 'done' },
+  ];
 
   const filtered = useMemo(() => {
     return tasks.filter(t => {
       const matchSearch = !search || t.title?.toLowerCase().includes(search.toLowerCase()) || t.course_code?.toLowerCase().includes(search.toLowerCase());
-      const matchStatus = filterStatus === 'All' || (t.status || '').toLowerCase() === filterStatus.toLowerCase();
+      const matchStatus = filterStatus === 'All' || (t.status || 'not_started') === filterStatus;
       return matchSearch && matchStatus;
     });
   }, [tasks, search, filterStatus]);
 
-  const active = useMemo(() => filtered.filter(t => {
-    const s = (t.status || '').toLowerCase();
-    return !s.includes('done') && !s.includes('complet');
-  }), [filtered]);
-  const done = useMemo(() => filtered.filter(t => {
-    const s = (t.status || '').toLowerCase();
-    return s.includes('done') || s.includes('complet');
-  }), [filtered]);
+  const active = useMemo(() => filtered.filter(t => t.status !== 'done'), [filtered]);
+  const done = useMemo(() => filtered.filter(t => t.status === 'done'), [filtered]);
 
   function toggleComplete(task) {
-    const isDone = (task.status || '').toLowerCase().includes('done');
-    updateTask.mutate({ id: task.id, updates: { status: isDone ? 'Not started' : 'Done' } });
+    const isDone = task.status === 'done';
+    updateTask.mutate({ id: task.id, updates: { status: isDone ? 'not_started' : 'done' } });
   }
 
   function handleDelete(e, taskId) {
@@ -73,7 +50,7 @@ export default function Tasks() {
   }
 
   const totalCount = tasks.length;
-  const inProgressCount = tasks.filter(t => (t.status || '').toLowerCase().includes('progress')).length;
+  const inProgressCount = tasks.filter(t => t.status === 'in_progress').length;
 
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
@@ -109,11 +86,11 @@ export default function Tasks() {
           <div className="flex gap-1.5 flex-wrap">
             {statuses.map(s => (
               <button
-                key={s}
-                onClick={() => setFilterStatus(s)}
-                className={`px-3 py-[5px] rounded-[20px] text-[12px] font-semibold border cursor-pointer transition-all ${filterStatus === s ? 'bg-primary text-white border-primary' : 'bg-white text-text-3 border-border hover:border-primary hover:text-primary'}`}
+                key={s.value}
+                onClick={() => setFilterStatus(s.value)}
+                className={`px-3 py-[5px] rounded-[20px] text-[12px] font-semibold border cursor-pointer transition-all ${filterStatus === s.value ? 'bg-primary text-white border-primary' : 'bg-white text-text-3 border-border hover:border-primary hover:text-primary'}`}
               >
-                {s}
+                {s.label}
               </button>
             ))}
           </div>
@@ -158,7 +135,7 @@ export default function Tasks() {
               const rel = formatRelativeDate(task.due_date);
               const dueBadge = getDueBadgeClass(task.due_date);
               const statusBadge = getStatusClass(task.status);
-              const isDone = (task.status || '').toLowerCase().includes('done');
+              const isDone = task.status === 'done';
               return (
                 <div key={task.id}>
                   <div
@@ -185,7 +162,7 @@ export default function Tasks() {
                     <div className="hidden md:block text-[12.5px] text-text-1 font-semibold">{task.estimated_hours ? `${task.estimated_hours} hrs` : '—'}</div>
                     <div className="hidden md:block text-[12.5px] text-text-1 font-semibold">{task.grade_weight ? `${task.grade_weight}%` : '—'}</div>
                     <div className="hidden md:flex">
-                      <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full tracking-[0.01em] ${statusBadge}`}>{task.status || 'Not started'}</span>
+                      <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full tracking-[0.01em] ${statusBadge}`}>{formatStatus(task.status)}</span>
                     </div>
                     <div className="hidden md:flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
                       <button
@@ -235,7 +212,7 @@ export default function Tasks() {
                         )}
                         <div>
                           <div className="text-[10px] font-bold uppercase tracking-wide text-text-3 mb-0.5">Status</div>
-                          <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full ${statusBadge}`}>{task.status || 'Not started'}</span>
+                          <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full ${statusBadge}`}>{formatStatus(task.status)}</span>
                         </div>
                       </div>
                       {task.description && (

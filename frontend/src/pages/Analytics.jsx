@@ -63,15 +63,15 @@ export default function Analytics() {
 
   const stats = useMemo(() => {
     const total = tasks.length;
-    const done = tasks.filter(t => (t.status || '').toLowerCase().includes('done')).length;
-    const inProgress = tasks.filter(t => (t.status || '').toLowerCase().includes('progress')).length;
-    const notStarted = tasks.filter(t => (t.status || '').toLowerCase() === 'not started' || !(t.status)).length;
+    const done = tasks.filter(t => t.status === 'done').length;
+    const inProgress = tasks.filter(t => t.status === 'in_progress').length;
+    const notStarted = tasks.filter(t => !t.status || t.status === 'not_started').length;
     const overdue = tasks.filter(t => {
-      if (!t.due_date || (t.status || '').toLowerCase().includes('done')) return false;
+      if (!t.due_date || t.status === 'done') return false;
       return new Date(t.due_date) < new Date();
     }).length;
     const totalHours = tasks.reduce((s, t) => s + (t.estimated_hours || 0), 0);
-    const completedHours = tasks.filter(t => (t.status || '').toLowerCase().includes('done')).reduce((s, t) => s + (t.estimated_hours || 0), 0);
+    const completedHours = tasks.filter(t => t.status === 'done').reduce((s, t) => s + (t.estimated_hours || 0), 0);
     const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
 
     return { total, done, inProgress, notStarted, overdue, totalHours, completedHours, completionRate };

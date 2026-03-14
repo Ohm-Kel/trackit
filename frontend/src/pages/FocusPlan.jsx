@@ -2,11 +2,7 @@ import { RefreshCw, CheckCircle2, Circle, Loader2, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks, useUpdateTask } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
-
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  return Math.ceil((new Date(dateStr).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
-}
+import { daysUntil } from '../utils/dates';
 
 function blockColor(task) {
   const d = daysUntil(task.due_date);
@@ -27,10 +23,7 @@ export default function FocusPlan() {
   const dateStr = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
   const activeTasks = tasks
-    .filter(t => {
-      const s = (t.status || '').toLowerCase();
-      return !s.includes('done') && !s.includes('complet');
-    })
+    .filter(t => t.status !== 'done')
     .sort((a, b) => {
       const dA = daysUntil(a.due_date) ?? 999;
       const dB = daysUntil(b.due_date) ?? 999;
@@ -47,8 +40,8 @@ export default function FocusPlan() {
   const plannedTasks = activeTasks.slice(0, 3);
 
   function toggleDone(task) {
-    const isDone = (task.status || '').toLowerCase().includes('done');
-    updateTask.mutate({ id: task.id, updates: { status: isDone ? 'Not started' : 'Done' } });
+    const isDone = task.status === 'done';
+    updateTask.mutate({ id: task.id, updates: { status: isDone ? 'not_started' : 'done' } });
   }
 
   return (
@@ -124,7 +117,7 @@ export default function FocusPlan() {
             ) : (
               <div className="relative border-l-2 border-border ml-3 pl-6 pb-4">
                 {plannedTasks.map((task, idx) => {
-                  const isDone = (task.status || '').toLowerCase().includes('done');
+                  const isDone = task.status === 'done';
                   const { border, bg, text, labelClass, label } = blockColor(task);
                   return (
                     <div key={task.id} className={`relative mb-6 pb-2 transition-all hover:-translate-y-0.5 ${isDone ? 'opacity-50' : ''}`}>

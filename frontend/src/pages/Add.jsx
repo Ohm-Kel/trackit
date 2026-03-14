@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, Check } from 'lucide-react';
 import { useCreateTask } from '../hooks/useTasks';
@@ -12,30 +12,32 @@ export default function Add() {
   const [confidence, setConfidence] = useState('medium');
   const [topics, setTopics] = useState([]);
   const [topicInput, setTopicInput] = useState('');
-  const [showParsed, setShowParsed] = useState(false);
   const [savedOk, setSavedOk] = useState(false);
 
   const createTask = useCreateTask();
   const createExam = useCreateExam();
 
-  // Task form state
+  // Task form state — status uses snake_case to match the DB constraint
   const [taskForm, setTaskForm] = useState({
-    title: '', due_date: '', course_code: '', grade_weight: '', estimated_hours: '', status: 'Not started', description: ''
+    title: '', due_date: '', course_code: '', grade_weight: '',
+    estimated_hours: '', status: 'not_started', description: '',
   });
 
   // Exam form state
   const [examForm, setExamForm] = useState({
-    subject: '', course_code: '', exam_date: '', daily_study_hours: ''
+    subject: '', course_code: '', exam_date: '', daily_study_hours: '',
   });
 
-  // Mock NLP parse from plain-text description
+  // Plain-text quick-fill (client-side regex parse — not AI)
   const [nlpText, setNlpText] = useState('');
+  const [showParsed, setShowParsed] = useState(false);
+
   const parsedData = nlpText ? {
     title: nlpText.split(' ').slice(0, 6).join(' '),
-    due: 'Detected from description',
-    weight: nlpText.toLowerCase().includes('%') ? nlpText.match(/(\d+)%/)?.[1] + '%' : '—',
-    effort: nlpText.toLowerCase().includes('hour') ? nlpText.match(/(\d+(\.\d+)?)\s*hour/)?.[1] + ' hrs' : '—',
-    status: nlpText.toLowerCase().includes('started') ? 'Not started' : 'In Progress'
+    due: 'Review and set manually',
+    weight: nlpText.match(/(\d+)\s*%/)?.[1] ? nlpText.match(/(\d+)\s*%/)[1] + '%' : '—',
+    effort: nlpText.match(/(\d+(?:\.\d+)?)\s*hour/i)?.[1] ? nlpText.match(/(\d+(?:\.\d+)?)\s*hour/i)[1] + ' hrs' : '—',
+    status: nlpText.toLowerCase().includes('not started') ? 'not_started' : 'in_progress',
   } : null;
 
   const handleAddTopic = () => {
@@ -51,7 +53,7 @@ export default function Add() {
     if (!taskForm.title.trim()) return alert('Task name is required');
     await createTask.mutateAsync({
       ...taskForm,
-      grade_weight: taskForm.grade_weight ? Number(taskForm.grade_weight) : undefined,
+      grade_weight:    taskForm.grade_weight    ? Number(taskForm.grade_weight)    : undefined,
       estimated_hours: taskForm.estimated_hours ? Number(taskForm.estimated_hours) : undefined,
     });
     setSavedOk(true);
@@ -62,9 +64,9 @@ export default function Add() {
     if (!examForm.subject.trim()) return alert('Subject is required');
     await createExam.mutateAsync({
       ...examForm,
-      confidence_level: confidence,
+      confidence_level:   confidence,
       topics,
-      daily_study_hours: examForm.daily_study_hours ? Number(examForm.daily_study_hours) : undefined,
+      daily_study_hours:  examForm.daily_study_hours ? Number(examForm.daily_study_hours) : undefined,
     });
     setSavedOk(true);
     setTimeout(() => navigate('/exams'), 800);
@@ -85,6 +87,13 @@ export default function Add() {
   }
 
   const inputClass = "w-full p-[9px] px-3 border-[1.5px] border-border rounded-rs text-[13.5px] font-sans text-text-1 bg-white outline-none transition-colors focus:border-primary placeholder:text-text-3";
+
+  // Maps select option values to human-readable labels
+  const STATUS_OPTIONS = [
+    { value: 'not_started', label: 'Not Started' },
+    { value: 'in_progress', label: 'In Progress' },
+    { value: 'stuck',       label: 'Stuck / Blocked' },
+  ];
 
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
@@ -115,9 +124,9 @@ export default function Add() {
         {activeTab === 'task' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              {/* NLP Input */}
+              {/* Quick-fill from plain text (client-side regex, not AI) */}
               <div className="bg-white border-[1.5px] border-border rounded-r p-4 mb-4.5 transition-colors focus-within:border-primary shadow-xs">
-                <div className="text-[11px] font-semibold text-primary mb-2 uppercase tracking-[0.06em]">✦ Describe in plain English</div>
+                <div className="text-[11px] font-semibold text-primary mb-2 uppercase tracking-[0.06em]">✦ Quick fill from description</div>
                 <textarea
                   value={nlpText}
                   onChange={e => { setNlpText(e.target.value); setShowParsed(false); }}
@@ -125,11 +134,13 @@ export default function Add() {
                   placeholder="e.g. 'Stats assignment due this Friday, worth 30%, about 4 hours of work, haven't started yet…'"
                 />
                 <div className="flex justify-between items-center mt-2.5 pt-2.5 border-t border-border">
-                  <span className="text-[11px] text-text-3">AI parses all details automatically</span>
+                  <span className="text-[11px] text-text-3">Extracts title, weight, and effort from your text</span>
                   <button
                     onClick={() => { if (nlpText.trim()) setShowParsed(true); }}
                     className="bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors"
-                  >Parse with AI</button>
+                  >
+                    Parse Text
+                  </button>
                 </div>
               </div>
 
@@ -140,15 +151,14 @@ export default function Add() {
                     <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Task:</b> {parsedData.title}</div>
                     {parsedData.weight !== '—' && <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Weight:</b> {parsedData.weight}</div>}
                     {parsedData.effort !== '—' && <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Est:</b> {parsedData.effort}</div>}
-                    <div className="bg-white border border-primary-mid rounded-md px-2 py-0.5 text-[12px] text-text-1"><b className="text-primary font-bold">Status:</b> {parsedData.status}</div>
                   </div>
                   <button
                     onClick={() => setTaskForm(f => ({
                       ...f,
-                      title: parsedData.title,
-                      grade_weight: parsedData.weight.replace('%', ''),
-                      estimated_hours: parsedData.effort.replace(' hrs', ''),
-                      status: parsedData.status
+                      title:           parsedData.title,
+                      grade_weight:    parsedData.weight !== '—' ? parsedData.weight.replace('%', '') : f.grade_weight,
+                      estimated_hours: parsedData.effort !== '—' ? parsedData.effort.replace(' hrs', '') : f.estimated_hours,
+                      status:          parsedData.status,
                     }))}
                     className="mt-2 text-[12px] text-primary underline cursor-pointer bg-transparent border-none"
                   >
@@ -157,7 +167,9 @@ export default function Add() {
                 </div>
               )}
 
-              <div className="text-center text-[11.5px] text-text-3 my-3 mb-4.5 relative before:content-[''] before:absolute before:top-1/2 before:w-[42%] before:h-px before:bg-border before:left-0 after:content-[''] after:absolute after:top-1/2 after:w-[42%] after:h-px after:bg-border after:right-0">or fill in manually</div>
+              <div className="text-center text-[11.5px] text-text-3 my-3 mb-4.5 relative before:content-[''] before:absolute before:top-1/2 before:w-[42%] before:h-px before:bg-border before:left-0 after:content-[''] after:absolute after:top-1/2 after:w-[42%] after:h-px after:bg-border after:right-0">
+                or fill in manually
+              </div>
 
               <div className="mb-3.5">
                 <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Task Name *</label>
@@ -193,10 +205,14 @@ export default function Add() {
 
               <div className="mb-3.5">
                 <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Status</label>
-                <select className={inputClass} value={taskForm.status} onChange={e => setTaskForm(f => ({ ...f, status: e.target.value }))}>
-                  <option>Not started</option>
-                  <option>In Progress</option>
-                  <option>Stuck / blocked</option>
+                <select
+                  className={inputClass}
+                  value={taskForm.status}
+                  onChange={e => setTaskForm(f => ({ ...f, status: e.target.value }))}
+                >
+                  {STATUS_OPTIONS.map(({ value, label }) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -206,7 +222,7 @@ export default function Add() {
                 <div className="text-[12px] font-bold text-text-2 mb-2.5 uppercase tracking-[0.05em]">Priority Preview</div>
                 <div className="text-[13px] text-text-2 leading-relaxed mb-3">Fill in the due date and grade weight — Trackit will rank this against your existing tasks.</div>
                 <div className="bg-bg rounded-rs p-3 border border-border">
-                  <div className="text-[12px] font-semibold text-text-2 mb-1">This task will:</div>
+                  <div className="text-[12px] font-semibold text-text-2 mb-1">This task will be tracked as:</div>
                   <div className="text-[13.5px] font-bold text-text-1">{taskForm.title || 'New Task'}</div>
                   <div className="text-[11.5px] text-text-3 mt-1">
                     {taskForm.due_date ? `Due: ${new Date(taskForm.due_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}` : 'No due date set'}
@@ -219,7 +235,7 @@ export default function Add() {
                 <div className="text-[12px] font-bold text-text-2 mb-2.5 uppercase tracking-[0.05em]">Tips</div>
                 <div className="text-[13px] text-text-2 leading-[1.9]">
                   <div>· Grade weight matters — 5% quiz ranks below 40% exam</div>
-                  <div>· Mark "stuck" to get AI-specific help in Chat</div>
+                  <div>· Mark &quot;Stuck&quot; to get targeted help in AI Chat</div>
                   <div>· More detail = smarter priority reasoning</div>
                 </div>
               </div>
@@ -324,7 +340,9 @@ export default function Add() {
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             {activeTab === 'task' ? 'Save Task' : 'Save & Generate Plan'}
           </button>
-          <button onClick={() => navigate(-1)} className="bg-white text-text-2 border border-border2 px-4 py-2 rounded-rs text-[13px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all w-full sm:w-auto">Cancel</button>
+          <button onClick={() => navigate(-1)} className="bg-white text-text-2 border border-border2 px-4 py-2 rounded-rs text-[13px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all w-full sm:w-auto">
+            Cancel
+          </button>
         </div>
       </div>
     </div>

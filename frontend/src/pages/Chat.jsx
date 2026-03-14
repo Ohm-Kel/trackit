@@ -1,11 +1,13 @@
 import { Send, Loader2 } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
+import { daysUntil } from '../utils/dates';
+import { sendChatMessage } from '../api/chat';
 
 function daysLabel(dateStr) {
-  if (!dateStr) return null;
-  const diff = Math.ceil((new Date(dateStr).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
+  const diff = daysUntil(dateStr);
+  if (diff === null) return null;
   if (diff < 0) return 'Overdue';
   if (diff === 0) return 'Today';
   if (diff === 1) return 'Tomorrow';
@@ -13,8 +15,8 @@ function daysLabel(dateStr) {
 }
 
 function dotColor(task) {
-  const d = Math.ceil((new Date(task.due_date).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
-  if (d <= 1) return '#EF4444';
+  const d = daysUntil(task.due_date);
+  if (d === null || d <= 1) return '#EF4444';
   if (d <= 4) return '#F59E0B';
   return '#22C55E';
 }
@@ -28,31 +30,39 @@ export default function Chat() {
   const { data: exams = [], isLoading: examsLoading } = useExams();
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
+  const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const activeTasks = tasks.filter(t => {
-    const s = (t.status || '').toLowerCase();
-    return !s.includes('done') && !s.includes('complet');
-  });
+  const activeTasks = tasks.filter(t => t.status !== 'done');
   const upcomingExams = exams.filter(e => {
-    const diff = Math.ceil((new Date(e.exam_date).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
-    return diff >= 0;
+    const diff = daysUntil(e.exam_date);
+    return diff !== null && diff >= 0;
   });
 
-  function sendMessage() {
-    if (!input.trim()) return;
-    setMessages(m => [...m, { role: 'user', text: input }]);
+  const sendMessage = useCallback(async () => {
+    if (!input.trim() || sending) return;
     const userMsg = input;
     setInput('');
-    // Simulated AI response (will be replaced with real API call when AI is integrated)
-    setTimeout(() => {
-      setMessages(m => [...m, {
-        role: 'ai',
-        text: `I can see you asked: "${userMsg}"\n\nThe AI integration is coming soon! For now, check your ${activeTasks.length} active tasks on the Tasks page, and your ${upcomingExams.length} upcoming exam${upcomingExams.length !== 1 ? 's' : ''} on the Exam Countdown page.`
-      }]);
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 600);
-  }
+    const userEntry = { role: 'user', text: userMsg };
+    setMessages(m => [...m, userEntry]);
+    setSending(true);
+
+    try {
+      // Build history from existing messages (skip the initial greeting)
+      const history = messages
+        .filter((_, i) => i > 0)
+        .concat(userEntry)
+        .map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text }));
+
+      const { reply } = await sendChatMessage(userMsg, history);
+      setMessages(m => [...m, { role: 'ai', text: reply }]);
+    } catch (err) {
+      setMessages(m => [...m, { role: 'ai', text: `Sorry, I couldn't get a response right now. ${err.message}` }]);
+    } finally {
+      setSending(false);
+      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+    }
+  }, [input, sending, messages]);
 
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -95,6 +105,14 @@ export default function Chat() {
                 </div>
               </div>
             ))}
+            {sending && (
+              <div className="flex gap-2.5 items-start">
+                <div className="w-[30px] h-[30px] rounded-full shrink-0 flex items-center justify-center text-[11px] font-bold bg-primary text-white">T</div>
+                <div className="bg-white border border-border rounded-xl rounded-tl-sm shadow-xs p-3 px-3.5 flex items-center gap-2 text-[13px] text-text-3">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" /> Thinking…
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
@@ -104,7 +122,8 @@ export default function Chat() {
               <button
                 key={p}
                 onClick={() => setInput(p)}
-                className="bg-white border border-border rounded-[20px] px-3.5 py-1.5 text-[12px] font-medium text-text-2 cursor-pointer transition-colors hover:border-primary hover:text-primary hover:bg-primary-faint"
+                disabled={sending}
+                className="bg-white border border-border rounded-[20px] px-3.5 py-1.5 text-[12px] font-medium text-text-2 cursor-pointer transition-colors hover:border-primary hover:text-primary hover:bg-primary-faint disabled:opacity-50"
               >
                 {p}
               </button>
@@ -117,13 +136,14 @@ export default function Chat() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full border-none outline-none resize-none font-sans text-[13.5px] text-text-1 bg-transparent min-h-[20px] max-h-[80px] leading-relaxed placeholder:text-text-3"
+              disabled={sending}
+              className="w-full border-none outline-none resize-none font-sans text-[13.5px] text-text-1 bg-transparent min-h-[20px] max-h-[80px] leading-relaxed placeholder:text-text-3 disabled:opacity-50"
               placeholder="Ask anything about your workload…"
               rows="1"
             />
             <div className="flex justify-between items-center mt-2">
               <span className="text-[11px] text-text-3 hidden sm:block">Enter to send · Shift+Enter for new line</span>
-              <button onClick={sendMessage} className="bg-primary hover:bg-primary-hover border-none w-[30px] h-[30px] rounded-[7px] cursor-pointer flex items-center justify-center transition-colors shrink-0 ml-auto">
+              <button onClick={sendMessage} disabled={sending || !input.trim()} className="bg-primary hover:bg-primary-hover disabled:opacity-50 border-none w-[30px] h-[30px] rounded-[7px] cursor-pointer flex items-center justify-center transition-colors shrink-0 ml-auto">
                 <Send className="w-3 h-3 text-white" />
               </button>
             </div>
@@ -155,7 +175,7 @@ export default function Chat() {
             ) : upcomingExams.length === 0 ? (
               <div className="text-[12px] text-text-3 italic">No upcoming exams</div>
             ) : upcomingExams.slice(0, 4).map(exam => {
-              const days = Math.ceil((new Date(exam.exam_date).setHours(0,0,0,0) - new Date().setHours(0,0,0,0)) / 86400000);
+              const days = daysUntil(exam.exam_date);
               return (
                 <div key={exam.id} className="flex items-center gap-2 py-1.5 border-b border-border last:border-b-0 text-[12.5px]">
                   <span className="bg-primary-light text-primary text-[10px] font-bold px-1.5 py-[1px] rounded shrink-0">{days}d</span>
@@ -166,8 +186,8 @@ export default function Chat() {
           </div>
 
           <div className="bg-primary-faint border border-primary-mid rounded-r p-[15px]">
-            <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-primary mb-2">✦ AI Coming Soon</div>
-            <div className="text-[12px] text-text-2 leading-relaxed">Real AI responses powered by Claude are being integrated. For now, responses are simulated.</div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-primary mb-2">Powered by Claude AI</div>
+            <div className="text-[12px] text-text-2 leading-relaxed">Responses are generated using your real tasks and exams as context for personalised advice.</div>
           </div>
         </div>
       </div>
