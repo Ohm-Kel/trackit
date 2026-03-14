@@ -229,7 +229,7 @@ function LogoBar() {
           Trusted by students at leading universities
         </p>
         <div className="flex flex-wrap items-center justify-center gap-8 md:gap-14 opacity-40">
-          {['Oxford', 'Imperial', 'UCL', 'Manchester', 'Edinburgh', 'KCL'].map(uni => (
+          {['University of Ghana', 'KNUST', 'UCC', 'Ashesi', 'UPSA', 'Ghana Tech'].map(uni => (
             <span key={uni} className="text-[15px] md:text-[17px] font-bold text-[#19191D] tracking-[-0.3px]">{uni}</span>
           ))}
         </div>
