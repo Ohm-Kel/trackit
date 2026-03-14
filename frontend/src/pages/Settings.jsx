@@ -347,8 +347,8 @@ export default function Settings() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3.5 bg-bg border border-border rounded-r">
                     <div>
-                      <div className="text-[13.5px] font-semibold text-text-1">Export your data</div>
-                      <div className="text-[12px] text-text-3 mt-0.5">Download all your tasks, exams, and settings as JSON</div>
+                      <div className="text-[13.5px] font-semibold text-text-1">Export local settings</div>
+                      <div className="text-[12px] text-text-3 mt-0.5">Download your local app preferences as JSON</div>
                     </div>
                     <button
                       onClick={() => {
@@ -371,8 +371,8 @@ export default function Settings() {
 
                   <div className="flex items-center justify-between p-3.5 bg-bg border border-border rounded-r">
                     <div>
-                      <div className="text-[13.5px] font-semibold text-text-1">Clear local settings</div>
-                      <div className="text-[12px] text-text-3 mt-0.5">Remove your profile and preferences stored on this device</div>
+                      <div className="text-[13.5px] font-semibold text-text-1">Reset local preferences</div>
+                      <div className="text-[12px] text-text-3 mt-0.5">Reset theme and notifications on this device. Your account data stays in the cloud.</div>
                     </div>
                     <button
                       onClick={() => {
@@ -391,9 +391,9 @@ export default function Settings() {
                 </div>
 
                 <div className="mt-4 p-4 bg-primary-faint border border-primary-mid rounded-r">
-                  <div className="text-[12px] font-bold text-primary mb-1.5">About your data</div>
+                  <div className="text-[12px] font-bold text-primary mb-1.5">Where is my data?</div>
                   <div className="text-[12px] text-text-2 leading-relaxed">
-                    Your tasks and exams are stored in a secure Supabase database. Profile settings are stored in your browser's localStorage only and not transmitted to any server.
+                    Your profile, tasks, and exams are stored securely in a <strong>Supabase cloud database</strong> so they stay synced across all your devices. Only your theme and notification preferences are saved locally on your browser.
                   </div>
                 </div>
               </Section>
