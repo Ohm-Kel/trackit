@@ -2,10 +2,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTasks } from '../../hooks/useTasks';
 import { useExams } from '../../hooks/useExams';
 import { useAuth } from '../../context/AuthContext';
+import { useProfile } from '../../hooks/useProfile';
 import {
   LogOut, X,
   LayoutDashboard, GraduationCap, MessageSquare, Upload,
   CheckSquare, Target, BarChart2, PlusCircle, Settings,
+  User as UserIcon,
 } from 'lucide-react';
 import { daysUntil } from '../../utils/dates';
 
@@ -16,6 +18,7 @@ function safeJsonParse(value, fallback = {}) {
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { profile, loading: loadingProfile } = useProfile();
   const { data: tasks = [] } = useTasks();
   const { data: exams = [] } = useExams();
 
@@ -23,9 +26,9 @@ export default function Sidebar({ isOpen, onClose }) {
     try { await signOut(); } catch (err) { console.error('Logout failed:', err); }
   };
 
-  const profile = safeJsonParse(localStorage.getItem('trackit_profile'));
-  const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || profile.name || 'Student';
-  const course = profile.course || 'Add your course →';
+  const name = profile?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student';
+  const course = profile?.course || '';
+  const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
 
   const activeTasks = tasks.filter(t => {
@@ -107,30 +110,47 @@ export default function Sidebar({ isOpen, onClose }) {
         })}
       </nav>
 
-      {/* User Footer */}
-      <div className="mt-auto border-t border-border bg-white">
-        <Link
-          to="/settings"
-          onClick={onClose}
-          className="p-3 no-underline block hover:bg-bg transition-colors"
-        >
-          <div className="flex items-center gap-[9px] px-2.5 py-2 rounded-rs">
-            <div className="w-7 h-7 rounded-full bg-primary-light text-primary flex items-center justify-center text-[11px] font-bold shrink-0">
-              {initials}
+      {/* User Footer - Premium Redesign */}
+      <div className="mt-auto border-t border-border bg-white pt-2">
+        <div className="px-3 pb-3">
+          <Link
+            to="/settings"
+            onClick={onClose}
+            className="flex items-center gap-[10px] p-2.5 rounded-rs no-underline hover:bg-bg transition-all duration-200 group"
+          >
+            <div className="relative shrink-0">
+              {avatarUrl ? (
+                <img 
+                  src={avatarUrl} 
+                  alt={name} 
+                  className="w-9 h-9 rounded-full object-cover border border-border shadow-sm group-hover:border-primary-mid transition-colors"
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-primary-light text-primary flex items-center justify-center text-[12px] font-bold border border-border">
+                  {initials}
+                </div>
+              )}
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
             </div>
-            <div className="min-w-0">
-              <div className="text-[13px] font-semibold text-text-1 truncate">{name}</div>
-              <div className="text-[11px] text-text-3 truncate max-w-[100px]">{course}</div>
+            
+            <div className="min-w-0 flex-1">
+              <div className="text-[13px] font-bold text-text-1 truncate group-hover:text-primary transition-colors">
+                {name}
+              </div>
+              <div className="text-[11px] text-text-3 truncate font-medium">
+                {course || 'Set up profile'}
+              </div>
             </div>
-          </div>
-        </Link>
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-[9px] px-5.5 py-3 hover:bg-red-50 text-red-500 transition-colors border-none bg-transparent cursor-pointer group"
-        >
-          <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-          <span className="text-[13px] font-semibold text-text-1 group-hover:text-red-500 transition-colors">Log out</span>
-        </button>
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            className="w-full mt-1 flex items-center justify-center gap-2 py-2 px-3 rounded-rs text-text-3 hover:text-red-500 hover:bg-red-50 transition-all duration-200 border-none bg-transparent cursor-pointer group"
+          >
+            <LogOut className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            <span className="text-[12px] font-semibold">Sign out</span>
+          </button>
+        </div>
       </div>
     </aside>
   );
