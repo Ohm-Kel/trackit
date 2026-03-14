@@ -9,18 +9,25 @@ exports.getProfile = async (req, res) => {
     const userEmail = req.user.email;
     const userMeta = req.user.user_metadata || {};
 
-    // 1. Try to fetch existing
+    // 1. Try to fetch existing profile
+    // We select * to be safe against schema mismatches, but we really want the core fields
     let { data, error } = await supabase
       .from('users')
-      .select('display_name, email, avatar_url, university, course, year, weekly_schedule')
+      .select('*')
       .eq('id', userId)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error fetching profile:', error);
+      return res.status(500).json({ 
+        error: 'Database error fetching profile', 
+        details: error.message 
+      });
+    }
 
     // 2. If row doesn't exist, create it (auto-repair for missing rows)
     if (!data) {
-      console.log(`User ${userId} not found in public.users, creating entry...`);
+      console.log(`User ${userId} not found in public.users table, creating entry...`);
       const { data: newData, error: insertError } = await supabase
         .from('users')
         .insert({
@@ -29,17 +36,23 @@ exports.getProfile = async (req, res) => {
           display_name: userMeta.full_name || userMeta.name || userEmail.split('@')[0],
           avatar_url: userMeta.avatar_url || userMeta.picture,
         })
-        .select('display_name, email, avatar_url, university, course, year, weekly_schedule')
+        .select('*')
         .single();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Supabase error inserting profile:', insertError);
+        return res.status(500).json({ 
+          error: 'Failed to create user profile entry', 
+          details: insertError.message 
+        });
+      }
       data = newData;
     }
 
     res.json(data);
   } catch (err) {
-    console.error('Error fetching profile:', err);
-    res.status(500).json({ error: 'Failed to fetch profile' });
+    console.error('Unexpected error in getProfile:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 };
 
@@ -60,21 +73,25 @@ exports.updateProfile = async (req, res) => {
       }
     });
 
-    // Use upsert to handle case where user might not exist yet
     const { data, error } = await supabase
       .from('users')
       .upsert({
         id: userId,
         ...filteredUpdates,
-        email: req.user.email // Ensure email is never lost/changed to empty
+        email: req.user.email,
+        updated_at: new Date().toISOString()
       })
-      .select()
+      .select('*')
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error updating profile:', error);
+      return res.status(500).json({ error: 'Failed to update profile', details: error.message });
+    }
+
     res.json(data);
   } catch (err) {
-    console.error('Error updating profile:', err);
-    res.status(500).json({ error: 'Failed to update profile' });
+    console.error('Unexpected error in updateProfile:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 };

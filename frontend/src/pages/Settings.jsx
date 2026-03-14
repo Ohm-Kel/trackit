@@ -204,14 +204,21 @@ export default function Settings() {
                     <Loader2 className="w-8 h-8 animate-spin text-primary opacity-20" />
                     <p className="text-[12px] text-text-3 mt-3 animate-pulse">Loading profile data...</p>
                   </div>
-                ) : profileError ? (
+                ) : (profileError || !profileData) && !loadingProfile ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <div className="text-[24px] mb-2">⚠️</div>
                     <p className="text-[13px] font-semibold text-text-1">Failed to load profile</p>
-                    <p className="text-[12px] text-text-3 mb-4 max-w-[200px]">We couldn't reach the server to fetch your profile details.</p>
+                    <p className="text-[12px] text-text-3 mb-2 max-w-[240px]">
+                      {profileError ? (useProfile().error?.message || "We couldn't reach the server.") : "Profile data is empty."}
+                    </p>
+                    {useProfile().error?.details && (
+                      <p className="text-[10px] text-red-500 mb-4 font-mono bg-red-50 p-2 rounded max-w-[300px] overflow-auto mx-auto">
+                        {useProfile().error.details}
+                      </p>
+                    )}
                     <button 
                       onClick={() => refetchProfile()}
-                      className="px-4 py-1.5 bg-primary-light text-primary text-[12px] font-bold rounded-rs border-none cursor-pointer hover:bg-primary-mid transition-colors"
+                      className="px-4 py-1.5 bg-primary-light text-primary text-[12px] font-bold rounded-rs border-none cursor-pointer hover:bg-primary-mid transition-colors mt-2"
                     >
                       Retry Loading
                     </button>

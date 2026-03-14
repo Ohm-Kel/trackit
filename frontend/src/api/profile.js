@@ -13,7 +13,15 @@ async function getAuthHeader() {
 export async function fetchProfile() {
   const headers = await getAuthHeader();
   const res = await fetch(`${API_URL}/users/profile`, { headers });
-  if (!res.ok) throw new Error('Failed to fetch profile');
+  
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const error = new Error(errorData.error || 'Failed to fetch profile');
+    error.details = errorData.details;
+    error.status = res.status;
+    throw error;
+  }
+  
   return await res.json();
 }
 
