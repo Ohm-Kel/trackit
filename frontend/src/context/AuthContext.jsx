@@ -12,26 +12,29 @@ export const AuthProvider = ({ children }) => {
     if (!sessionUser) return;
 
     try {
-      const { data: metadata } = await supabase.auth.getUser();
-      const userMetadata = metadata.user?.user_metadata;
+      const userMetadata = sessionUser.user_metadata;
+      
+      console.log('Syncing user profile for:', sessionUser.email, 'Metadata:', userMetadata);
 
-      if (userMetadata) {
-        const { error } = await supabase
-          .from('users')
-          .upsert({
-            id: sessionUser.id,
-            email: sessionUser.email,
-            display_name: userMetadata.full_name || userMetadata.name || sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
-            avatar_url: userMetadata.avatar_url || sessionUser.user_metadata?.avatar_url,
-          }, {
-            onConflict: 'id',
-            ignoreDuplicates: false // We want to update display_name and avatar_url if they changed
-          });
+      const { error } = await supabase
+        .from('users')
+        .upsert({
+          id: sessionUser.id,
+          email: sessionUser.email,
+          display_name: userMetadata?.full_name || userMetadata?.name || sessionUser.email?.split('@')[0],
+          avatar_url: userMetadata?.avatar_url,
+        }, {
+          onConflict: 'id',
+          ignoreDuplicates: false
+        });
 
-        if (error) console.error('Error syncing user profile:', error);
+      if (error) {
+        console.error('Error syncing user profile to Supabase:', error);
+      } else {
+        console.log('Successfully synced user profile to Supabase');
       }
     } catch (err) {
-      console.error('Failed to sync user profile:', err);
+      console.error('Unexpected error during profile sync:', err);
     }
   };
 
