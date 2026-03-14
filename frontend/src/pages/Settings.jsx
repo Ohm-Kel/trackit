@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2, Sun, Moon, Monitor, Download } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2, Sun, Moon, Monitor, Download, Trash2, Shield, LogOut, Globe, ExternalLink, Mail, BellOff } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
@@ -7,6 +7,7 @@ import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
 import { requestNotificationPermission } from '../components/NotificationManager';
 import { useToast } from '../components/Toast';
+import { exportTasksCSV, exportExamsCSV } from '../utils/export';
 
 const PROFILE_KEY = 'trackit_profile';
 const NOTIF_KEY = 'trackit_notif';
@@ -51,6 +52,15 @@ export default function Settings() {
   const { user } = useAuth();
   const { data: allTasks = [] } = useTasks();
   const { data: allExams = [] } = useExams();
+  const [showExport, setShowExport] = useState(false);
+  const exportRef = useRef(null);
+
+  useEffect(() => {
+    if (!showExport) return;
+    const handler = (e) => { if (exportRef.current && !exportRef.current.contains(e.target)) setShowExport(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showExport]);
   const { addToast } = useToast();
   const [profile, setProfile] = useState({
     name: '', university: '', course: '', year: '', email: '', avatar_url: ''
@@ -373,29 +383,39 @@ export default function Settings() {
                       <div className="text-[13.5px] font-semibold text-text-1">Export all data</div>
                       <div className="text-[12px] text-text-3 mt-0.5">Download your profile, tasks, exams, and preferences as JSON</div>
                     </div>
+                    <div className="relative" ref={exportRef}>
                     <button
-                      onClick={() => {
-                        const data = {
-                          profile,
-                          tasks: allTasks,
-                          exams: allExams,
-                          notifications: JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}'),
-                          exported_at: new Date().toISOString()
-                        };
-                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url; a.download = 'trackit-data.json'; a.click();
-                        URL.revokeObjectURL(url);
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border2 text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all shrink-0 ml-3"
+                      onClick={() => setShowExport(!showExport)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
                     >
                       <Download className="w-3 h-3" />
-                      Export
+                      Export Data
                     </button>
+                    {showExport && (
+                      <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-rs shadow-md z-10 py-1 min-w-[180px]">
+                        <div className="px-3 py-1.5 text-[10px] font-bold text-text-3 uppercase tracking-wider border-b border-border mb-1">Backup</div>
+                        <button
+                          onClick={() => {
+                            const data = { profile, tasks: allTasks, exams: allExams, notifications: JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}'), exported_at: new Date().toISOString() };
+                            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a'); a.href = url; a.download = 'trackit-full-data.json'; a.click();
+                            URL.revokeObjectURL(url);
+                            setShowExport(false);
+                          }}
+                          className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium"
+                        >
+                          Full JSON Backup (.json)
+                        </button>
+                        <div className="px-3 py-1.5 text-[10px] font-bold text-text-3 uppercase tracking-wider border-b border-border my-1">Quick Export</div>
+                        <button onClick={() => { exportTasksCSV(allTasks); setShowExport(false); }} className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium">Tasks as CSV</button>
+                        <button onClick={() => { exportExamsCSV(allExams); setShowExport(false); }} className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium">Exams as CSV</button>
+                      </div>
+                    )}
                   </div>
+                </div>
 
-                  <div className="flex items-center justify-between p-3.5 bg-bg border border-border rounded-r">
+                <div className="flex items-center justify-between p-3.5 bg-bg border border-border rounded-r">
                     <div>
                       <div className="text-[13.5px] font-semibold text-text-1">Reset local preferences</div>
                       <div className="text-[12px] text-text-3 mt-0.5">Reset theme and notifications on this device. Your account data stays in the cloud.</div>

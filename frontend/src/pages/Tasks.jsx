@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Plus, Search, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2, AlertTriangle, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
 import { formatRelativeDate, getDueBadgeClass, formatStatus, daysUntil } from '../utils/dates';
 import { exportTasksCSV, exportTasksPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
+import { TasksSkeleton } from '../components/Skeleton';
 
 function getStatusClass(status) {
   if (status === 'in_progress') return 'bg-primary-light text-primary';
@@ -23,6 +24,14 @@ export default function Tasks() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showExport, setShowExport] = useState(false);
+  const exportRef = useRef(null);
+
+  useEffect(() => {
+    if (!showExport) return;
+    const handler = (e) => { if (exportRef.current && !exportRef.current.contains(e.target)) setShowExport(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showExport]);
 
   const statuses = [
     { label: 'All', value: 'All' },
@@ -65,6 +74,8 @@ export default function Tasks() {
   const inProgressCount = tasks.filter(t => t.status === 'in_progress').length;
   const overdueCount = tasks.filter(t => t.status !== 'done' && t.due_date && daysUntil(t.due_date) < 0).length;
 
+  if (isLoading) return <TasksSkeleton />;
+
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
       <div className="pt-5 md:pt-7 px-4 md:px-8 pb-0 flex items-center justify-between mb-4 md:mb-6">
@@ -76,7 +87,7 @@ export default function Tasks() {
         </div>
         <div className="flex items-center gap-2">
           {tasks.length > 0 && (
-            <div className="relative">
+            <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setShowExport(!showExport)}
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
@@ -142,13 +153,8 @@ export default function Tasks() {
           </div>
         </div>
 
-        {/* Loading */}
-        {isLoading ? (
-          <div className="bg-white border border-border rounded-r shadow-xs p-8 flex flex-col items-center gap-3 text-text-3">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            <span className="text-[13px]">Loading your tasks…</span>
-          </div>
-        ) : filtered.length === 0 ? (
+        {/* Search + Filter Skeleton or Content */}
+        {filtered.length === 0 ? (
           <div className="bg-white border border-border rounded-r shadow-xs p-8 flex flex-col items-center gap-2 text-center">
             <div className="text-[40px]">📋</div>
             <div className="text-[14px] font-semibold text-text-1">

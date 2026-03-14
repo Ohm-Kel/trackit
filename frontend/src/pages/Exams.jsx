@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Loader2, ChevronDown, ChevronUp, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useExams, useUpdateExam, useDeleteExam } from '../hooks/useExams';
 import { daysUntil } from '../utils/dates';
 import { exportExamsCSV, exportExamsPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
+import { ExamsSkeleton } from '../components/Skeleton';
 
 function confidenceStyle(level) {
   const l = (level || '').toLowerCase();
@@ -21,6 +22,14 @@ export default function Exams() {
 
   const [expandedExam, setExpandedExam] = useState(null);
   const [showExport, setShowExport] = useState(false);
+  const exportRef = useRef(null);
+
+  useEffect(() => {
+    if (!showExport) return;
+    const handler = (e) => { if (exportRef.current && !exportRef.current.contains(e.target)) setShowExport(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showExport]);
 
   const upcoming = exams.filter(e => daysUntil(e.exam_date) >= 0);
   const past = exams.filter(e => daysUntil(e.exam_date) < 0);
@@ -29,6 +38,8 @@ export default function Exams() {
     e.stopPropagation();
     if (window.confirm('Remove this exam?')) deleteExam.mutate(id);
   }
+
+  if (isLoading) return <ExamsSkeleton />;
 
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
@@ -41,7 +52,7 @@ export default function Exams() {
         </div>
         <div className="flex items-center gap-2">
           {exams.length > 0 && (
-            <div className="relative">
+            <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setShowExport(!showExport)}
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
@@ -68,12 +79,7 @@ export default function Exams() {
       </div>
 
       <div className="px-4 md:px-8 pb-9">
-        {isLoading ? (
-          <div className="flex flex-col items-center gap-3 py-12 text-text-3">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            <span className="text-[13px]">Loading your exams…</span>
-          </div>
-        ) : upcoming.length === 0 && past.length === 0 ? (
+        {upcoming.length === 0 && past.length === 0 ? (
           <div className="bg-white border border-border rounded-r shadow-xs p-10 flex flex-col items-center gap-2 text-center">
             <div className="text-[48px]">🎓</div>
             <div className="text-[15px] font-bold text-text-1">No exams tracked yet</div>

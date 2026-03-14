@@ -5,6 +5,7 @@ import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
 import { useProfile } from '../hooks/useProfile';
 import { daysUntil, formatRelativeDate, getDueBadgeClass, formatStatus } from '../utils/dates';
+import { DashboardSkeleton } from '../components/Skeleton';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -43,13 +44,7 @@ export default function Dashboard() {
 
   const dateStr = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
-  if (tasksLoading && examsLoading) {
-    return (
-      <div className="min-h-full flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-primary animate-spin" />
-      </div>
-    );
-  }
+  if (tasksLoading && examsLoading) return <DashboardSkeleton />;
 
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
