@@ -29,7 +29,7 @@ export default function Landing() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#19191D] font-['Inter',system-ui,sans-serif] antialiased overflow-x-hidden">
+    <div className="fixed inset-0 bg-white text-[#19191D] font-['Inter',system-ui,sans-serif] antialiased overflow-x-hidden overflow-y-auto">
       <Nav onSignup={() => navigate('/signup')} onLogin={() => navigate('/login')} />
       <Hero onGetStarted={() => navigate('/signup')} onLearnMore={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} />
       <LogoBar />
