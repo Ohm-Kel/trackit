@@ -17,9 +17,10 @@ CREATE TABLE public.users (
 -- Turn on Row Level Security (RLS)
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
--- Allow users to view and update their own profiles
+-- Allow users to manage their own profiles
 CREATE POLICY "Users can view own profile"   ON public.users FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON public.users FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Trigger to automatically create a user profile when they sign up
 CREATE OR REPLACE FUNCTION public.handle_new_user()

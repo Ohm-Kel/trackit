@@ -108,7 +108,7 @@ export default function Sidebar({ isOpen, onClose }) {
       </nav>
 
       {/* User Footer */}
-      <div className="mt-auto border-t border-border bg-white dark:bg-gray-900">
+      <div className="mt-auto border-t border-border bg-white">
         <Link
           to="/settings"
           onClick={onClose}
@@ -126,7 +126,7 @@ export default function Sidebar({ isOpen, onClose }) {
         </Link>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-[9px] px-5.5 py-3 hover:bg-red-50 dark:hover:bg-red-900/10 text-red-500 transition-colors border-none bg-transparent cursor-pointer group"
+          className="w-full flex items-center gap-[9px] px-5.5 py-3 hover:bg-red-50 text-red-500 transition-colors border-none bg-transparent cursor-pointer group"
         >
           <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           <span className="text-[13px] font-semibold text-text-1 group-hover:text-red-500 transition-colors">Log out</span>
