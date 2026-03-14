@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react';
+import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2, Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 
