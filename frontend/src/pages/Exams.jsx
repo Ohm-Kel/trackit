@@ -9,9 +9,9 @@ import { ExamsSkeleton } from '../components/Skeleton';
 
 function confidenceStyle(level) {
   const l = (level || '').toLowerCase();
-  if (l === 'high') return { badge: 'bg-[#F0FDF4] text-[#16A34A]', label: '😊 High' };
-  if (l === 'low') return { badge: 'bg-[#FEF2F2] text-[#EF4444]', label: '😰 Low' };
-  return { badge: 'bg-[#FFFBEB] text-[#D97706]', label: '😐 Medium' };
+  if (l === 'high') return { badge: 'bg-success-bg text-success', label: '😊 High' };
+  if (l === 'low') return { badge: 'bg-error-bg text-error', label: '😰 Low' };
+  return { badge: 'bg-warning-bg text-warning', label: '😐 Medium' };
 }
 
 export default function Exams() {
@@ -184,7 +184,7 @@ export default function Exams() {
                             {exam.exam_date ? new Date(exam.exam_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}
                           </div>
                         </div>
-                        <span className="bg-[#F0FDF4] text-[#16A34A] text-[11px] font-semibold px-2 py-0.5 rounded-full">Done</span>
+                        <span className="bg-success-bg text-success text-[11px] font-semibold px-2 py-0.5 rounded-full">Done</span>
                       </div>
                     </div>
                   ))}

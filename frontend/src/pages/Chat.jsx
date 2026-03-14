@@ -138,21 +138,32 @@ export default function Chat() {
         {/* Chat Main Area */}
         <div className="flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto py-1 pb-3.5 flex flex-col gap-3.5 custom-scrollbar">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`flex gap-2.5 items-start ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                <div className={`w-[30px] h-[30px] rounded-full shrink-0 flex items-center justify-center text-[11px] font-bold ${msg.role === 'ai' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>
-                  {msg.role === 'ai' ? 'T' : 'U'}
-                </div>
-                <div>
-                  <div className={`max-w-[85%] md:max-w-[80%] p-3 px-3.5 rounded-xl text-[13px] md:text-[13.5px] leading-relaxed whitespace-pre-line ${msg.role === 'ai' ? 'bg-white border border-border text-text-1 rounded-tl-sm shadow-xs' : 'bg-primary text-white rounded-tr-sm ml-auto text-left'}`}>
-                    {msg.text}
+            {!historyLoaded ? (
+              <div className="flex flex-col gap-3.5 animate-pulse-soft">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className={`flex gap-2.5 items-start ${i === 2 ? 'flex-row-reverse' : ''}`}>
+                    <div className="w-[30px] h-[30px] rounded-full bg-border shrink-0" />
+                    <div className={`h-[60px] w-[60%] rounded-xl bg-bg border border-border ${i === 2 ? 'rounded-tr-sm' : 'rounded-tl-sm'}`} />
                   </div>
-                  <div className={`text-[10px] text-text-3 mt-1 ${msg.role === 'user' ? 'text-right' : ''}`}>
-                    {msg.time || ''}
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              messages.map((msg, idx) => (
+                <div key={idx} className={`flex gap-2.5 items-start ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                  <div className={`w-[30px] h-[30px] rounded-full shrink-0 flex items-center justify-center text-[11px] font-bold ${msg.role === 'ai' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>
+                    {msg.role === 'ai' ? 'T' : 'U'}
+                  </div>
+                  <div className={msg.role === 'user' ? 'ml-auto' : ''}>
+                    <div className={`max-w-[85%] md:max-w-[80%] p-3 px-3.5 rounded-xl text-[13px] md:text-[13.5px] leading-relaxed whitespace-pre-line ${msg.role === 'ai' ? 'bg-white border border-border text-text-1 rounded-tl-sm shadow-xs' : 'bg-primary text-white rounded-tr-sm ml-auto text-left'}`}>
+                      {msg.text}
+                    </div>
+                    <div className={`text-[10px] text-text-3 mt-1 ${msg.role === 'user' ? 'text-right' : ''}`}>
+                      {msg.time || ''}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
             {sending && (
               <div className="flex gap-2.5 items-start">
                 <div className="w-[30px] h-[30px] rounded-full shrink-0 flex items-center justify-center text-[11px] font-bold bg-primary text-white">T</div>

@@ -356,20 +356,35 @@ export default function Settings() {
 
                 <div>
                   <div className="text-[13px] font-semibold text-text-2 mb-3">Accent Colour</div>
-                  <div className="flex gap-3 flex-wrap">
+                  <div className="flex gap-2.5 flex-wrap mb-4">
                     {Object.entries(ACCENTS).map(([key, colors]) => (
                       <button
                         key={key}
                         title={key.charAt(0).toUpperCase() + key.slice(1)}
                         onClick={() => setAccent(key)}
-                        className={`w-9 h-9 rounded-full border-[2.5px] cursor-pointer transition-all hover:scale-110 flex items-center justify-center ${accent === key ? 'border-text-1 scale-110 shadow-sm' : 'border-transparent'}`}
+                        className={`w-10 h-10 rounded-full border-[3px] cursor-pointer transition-all hover:scale-105 flex items-center justify-center ${accent === key ? 'border-text-1 scale-105 shadow-md' : 'border-transparent'}`}
                         style={{ backgroundColor: colors.primary }}
                       >
-                        {accent === key && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
+                        {accent === key && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
                       </button>
                     ))}
                   </div>
-                  <div className="mt-2.5 text-[11.5px] text-text-3">Changes apply instantly across the entire app.</div>
+
+                  {/* Accent Preview Card */}
+                  <div className="p-4 rounded-r border border-border bg-white shadow-xs max-w-[320px]">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-text-3 mb-2">Accent Preview</div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white">
+                        <Palette className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="h-2 w-24 rounded-full bg-primary mb-1.5" />
+                        <div className="h-1.5 w-16 rounded-full bg-primary-mid" />
+                      </div>
+                      <button className="px-3 py-1 bg-primary text-white text-[11px] font-bold rounded-rs border-none">Button</button>
+                    </div>
+                  </div>
+                  <div className="mt-4 text-[11.5px] text-text-3">Accent colors change the primary buttons, highlights, and icons throughout Trackit.</div>
                 </div>
               </Section>
             )}

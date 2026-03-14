@@ -53,7 +53,7 @@ export default function Dashboard() {
           <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">{greeting}, {firstName} {hour < 12 ? '☀️' : hour < 17 ? '🌤️' : '🌙'}</h1>
           <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">
             {dateStr}
-            {urgentTasks.length > 0 && <span className="text-[#EF4444] font-semibold"> · {urgentTasks.length} urgent</span>}
+            {urgentTasks.length > 0 && <span className="text-error font-semibold"> · {urgentTasks.length} urgent</span>}
             {upcomingExams.length > 0 && ` · ${upcomingExams.length} exam${upcomingExams.length !== 1 ? 's' : ''} coming up`}
           </p>
         </div>
@@ -148,7 +148,7 @@ export default function Dashboard() {
               ) : priorityQueue.map((task, idx) => {
                 const rel = formatRelativeDate(task.due_date);
                 const badgeClass = getDueBadgeClass(task.due_date);
-                const statusColor = task.status === 'in_progress' ? 'bg-primary-light text-primary' : task.status === 'stuck' ? 'bg-[#FEF2F2] text-[#EF4444]' : 'bg-bg text-text-3 border border-border';
+                const statusColor = task.status === 'in_progress' ? 'bg-primary-light text-primary' : task.status === 'stuck' ? 'bg-error-bg text-error' : 'bg-bg text-text-3 border border-border';
                 return (
                   <div key={task.id} className={`flex items-start gap-3 p-3.5 px-4 ${idx < priorityQueue.length - 1 ? 'border-b border-border' : ''} hover:bg-bg transition-colors cursor-pointer group`} onClick={() => navigate('/tasks')}>
                     <div className="w-[17px] h-[17px] rounded-full border-[1.5px] border-border2 bg-white shrink-0 mt-0.5 group-hover:border-primary group-hover:bg-primary-light transition-colors"></div>
@@ -226,9 +226,9 @@ export default function Dashboard() {
               const totalHours = overloaded.reduce((s, t) => s + (t.estimated_hours || 0), 0);
               if (totalHours < 6) return null;
               return (
-                <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-r p-3.5 px-4">
-                  <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-[#92400E] mb-1.5">⚠ Schedule Alert</div>
-                  <div className="text-[12.5px] text-[#78350F] leading-relaxed">
+                <div className="bg-warning-bg border border-warning-border rounded-r p-3.5 px-4 font-sans shadow-xs">
+                  <div className="text-[11px] font-bold uppercase tracking-[0.06em] text-warning mb-1.5">⚠ Schedule Alert</div>
+                  <div className="text-[12.5px] text-text-2 leading-relaxed">
                     You have <strong>{totalHours}hrs of work</strong> due in the next 2 days — plan carefully!
                   </div>
                   <button onClick={() => navigate('/chat')} className="mt-[11px] text-[12px] bg-white border border-border2 text-text-2 px-3 py-1.5 rounded-rs font-semibold shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all cursor-pointer">

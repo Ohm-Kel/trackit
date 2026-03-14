@@ -41,10 +41,10 @@ export function formatRelativeDate(dateStr) {
 export function getDueBadgeClass(dateStr) {
   if (!dateStr) return 'bg-bg text-text-3 border border-border';
   const days = daysUntil(dateStr);
-  if (days < 0) return 'bg-[#FEF2F2] text-[#EF4444]';
-  if (days <= 1) return 'bg-[#FEF2F2] text-[#EF4444]';
-  if (days <= 4) return 'bg-[#FFFBEB] text-[#D97706]';
-  return 'bg-[#F0FDF4] text-[#16A34A]';
+  if (days < 0) return 'bg-error-bg text-error';
+  if (days <= 1) return 'bg-error-bg text-error';
+  if (days <= 4) return 'bg-warning-bg text-warning';
+  return 'bg-success-bg text-success';
 }
 
 /**

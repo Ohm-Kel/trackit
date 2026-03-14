@@ -16,6 +16,15 @@
   --color-text-2: #475569;
   --color-text-3: #94A3B8;
 
+  --color-success: #16A34A;
+  --color-success-bg: #F0FDF4;
+  --color-error: #EF4444;
+  --color-error-bg: #FEF2F2;
+  --color-warning: #D97706;
+  --color-warning-bg: #FFFBEB;
+  --color-warning-border: #FDE68A;
+  --color-error-border: #FCA5A5;
+
   --shadow-xs: 0 1px 3px rgba(15,23,42,0.06);
   --shadow-sm: 0 2px 8px rgba(15,23,42,0.08);
   --shadow-md: 0 4px 16px rgba(15,23,42,0.10);
@@ -34,6 +43,15 @@
   --color-text-2: #A0AECB;
   --color-text-3: #5B6682;
 
+  --color-success: #4ADE80;
+  --color-success-bg: rgba(74, 222, 128, 0.1);
+  --color-error: #F87171;
+  --color-error-bg: rgba(248, 113, 113, 0.1);
+  --color-warning: #FBBF24;
+  --color-warning-bg: rgba(251, 191, 36, 0.1);
+  --color-warning-border: rgba(251, 191, 36, 0.2);
+  --color-error-border: rgba(248, 113, 113, 0.2);
+
   --shadow-xs: 0 1px 3px rgba(0,0,0,0.25);
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.30);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
@@ -47,24 +65,15 @@
 }
 
 /* Dark overrides for specific hardcoded colours used throughout pages */
-[data-theme="dark"] .bg-\[\#F0FDF4\] { background-color: rgba(16, 185, 129, 0.12) !important; }
-[data-theme="dark"] .bg-\[\#FEF2F2\] { background-color: rgba(239, 68, 68, 0.12) !important; }
-[data-theme="dark"] .bg-\[\#FFFBEB\] { background-color: rgba(217, 119, 6, 0.12) !important; }
-[data-theme="dark"] .bg-\[\#F1F5F9\] { background-color: #1E2235 !important; }
-[data-theme="dark"] .bg-\[\#DCFCE7\] { background-color: rgba(16, 185, 129, 0.15) !important; }
-
-/* Toast & upload new hardcoded colours */
-[data-theme="dark"] .bg-\[\#BBF7D0\] { background-color: rgba(16, 185, 129, 0.18) !important; }
-[data-theme="dark"] .bg-\[\#FEE2E2\] { background-color: rgba(239, 68, 68, 0.15) !important; }
-[data-theme="dark"] .bg-\[\#FEF3C7\] { background-color: rgba(217, 119, 6, 0.15) !important; }
-[data-theme="dark"] .bg-\[\#DBEAFE\] { background-color: rgba(59, 130, 246, 0.15) !important; }
-[data-theme="dark"] .bg-\[\#E0E7FF\] { background-color: rgba(79, 70, 229, 0.15) !important; }
-[data-theme="dark"] .bg-\[\#FCA5A5\] { border-color: rgba(239, 68, 68, 0.3) !important; }
-[data-theme="dark"] .border-\[\#FCA5A5\] { border-color: rgba(239, 68, 68, 0.3) !important; }
-[data-theme="dark"] .border-\[\#86EFAC\] { border-color: rgba(16, 185, 129, 0.3) !important; }
-[data-theme="dark"] .border-\[\#BBF7D0\] { border-color: rgba(16, 185, 129, 0.25) !important; }
-[data-theme="dark"] .border-\[\#93C5FD\] { border-color: rgba(59, 130, 246, 0.3) !important; }
-[data-theme="dark"] .border-\[\#FDE68A\] { border-color: rgba(217, 119, 6, 0.3) !important; }
+/* Semantic overrides for dark mode */
+[data-theme="dark"] .text-success { color: var(--color-success) !important; }
+[data-theme="dark"] .bg-success-bg { background-color: var(--color-success-bg) !important; }
+[data-theme="dark"] .text-error { color: var(--color-error) !important; }
+[data-theme="dark"] .bg-error-bg { background-color: var(--color-error-bg) !important; }
+[data-theme="dark"] .text-warning { color: var(--color-warning) !important; }
+[data-theme="dark"] .bg-warning-bg { background-color: var(--color-warning-bg) !important; }
+[data-theme="dark"] .border-warning-border { border-color: var(--color-warning-border) !important; }
+[data-theme="dark"] .border-error-border { border-color: var(--color-error-border) !important; }
 
 /* Primary banner dark mode adjustments */
 [data-theme="dark"] .bg-primary {

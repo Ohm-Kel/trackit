@@ -9,8 +9,8 @@ import { TasksSkeleton } from '../components/Skeleton';
 
 function getStatusClass(status) {
   if (status === 'in_progress') return 'bg-primary-light text-primary';
-  if (status === 'done') return 'bg-[#F0FDF4] text-[#16A34A]';
-  if (status === 'stuck') return 'bg-[#FEF2F2] text-[#EF4444]';
+  if (status === 'done') return 'bg-success-bg text-success';
+  if (status === 'stuck') return 'bg-error-bg text-error';
   return 'bg-bg text-text-3 border border-border';
 }
 
@@ -116,9 +116,9 @@ export default function Tasks() {
       <div className="px-4 md:px-8 pb-9">
         {/* Overdue alert */}
         {overdueCount > 0 && (
-          <div className="flex items-center gap-2 p-3 mb-4 bg-[#FEF2F2] border border-[#FCA5A5] rounded-rs text-[12.5px]">
-            <AlertTriangle className="w-4 h-4 text-[#EF4444] shrink-0" />
-            <span className="text-[#991B1B] font-semibold">{overdueCount} task{overdueCount !== 1 ? 's' : ''} overdue</span>
+          <div className="flex items-center gap-2 p-3 mb-4 bg-error-bg border border-error-border rounded-rs text-[12.5px]">
+            <AlertTriangle className="w-4 h-4 text-error shrink-0" />
+            <span className="text-error font-semibold">{overdueCount} task{overdueCount !== 1 ? 's' : ''} overdue</span>
             <button
               onClick={() => setFilterStatus('overdue')}
               className="ml-auto text-[11.5px] font-semibold text-[#EF4444] hover:underline bg-transparent border-none cursor-pointer"
