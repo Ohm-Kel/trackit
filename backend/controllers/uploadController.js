@@ -102,6 +102,15 @@ exports.parseUpload = async (req, res) => {
     res.json({ type, data: parsed });
   } catch (err) {
     console.error('Upload parse error:', err);
+    if (err.status === 401 || err.message?.includes('authentication') || err.message?.includes('API key')) {
+      return res.status(500).json({ error: 'AI service is not configured. Please contact the administrator to set up the ANTHROPIC_API_KEY.' });
+    }
+    if (err.status === 429) {
+      return res.status(429).json({ error: 'AI service is temporarily busy. Please wait a moment and try again.' });
+    }
+    if (err.message?.includes('too large') || err.message?.includes('size')) {
+      return res.status(413).json({ error: 'File is too large for AI processing. Try a smaller file or compress the image.' });
+    }
     res.status(500).json({ error: 'Failed to parse document. Please try again.' });
   }
 };

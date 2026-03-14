@@ -53,6 +53,19 @@
 [data-theme="dark"] .bg-\[\#F1F5F9\] { background-color: #1E2235 !important; }
 [data-theme="dark"] .bg-\[\#DCFCE7\] { background-color: rgba(16, 185, 129, 0.15) !important; }
 
+/* Toast & upload new hardcoded colours */
+[data-theme="dark"] .bg-\[\#BBF7D0\] { background-color: rgba(16, 185, 129, 0.18) !important; }
+[data-theme="dark"] .bg-\[\#FEE2E2\] { background-color: rgba(239, 68, 68, 0.15) !important; }
+[data-theme="dark"] .bg-\[\#FEF3C7\] { background-color: rgba(217, 119, 6, 0.15) !important; }
+[data-theme="dark"] .bg-\[\#DBEAFE\] { background-color: rgba(59, 130, 246, 0.15) !important; }
+[data-theme="dark"] .bg-\[\#E0E7FF\] { background-color: rgba(79, 70, 229, 0.15) !important; }
+[data-theme="dark"] .bg-\[\#FCA5A5\] { border-color: rgba(239, 68, 68, 0.3) !important; }
+[data-theme="dark"] .border-\[\#FCA5A5\] { border-color: rgba(239, 68, 68, 0.3) !important; }
+[data-theme="dark"] .border-\[\#86EFAC\] { border-color: rgba(16, 185, 129, 0.3) !important; }
+[data-theme="dark"] .border-\[\#BBF7D0\] { border-color: rgba(16, 185, 129, 0.25) !important; }
+[data-theme="dark"] .border-\[\#93C5FD\] { border-color: rgba(59, 130, 246, 0.3) !important; }
+[data-theme="dark"] .border-\[\#FDE68A\] { border-color: rgba(217, 119, 6, 0.3) !important; }
+
 /* Primary banner dark mode adjustments */
 [data-theme="dark"] .bg-primary {
   --tw-bg-opacity: 1;

@@ -1,52 +1,65 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/layout/Layout';
-import Dashboard from './pages/Dashboard';
-import Exams from './pages/Exams';
-import Chat from './pages/Chat';
-import Upload from './pages/Upload';
-import Tasks from './pages/Tasks';
-import FocusPlan from './pages/FocusPlan';
-import Analytics from './pages/Analytics';
-import Add from './pages/Add';
-import Settings from './pages/Settings';
 import ProtectedRoute from './components/ProtectedRoute';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
+
+// Lazy-loaded pages
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Exams = lazy(() => import('./pages/Exams'));
+const Chat = lazy(() => import('./pages/Chat'));
+const Upload = lazy(() => import('./pages/Upload'));
+const Tasks = lazy(() => import('./pages/Tasks'));
+const FocusPlan = lazy(() => import('./pages/FocusPlan'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const Add = lazy(() => import('./pages/Add'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[200px]">
+      <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function App() {
   return (
     <Router>
       <ErrorBoundary>
-        <Routes>
-          {/* Public Auth Routes */}
-          <Route path="/login"           element={<Login />} />
-          <Route path="/signup"          element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password"  element={<ResetPassword />} />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Public Auth Routes */}
+            <Route path="/login"           element={<Login />} />
+            <Route path="/signup"          element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password"  element={<ResetPassword />} />
 
-          {/* Protected Application Routes */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index             element={<Dashboard />} />
-            <Route path="tasks"      element={<Tasks />} />
-            <Route path="exams"      element={<Exams />} />
-            <Route path="chat"       element={<Chat />} />
-            <Route path="upload"     element={<Upload />} />
-            <Route path="focus"      element={<FocusPlan />} />
-            <Route path="analytics"  element={<Analytics />} />
-            <Route path="add"        element={<Add />} />
-            <Route path="settings"   element={<Settings />} />
-          </Route>
-        </Routes>
+            {/* Protected Application Routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index             element={<Dashboard />} />
+              <Route path="tasks"      element={<Tasks />} />
+              <Route path="exams"      element={<Exams />} />
+              <Route path="chat"       element={<Chat />} />
+              <Route path="upload"     element={<Upload />} />
+              <Route path="focus"      element={<FocusPlan />} />
+              <Route path="analytics"  element={<Analytics />} />
+              <Route path="add"        element={<Add />} />
+              <Route path="settings"   element={<Settings />} />
+            </Route>
+          </Routes>
+        </Suspense>
       </ErrorBoundary>
     </Router>
   );

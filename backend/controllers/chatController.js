@@ -39,31 +39,53 @@ exports.chat = async (req, res) => {
     const exams = examsResult.data || [];
     const today = new Date().toISOString().split('T')[0];
 
+    // Categorize tasks for richer context
+    const overdueTasks = tasks.filter(t => t.status !== 'done' && t.due_date && t.due_date < today);
+    const stuckTasks = tasks.filter(t => t.status === 'stuck');
+    const activeTasks = tasks.filter(t => t.status !== 'done');
+
     const taskLines = tasks.length === 0
       ? '  (no tasks yet)'
-      : tasks.map(t =>
-          `  • "${t.title}" | status: ${t.status} | due: ${t.due_date || 'not set'}` +
+      : tasks.map(t => {
+          const isOverdue = t.status !== 'done' && t.due_date && t.due_date < today;
+          return `  • "${t.title}" | status: ${t.status}${isOverdue ? ' ⚠️ OVERDUE' : ''} | due: ${t.due_date || 'not set'}` +
           (t.grade_weight ? ` | weight: ${t.grade_weight}%` : '') +
           (t.estimated_hours ? ` | effort: ${t.estimated_hours}h` : '') +
-          (t.course_code ? ` | course: ${t.course_code}` : '')
-        ).join('\n');
+          (t.course_code ? ` | course: ${t.course_code}` : '') +
+          (t.description ? ` | notes: ${t.description.substring(0, 80)}` : '');
+        }).join('\n');
 
     const examLines = exams.length === 0
       ? '  (no exams yet)'
-      : exams.map(e =>
-          `  • "${e.subject}" | date: ${e.exam_date || 'not set'}` +
+      : exams.map(e => {
+          const daysLeft = e.exam_date ? Math.ceil((new Date(e.exam_date) - new Date(today)) / 86400000) : null;
+          return `  • "${e.subject}" | date: ${e.exam_date || 'not set'}` +
+          (daysLeft !== null ? ` | ${daysLeft} days left` : '') +
           ` | confidence: ${e.confidence_level}` +
-          (Array.isArray(e.topics) && e.topics.length ? ` | topics: ${e.topics.join(', ')}` : '')
-        ).join('\n');
+          (Array.isArray(e.topics) && e.topics.length ? ` | topics: ${e.topics.join(', ')}` : '');
+        }).join('\n');
+
+    // Build alert sections
+    let alerts = '';
+    if (overdueTasks.length > 0) {
+      alerts += `\n⚠️ OVERDUE TASKS (${overdueTasks.length}): ${overdueTasks.map(t => `"${t.title}"`).join(', ')}\n`;
+    }
+    if (stuckTasks.length > 0) {
+      alerts += `\n🚧 STUCK TASKS (${stuckTasks.length}): ${stuckTasks.map(t => `"${t.title}"`).join(', ')}` +
+        `\nFor stuck tasks, suggest: breaking into smaller steps, changing approach, asking for help, or identifying the specific blocker.\n`;
+    }
 
     const systemPrompt =
-      `You are Trackit's AI study assistant. Today is ${today}.\n\n` +
-      `Student's active tasks:\n${taskLines}\n\n` +
+      `You are Trackit's AI study assistant. Today is ${today}.\n` +
+      `Student has ${activeTasks.length} active task(s) and ${exams.length} exam(s).` +
+      alerts +
+      `\nStudent's tasks:\n${taskLines}\n\n` +
       `Student's exams:\n${examLines}\n\n` +
       `Guidelines:\n` +
       `- Give strategic, actionable advice grounded in the data above.\n` +
       `- Prioritise by urgency (due date) and academic importance (grade weight).\n` +
       `- Be encouraging but realistic. Flag overdue or high-risk items clearly.\n` +
+      `- For stuck tasks, proactively suggest unblocking strategies: break the task into subtasks, try a different approach, seek help from peers/tutors, or timebox the difficult part.\n` +
       `- Keep responses concise (under 180 words) unless deep detail is explicitly requested.\n` +
       `- Use plain text; avoid markdown headers. Short bullet lists are fine.`;
 

@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Plus, Search, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
-import { formatRelativeDate, getDueBadgeClass, formatStatus } from '../utils/dates';
+import { formatRelativeDate, getDueBadgeClass, formatStatus, daysUntil } from '../utils/dates';
 import SubtaskList from '../components/SubtaskList';
 
 function getStatusClass(status) {
@@ -24,6 +24,7 @@ export default function Tasks() {
 
   const statuses = [
     { label: 'All', value: 'All' },
+    { label: 'Overdue', value: 'overdue' },
     { label: 'In Progress', value: 'in_progress' },
     { label: 'Not Started', value: 'not_started' },
     { label: 'Stuck', value: 'stuck' },
@@ -33,7 +34,14 @@ export default function Tasks() {
   const filtered = useMemo(() => {
     return tasks.filter(t => {
       const matchSearch = !search || t.title?.toLowerCase().includes(search.toLowerCase()) || t.course_code?.toLowerCase().includes(search.toLowerCase());
-      const matchStatus = filterStatus === 'All' || (t.status || 'not_started') === filterStatus;
+      let matchStatus;
+      if (filterStatus === 'All') {
+        matchStatus = true;
+      } else if (filterStatus === 'overdue') {
+        matchStatus = t.status !== 'done' && t.due_date && daysUntil(t.due_date) < 0;
+      } else {
+        matchStatus = (t.status || 'not_started') === filterStatus;
+      }
       return matchSearch && matchStatus;
     });
   }, [tasks, search, filterStatus]);
@@ -53,6 +61,7 @@ export default function Tasks() {
 
   const totalCount = tasks.length;
   const inProgressCount = tasks.filter(t => t.status === 'in_progress').length;
+  const overdueCount = tasks.filter(t => t.status !== 'done' && t.due_date && daysUntil(t.due_date) < 0).length;
 
   return (
     <div className="min-h-full animate-[fadeIn_0.2s_ease]">
@@ -73,6 +82,20 @@ export default function Tasks() {
       </div>
 
       <div className="px-4 md:px-8 pb-9">
+        {/* Overdue alert */}
+        {overdueCount > 0 && (
+          <div className="flex items-center gap-2 p-3 mb-4 bg-[#FEF2F2] border border-[#FCA5A5] rounded-rs text-[12.5px]">
+            <AlertTriangle className="w-4 h-4 text-[#EF4444] shrink-0" />
+            <span className="text-[#991B1B] font-semibold">{overdueCount} task{overdueCount !== 1 ? 's' : ''} overdue</span>
+            <button
+              onClick={() => setFilterStatus('overdue')}
+              className="ml-auto text-[11.5px] font-semibold text-[#EF4444] hover:underline bg-transparent border-none cursor-pointer"
+            >
+              Show overdue
+            </button>
+          </div>
+        )}
+
         {/* Search + Filter */}
         <div className="flex items-center gap-2.5 mb-4.5 flex-wrap">
           <div className="relative flex-1 min-w-[180px]">

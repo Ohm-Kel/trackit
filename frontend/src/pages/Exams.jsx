@@ -1,7 +1,9 @@
-import { Plus, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useExams, useUpdateExam, useDeleteExam } from '../hooks/useExams';
 import { daysUntil } from '../utils/dates';
+import SubtaskList from '../components/SubtaskList';
 
 function confidenceStyle(level) {
   const l = (level || '').toLowerCase();
@@ -15,6 +17,8 @@ export default function Exams() {
   const { data: exams = [], isLoading } = useExams();
   const updateExam = useUpdateExam();
   const deleteExam = useDeleteExam();
+
+  const [expandedExam, setExpandedExam] = useState(null);
 
   const upcoming = exams.filter(e => daysUntil(e.exam_date) >= 0);
   const past = exams.filter(e => daysUntil(e.exam_date) < 0);
@@ -120,7 +124,20 @@ export default function Exams() {
                         </button>
                       </div>
 
-                      <button onClick={e => handleDelete(e, exam.id)} className="mt-2 w-full text-[11.5px] text-text-3 hover:text-[#EF4444] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
+                      {/* Subtasks toggle */}
+                      <button
+                        onClick={() => setExpandedExam(expandedExam === exam.id ? null : exam.id)}
+                        className="mt-2 w-full flex items-center justify-center gap-1 text-[11.5px] text-text-3 hover:text-primary transition-colors cursor-pointer bg-transparent border-none py-1"
+                      >
+                        {expandedExam === exam.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        {expandedExam === exam.id ? 'Hide' : 'Show'} Revision Subtasks
+                      </button>
+
+                      {expandedExam === exam.id && (
+                        <SubtaskList parentId={exam.id} parentType="exam" />
+                      )}
+
+                      <button onClick={e => handleDelete(e, exam.id)} className="mt-1 w-full text-[11.5px] text-text-3 hover:text-[#EF4444] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
                     </div>
                   );
                 })}
