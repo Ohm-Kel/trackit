@@ -62,7 +62,7 @@ export default function Settings() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [showExport]);
-  const { data: profileData, isLoading: loadingProfile } = useProfile();
+  const { data: profileData, isLoading: loadingProfile, isError: profileError, refetch: refetchProfile } = useProfile();
   const updateProfileMutation = useUpdateProfile();
   const { addToast } = useToast();
 
@@ -82,17 +82,24 @@ export default function Settings() {
   }, []);
 
   useEffect(() => {
+    // Initialize email from auth user if available
+    if (user?.email && !localProfile.email) {
+      setLocalProfile(p => ({ ...p, email: user.email }));
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (profileData) {
       setLocalProfile({
         name: profileData.display_name || '',
-        email: profileData.email || '',
+        email: profileData.email || user?.email || '',
         avatar_url: profileData.avatar_url || '',
         university: profileData.university || '',
         course: profileData.course || '',
         year: profileData.year || ''
       });
     }
-  }, [profileData]);
+  }, [profileData, user]);
 
   async function handleSaveProfile() {
     updateProfileMutation.mutate({
@@ -193,8 +200,21 @@ export default function Settings() {
                 </div>
 
                 {loadingProfile ? (
-                  <div className="flex items-center justify-center py-10">
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary opacity-20" />
+                    <p className="text-[12px] text-text-3 mt-3 animate-pulse">Loading profile data...</p>
+                  </div>
+                ) : profileError ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="text-[24px] mb-2">⚠️</div>
+                    <p className="text-[13px] font-semibold text-text-1">Failed to load profile</p>
+                    <p className="text-[12px] text-text-3 mb-4 max-w-[200px]">We couldn't reach the server to fetch your profile details.</p>
+                    <button 
+                      onClick={() => refetchProfile()}
+                      className="px-4 py-1.5 bg-primary-light text-primary text-[12px] font-bold rounded-rs border-none cursor-pointer hover:bg-primary-mid transition-colors"
+                    >
+                      Retry Loading
+                    </button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">

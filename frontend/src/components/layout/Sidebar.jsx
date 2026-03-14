@@ -26,7 +26,7 @@ export default function Sidebar({ isOpen, onClose }) {
     try { await signOut(); } catch (err) { console.error('Logout failed:', err); }
   };
 
-  const name = profile?.display_name || user?.user_metadata?.full_name || 'Student';
+  const name = profile?.display_name || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Student';
   const course = profile?.course || '';
   const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U';
