@@ -40,7 +40,7 @@ export default function ForgotPassword() {
         <div className="bg-white rounded-[24px] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-border/50">
           {sent ? (
             <div className="text-center py-4 animate-scale-in">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 mb-6">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-6">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <h2 className="text-[20px] font-bold text-[#0F172A] mb-3">Check your email</h2>
