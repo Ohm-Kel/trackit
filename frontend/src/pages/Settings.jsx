@@ -1,20 +1,19 @@
-import { useState, useEffect } from 'react';
-import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2, Sun, Moon, Monitor } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabaseClient';
 
 const PROFILE_KEY = 'trackit_profile';
 const NOTIF_KEY = 'trackit_notif';
 
 function Section({ icon: Icon, title, description, children }) {
   return (
-    <div className="bg-white border border-border rounded-r shadow-xs overflow-hidden mb-4">
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+    <div className="bg-white border border-border rounded-r shadow-xs overflow-hidden mb-4 dark:bg-gray-900 dark:border-gray-800">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-border dark:border-gray-800">
         <div className="w-[34px] h-[34px] rounded-[9px] bg-primary-light flex items-center justify-center text-primary shrink-0">
           <Icon className="w-[16px] h-[16px]" />
         </div>
         <div>
-          <div className="text-[14px] font-bold text-text-1">{title}</div>
-          {description && <div className="text-[12px] text-text-3 mt-[1px]">{description}</div>}
+          <div className="text-[14px] font-bold text-text-1 dark:text-white">{title}</div>
+          {description && <div className="text-[12px] text-text-3 dark:text-gray-400 mt-[1px]">{description}</div>}
         </div>
       </div>
       <div className="p-5">{children}</div>
@@ -24,10 +23,10 @@ function Section({ icon: Icon, title, description, children }) {
 
 function Toggle({ label, description, checked, onChange }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-3 border-b border-border last:border-b-0">
+    <div className="flex items-start justify-between gap-4 py-3 border-b border-border dark:border-gray-800 last:border-b-0">
       <div className="flex-1">
-        <div className="text-[13.5px] font-semibold text-text-1">{label}</div>
-        {description && <div className="text-[12px] text-text-3 mt-0.5">{description}</div>}
+        <div className="text-[13.5px] font-semibold text-text-1 dark:text-white">{label}</div>
+        {description && <div className="text-[12px] text-text-3 dark:text-gray-400 mt-0.5">{description}</div>}
       </div>
       <button
         onClick={() => onChange(!checked)}
@@ -42,31 +41,85 @@ function Toggle({ label, description, checked, onChange }) {
 
 export default function Settings() {
   const { theme, setTheme, accent, setAccent, ACCENTS } = useTheme();
+  const { user } = useAuth();
   const [profile, setProfile] = useState({
-    name: '', university: '', course: '', year: '', email: ''
+    name: '', university: '', course: '', year: '', email: '', avatar_url: ''
   });
   const [notif, setNotif] = useState({
     browser: false, deadlineReminder: true, weeklyDigest: false, focusPlanAlert: true
   });
   const [saved, setSaved] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const [activeSection, setActiveSection] = useState('profile');
 
   useEffect(() => {
-    const p = localStorage.getItem(PROFILE_KEY);
+    // Load notifications from localStorage (still local preference)
     const n = localStorage.getItem(NOTIF_KEY);
-    if (p) setProfile(JSON.parse(p));
     if (n) setNotif(JSON.parse(n));
-  }, []);
 
-  function saveProfile() {
+    // Load profile from Supabase if user is logged in
+    async function loadProfile() {
+      if (!user) {
+        setLoadingProfile(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('display_name, email, avatar_url, university, course, year')
+          .eq('id', user.id)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setProfile({
+            name: data.display_name || '',
+            email: data.email || '',
+            avatar_url: data.avatar_url || '',
+            university: data.university || '',
+            course: data.course || '',
+            year: data.year || ''
+          });
+        }
+      } catch (err) {
+        console.error('Error loading profile:', err);
+      } finally {
+        setLoadingProfile(false);
+      }
+    }
+
+    loadProfile();
+  }, [user]);
+
+  async function saveProfile() {
+    if (!user) return;
     setSavingProfile(true);
-    setTimeout(() => {
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-      setSavingProfile(false);
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          display_name: profile.name,
+          email: profile.email,
+          university: profile.university,
+          course: profile.course,
+          year: profile.year
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    }, 400);
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      alert('Failed to save profile. Please try again.');
+    } finally {
+      setSavingProfile(false);
+    }
   }
 
   function updateNotif(key, value) {
@@ -120,46 +173,61 @@ export default function Settings() {
             {activeSection === 'profile' && (
               <Section icon={User} title="Profile" description="Your personal information displayed in the app">
                 {/* Avatar */}
-                <div className="flex items-center gap-4 mb-5 pb-5 border-b border-border">
-                  <div className="w-[52px] h-[52px] rounded-full bg-primary-light flex items-center justify-center text-primary font-bold text-[20px] shrink-0">
-                    {profile.name ? profile.name.charAt(0).toUpperCase() : 'U'}
-                  </div>
+                <div className="flex items-center gap-4 mb-5 pb-5 border-b border-border dark:border-gray-800">
+                  {profile.avatar_url ? (
+                    <img 
+                      src={profile.avatar_url} 
+                      alt={profile.name} 
+                      className="w-[52px] h-[52px] rounded-full object-cover shrink-0 border border-border dark:border-gray-700"
+                    />
+                  ) : (
+                    <div className="w-[52px] h-[52px] rounded-full bg-primary-light flex items-center justify-center text-primary font-bold text-[20px] shrink-0">
+                      {profile.name ? profile.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
                   <div>
-                    <div className="text-[14px] font-bold text-text-1">{profile.name || 'Your Name'}</div>
-                    <div className="text-[12px] text-text-3">{profile.email || 'Set your email below'}</div>
+                    <div className="text-[14px] font-bold text-text-1 dark:text-white">{profile.name || 'Your Name'}</div>
+                    <div className="text-[12px] text-text-3 dark:text-gray-400">{profile.email || 'Set your email below'}</div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Full Name</label>
-                    <input type="text" className={inputClass} placeholder="e.g. Kwame Mensah" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} />
+                {loadingProfile ? (
+                  <div className="flex items-center justify-center py-10">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
                   </div>
-                  <div>
-                    <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Email Address</label>
-                    <input type="email" className={inputClass} placeholder="you@university.edu" value={profile.email} onChange={e => setProfile(p => ({ ...p, email: e.target.value }))} />
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="text-[12px] font-semibold text-text-2 dark:text-gray-400 mb-1.5 block">Full Name</label>
+                      <input type="text" className={`${inputClass} dark:bg-gray-800/50 dark:border-gray-700 dark:text-white`} placeholder="e.g. Kwame Mensah" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="text-[12px] font-semibold text-text-2 dark:text-gray-400 mb-1.5 block">Email Address</label>
+                      <input type="email" disabled className={`${inputClass} opacity-60 cursor-not-allowed dark:bg-gray-800/50 dark:border-gray-700 dark:text-white`} placeholder="you@university.edu" value={profile.email} />
+                      <p className="text-[10px] text-text-3 mt-1 italic">Email is managed via your login provider</p>
+                    </div>
+                    <div>
+                      <label className="text-[12px] font-semibold text-text-2 dark:text-gray-400 mb-1.5 block">University / Institution</label>
+                      <input type="text" className={`${inputClass} dark:bg-gray-800/50 dark:border-gray-700 dark:text-white`} placeholder="e.g. University of Ghana" value={profile.university} onChange={e => setProfile(p => ({ ...p, university: e.target.value}))} />
+                    </div>
+                    <div>
+                      <label className="text-[12px] font-semibold text-text-2 dark:text-gray-400 mb-1.5 block">Course / Program</label>
+                      <input type="text" className={`${inputClass} dark:bg-gray-800/50 dark:border-gray-700 dark:text-white`} placeholder="e.g. BSc Computer Science" value={profile.course} onChange={e => setProfile(p => ({ ...p, course: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="text-[12px] font-semibold text-text-2 dark:text-gray-400 mb-1.5 block">Year / Level</label>
+                      <select className={`${inputClass} dark:bg-gray-800/50 dark:border-gray-700 dark:text-white`} value={profile.year} onChange={e => setProfile(p => ({ ...p, year: e.target.value }))}>
+                        <option value="">Select year…</option>
+                        <option>Year 1 / Freshman</option>
+                        <option>Year 2 / Sophomore</option>
+                        <option>Year 3 / Junior</option>
+                        <option>Year 4 / Senior</option>
+                        <option>Postgraduate / Masters</option>
+                        <option>PhD</option>
+                      </select>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">University / Institution</label>
-                    <input type="text" className={inputClass} placeholder="e.g. University of Ghana" value={profile.university} onChange={e => setProfile(p => ({ ...p, university: e.target.value }))} />
-                  </div>
-                  <div>
-                    <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course / Program</label>
-                    <input type="text" className={inputClass} placeholder="e.g. BSc Computer Science" value={profile.course} onChange={e => setProfile(p => ({ ...p, course: e.target.value }))} />
-                  </div>
-                  <div>
-                    <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Year / Level</label>
-                    <select className={inputClass} value={profile.year} onChange={e => setProfile(p => ({ ...p, year: e.target.value }))}>
-                      <option value="">Select year…</option>
-                      <option>Year 1 / Freshman</option>
-                      <option>Year 2 / Sophomore</option>
-                      <option>Year 3 / Junior</option>
-                      <option>Year 4 / Senior</option>
-                      <option>Postgraduate / Masters</option>
-                      <option>PhD</option>
-                    </select>
-                  </div>
-                </div>
+                )}
 
                 <div className="flex items-center gap-3">
                   <button

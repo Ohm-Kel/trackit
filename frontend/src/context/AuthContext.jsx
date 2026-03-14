@@ -8,19 +8,54 @@ export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const syncUserProfile = async (sessionUser) => {
+    if (!sessionUser) return;
+
+    try {
+      const { data: metadata } = await supabase.auth.getUser();
+      const userMetadata = metadata.user?.user_metadata;
+
+      if (userMetadata) {
+        const { error } = await supabase
+          .from('users')
+          .upsert({
+            id: sessionUser.id,
+            email: sessionUser.email,
+            display_name: userMetadata.full_name || userMetadata.name || sessionUser.user_metadata?.full_name || sessionUser.user_metadata?.name,
+            avatar_url: userMetadata.avatar_url || sessionUser.user_metadata?.avatar_url,
+          }, {
+            onConflict: 'id',
+            ignoreDuplicates: false // We want to update display_name and avatar_url if they changed
+          });
+
+        if (error) console.error('Error syncing user profile:', error);
+      }
+    } catch (err) {
+      console.error('Failed to sync user profile:', err);
+    }
+  };
+
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) syncUserProfile(currentUser);
       setLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+          if (currentUser) syncUserProfile(currentUser);
+        }
+        
         setLoading(false);
       }
     );
@@ -42,7 +77,11 @@ export const AuthProvider = ({ children }) => {
     return supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin
+        redirectTo: window.location.origin,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
       }
     });
   };
