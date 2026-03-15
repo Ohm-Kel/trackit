@@ -63,19 +63,18 @@ export default function Sidebar({ isOpen, onClose }) {
   return (
     <aside className={`fixed inset-y-0 left-0 z-40 w-[240px] md:w-[220px] md:min-w-[220px] bg-white border-r border-border flex flex-col p-0 h-full transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} md:relative`}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 pt-6 pb-5 border-b border-border">
-        <div className="shrink-0">
-          <img src="/logo.png" alt="Trackit Logo" className="w-[34px] h-[34px] object-contain" />
+      <div className="flex flex-col items-center px-4 pt-6 pb-5 border-b border-border">
+        <div className="shrink-0 mb-2">
+          <img src="/logo.png" alt="Trackit Logo" className="w-[140px] h-auto object-contain mix-blend-multiply" />
         </div>
-        <div className="flex flex-col">
-          <span className="text-[17px] font-extrabold text-text-1 tracking-[-0.03em] leading-tight">Trackit</span>
-          <span className="text-[9px] font-bold tracking-[0.05em] text-primary uppercase">Beta Edition</span>
-        </div>
-        <div className="ml-auto flex items-center gap-1">
-          <NotificationCenter />
-          <button onClick={onClose} className="md:hidden p-1 text-text-3 border-none bg-transparent">
-            <X className="w-5 h-5" />
-          </button>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold tracking-[0.1em] text-primary uppercase bg-primary-light px-2 py-0.5 rounded-full">Pro Edition</span>
+          <div className="ml-auto flex items-center gap-1">
+            <NotificationCenter />
+            <button onClick={onClose} className="md:hidden p-1 text-text-3 border-none bg-transparent">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 

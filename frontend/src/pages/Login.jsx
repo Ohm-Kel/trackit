@@ -43,8 +43,8 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 transition-colors duration-300">
       <div className="max-w-[420px] w-full animate-fade-in">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center mb-5">
-            <img src="/logo.png" alt="Trackit Logo" className="w-[84px] h-[84px] object-contain drop-shadow-sm" />
+          <div className="inline-flex items-center justify-center mb-6">
+            <img src="/logo.png" alt="Trackit Logo" className="w-[180px] h-auto object-contain mix-blend-multiply" />
           </div>
           <h1 className="text-[32px] font-extrabold text-[#0F172A] tracking-tight mb-2.5">Welcome Back</h1>
           <p className="text-[#64748B] text-[15px] font-medium">Sign in to continue your progress</p>
