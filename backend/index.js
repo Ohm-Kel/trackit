@@ -52,6 +52,17 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Trackit API is running (via /api)', timestamp: new Date() });
 });
 
+app.get('/api/debug-env', (req, res) => {
+  res.json({
+    supabase_url_set: !!process.env.SUPABASE_URL && !process.env.SUPABASE_URL.includes('placeholder'),
+    supabase_key_set: !!process.env.SUPABASE_SERVICE_KEY && !process.env.SUPABASE_SERVICE_KEY.includes('placeholder'),
+    node_env: process.env.NODE_ENV,
+    vercel_env: !!process.env.VERCEL,
+    cwd: process.cwd(),
+    __dirname: __dirname
+  });
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(`[CRITICAL ERROR] ${new Date().toISOString()}:`, err);
