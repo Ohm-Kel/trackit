@@ -52,11 +52,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Trackit API is running (via /api)', timestamp: new Date() });
 });
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error(`[CRITICAL ERROR] ${new Date().toISOString()}:`, err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message,
+    path: req.url,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Export the app for Vercel Serverless Functions
 module.exports = app;
 
 // Only listen locally if not running in Vercel production
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
   });
