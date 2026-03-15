@@ -47,6 +47,25 @@ export async function updateProfile(updates) {
     },
     body: JSON.stringify(updates)
   });
-  if (!res.ok) throw new Error('Failed to update profile');
+
+  if (!res.ok) {
+    let errorMessage = `Failed to update profile (${res.status})`;
+    let details = null;
+
+    try {
+      const errorData = await res.json();
+      errorMessage = errorData.error || errorMessage;
+      details = errorData.details;
+    } catch (e) {
+      errorMessage = `HTTP ${res.status}: ${res.statusText || 'Unknown Error'}`;
+      details = 'The server returned a non-JSON response during update.';
+    }
+
+    const error = new Error(errorMessage);
+    error.details = details;
+    error.status = res.status;
+    throw error;
+  }
+  
   return await res.json();
 }

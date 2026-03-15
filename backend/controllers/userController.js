@@ -78,8 +78,7 @@ exports.updateProfile = async (req, res) => {
       .upsert({
         id: userId,
         ...filteredUpdates,
-        email: req.user.email,
-        updated_at: new Date().toISOString()
+        email: req.user.email
       })
       .select('*')
       .single();
