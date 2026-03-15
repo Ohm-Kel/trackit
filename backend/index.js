@@ -8,6 +8,7 @@ const chatRoutes = require('./routes/chat');
 const subtaskRoutes = require('./routes/subtasks');
 const uploadRoutes = require('./routes/upload');
 const userRoutes = require('./routes/users');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -40,6 +41,7 @@ const mountRoutes = (basePath) => {
   app.use(`${basePath}/subtasks`, subtaskRoutes);
   app.use(`${basePath}/upload`, uploadRoutes);
   app.use(`${basePath}/users`, userRoutes);
+  app.use(`${basePath}/notifications`, notificationRoutes);
 };
 
 mountRoutes('/api'); // Standard

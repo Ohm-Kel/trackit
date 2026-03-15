@@ -137,3 +137,24 @@ CREATE TRIGGER set_tasks_updated_at
 CREATE TRIGGER set_exams_updated_at
   BEFORE UPDATE ON public.exams
   FOR EACH ROW EXECUTE PROCEDURE set_current_timestamp_updated_at();
+-- Notifications Table
+CREATE TABLE public.notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('info', 'success', 'warning', 'ai_suggestion')),
+    message TEXT NOT NULL,
+    read_status BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS for notifications
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own notifications" ON public.notifications
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own notifications" ON public.notifications
+    FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own notifications" ON public.notifications
+    FOR DELETE USING (auth.uid() = user_id);

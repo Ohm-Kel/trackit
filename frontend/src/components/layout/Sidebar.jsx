@@ -3,6 +3,8 @@ import { useTasks } from '../../hooks/useTasks';
 import { useExams } from '../../hooks/useExams';
 import { useAuth } from '../../context/AuthContext';
 import { useProfile } from '../../hooks/useProfile';
+import NotificationCenter from './NotificationCenter';
+
 import {
   LogOut, X,
   LayoutDashboard, GraduationCap, MessageSquare, Upload,
@@ -61,15 +63,20 @@ export default function Sidebar({ isOpen, onClose }) {
   return (
     <aside className={`fixed inset-y-0 left-0 z-40 w-[240px] md:w-[220px] md:min-w-[220px] bg-white border-r border-border flex flex-col p-0 h-full transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} md:relative`}>
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 pt-5.5 pb-5 border-b border-border">
-        <div className="w-[30px] h-[30px] bg-primary rounded-lg flex items-center justify-center shrink-0">
-          <svg viewBox="0 0 16 16" className="w-[15px] h-[15px] fill-white"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/></svg>
+      <div className="flex items-center gap-3 px-5 pt-6 pb-5 border-b border-border">
+        <div className="shrink-0">
+          <img src="/logo.png" alt="Trackit Logo" className="w-[34px] h-[34px] object-contain" />
         </div>
-        <span className="text-base font-bold text-text-1 tracking-[-0.3px]">Trackit</span>
-        <span className="text-[9px] font-semibold tracking-[0.05em] bg-primary-light text-primary rounded px-1.5 py-0.5 ml-0.5">BETA</span>
-        <button onClick={onClose} className="md:hidden ml-auto p-1 text-text-3 border-none bg-transparent">
-          <X className="w-5 h-5" />
-        </button>
+        <div className="flex flex-col">
+          <span className="text-[17px] font-extrabold text-text-1 tracking-[-0.03em] leading-tight">Trackit</span>
+          <span className="text-[9px] font-bold tracking-[0.05em] text-primary uppercase">Beta Edition</span>
+        </div>
+        <div className="ml-auto flex items-center gap-1">
+          <NotificationCenter />
+          <button onClick={onClose} className="md:hidden p-1 text-text-3 border-none bg-transparent">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Navigation */}
