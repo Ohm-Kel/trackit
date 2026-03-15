@@ -15,27 +15,41 @@ const port = process.env.PORT || 3001;
 // Middleware — allow localhost in dev and any vercel.app origin in production
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // same-origin / server-to-server
+    if (!origin) return callback(null, true);
     if (origin.includes('localhost')) return callback(null, true);
     if (origin.includes('vercel.app')) return callback(null, true);
-    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true);
-    callback(null, true); // permissive for student project
+    callback(null, true);
   },
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 
-// Routes
-app.use('/api/tasks', taskRoutes);
-app.use('/api/exams', examRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/subtasks', subtaskRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/users', userRoutes);
+// Logging for remote debugging on Vercel
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
 
-// Basic health check endpoint
+// Resilient Route Mounting: 
+// Vercel rewrites might strip /api or pass it through. 
+// We mount on both to be safe.
+const mountRoutes = (basePath) => {
+  app.use(`${basePath}/tasks`, taskRoutes);
+  app.use(`${basePath}/exams`, examRoutes);
+  app.use(`${basePath}/chat`, chatRoutes);
+  app.use(`${basePath}/subtasks`, subtaskRoutes);
+  app.use(`${basePath}/upload`, uploadRoutes);
+  app.use(`${basePath}/users`, userRoutes);
+};
+
+mountRoutes('/api'); // Standard
+mountRoutes('');     // For cases where /api is stripped by proxy
+
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Trackit API is running' });
+  res.json({ status: 'ok', message: 'Trackit API is running', timestamp: new Date() });
+});
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Trackit API is running (via /api)', timestamp: new Date() });
 });
 
 // Export the app for Vercel Serverless Functions

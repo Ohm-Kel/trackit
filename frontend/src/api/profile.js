@@ -15,9 +15,21 @@ export async function fetchProfile() {
   const res = await fetch(`${API_URL}/users/profile`, { headers });
   
   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}));
-    const error = new Error(errorData.error || 'Failed to fetch profile');
-    error.details = errorData.details;
+    let errorMessage = `Server error (${res.status})`;
+    let details = null;
+
+    try {
+      const errorData = await res.json();
+      errorMessage = errorData.error || errorMessage;
+      details = errorData.details;
+    } catch (e) {
+      // If not JSON, it might be a Vercel 404 HTML page
+      errorMessage = `HTTP ${res.status}: ${res.statusText || 'Unknown Error'}`;
+      details = 'The server returned a non-JSON response. This often means a routing mismatch (404) or a crash.';
+    }
+
+    const error = new Error(errorMessage);
+    error.details = details;
     error.status = res.status;
     throw error;
   }
