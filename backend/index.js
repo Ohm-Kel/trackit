@@ -12,9 +12,16 @@ const userRoutes = require('./routes/users');
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Middleware
+// Middleware — allow localhost in dev and any vercel.app origin in production
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173'
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // same-origin / server-to-server
+    if (origin.includes('localhost')) return callback(null, true);
+    if (origin.includes('vercel.app')) return callback(null, true);
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true);
+    callback(null, true); // permissive for student project
+  },
+  credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 
