@@ -13,7 +13,12 @@ const authMiddleware = async (req, res, next) => {
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      return res.status(401).json({ error: 'Invalid or expired token' });
+      console.error('[AUTH ERROR] Token verification failed:', error?.message || 'No user found');
+      console.debug('[AUTH DEBUG] Token starts with:', token.substring(0, 10));
+      return res.status(401).json({ 
+        error: 'Invalid or expired token',
+        details: error?.message || 'Authentication service rejected the token.'
+      });
     }
 
     // Attach user to request object
