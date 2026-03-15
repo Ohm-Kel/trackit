@@ -22,6 +22,12 @@ export default function NotificationCenter() {
         const data = await res.json();
         setNotifications(data);
       }
+
+      // Proactively trigger AI suggestion analysis
+      await fetch('/api/notifications/generate-suggestions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
     } catch (err) {
       console.error('Error fetching notifications:', err);
     } finally {
