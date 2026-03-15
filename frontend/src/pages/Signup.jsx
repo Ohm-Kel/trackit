@@ -13,18 +13,38 @@ const Signup = () => {
   const { signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
+  const validatePassword = (pass) => {
+    if (pass.length < 8) return 'Password must be at least 8 characters long';
+    if (!/[0-9]/.test(pass)) return 'Password must contain at least one number';
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return 'Password must contain at least one special character';
+    return null;
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
+    
+    // Basic validation
     if (password !== confirmPassword) {
       return setError('Passwords do not match');
     }
+
+    const passError = validatePassword(password);
+    if (passError) {
+      return setError(passError);
+    }
+
     setLoading(true);
     setError('');
     setSuccess('');
     try {
       const { error } = await signUp(email, password);
       if (error) throw error;
-      // Supabase sends a confirmation email by default
+      
+      // Clear sensitive info from state
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      
       setSuccess('Account created! Check your email for a confirmation link before signing in.');
     } catch (err) {
       setError(err.message);
@@ -54,80 +74,94 @@ const Signup = () => {
         </div>
 
         <div className="bg-white rounded-[24px] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-border/50">
-          <form onSubmit={handleSignup} className="space-y-6">
-            {success && (
-              <div className="bg-[#EEF2FF] border border-[#C7D2FE] text-primary p-4 rounded-xl flex items-center gap-3 text-sm animate-fade-in">
-                <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                <p className="font-medium">{success}</p>
+            {success ? (
+              <div className="text-center py-8 animate-fade-in">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-50 text-green-500 mb-6">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <h2 className="text-xl font-bold text-[#0F172A] mb-3">Check your email</h2>
+                <p className="text-[#64748B] text-sm leading-relaxed mb-8">
+                  We've sent a verification link to your email address. Please follow the instructions in the email to activate your account.
+                </p>
+                <Link 
+                  to="/login"
+                  className="inline-flex items-center justify-center w-full py-3.5 bg-primary hover:bg-primary-hover text-white text-[15px] font-bold rounded-rs shadow-lg shadow-primary/20 transition-all"
+                >
+                  Return to Login
+                </Link>
               </div>
+            ) : (
+              <form onSubmit={handleSignup} className="space-y-6">
+                {error && (
+                  <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl flex items-center gap-3 text-sm animate-shake">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <p className="font-medium">{error}</p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Email Address</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
+                      <Mail className="w-[18px] h-[18px]" />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      placeholder="name@example.com"
+                      className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Password</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
+                      <Lock className="w-[18px] h-[18px]" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      placeholder="8+ chars, number, special char"
+                      className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <p className="text-[11px] text-[#64748B] mt-1 ml-1">
+                    At least 8 characters, 1 number, and 1 special character.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Confirm Password</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
+                      <Lock className="w-[18px] h-[18px]" />
+                    </div>
+                    <input
+                      type="password"
+                      required
+                      placeholder="Re-type password"
+                      className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 py-4 bg-primary hover:bg-primary-hover disabled:bg-primary/50 text-white text-[15px] font-bold rounded-rs shadow-lg shadow-primary/20 transform active:scale-[0.98] transition-all"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><UserPlus className="w-5 h-5" /> Create Account</>}
+                </button>
+              </form>
             )}
-
-            {error && (
-              <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl flex items-center gap-3 text-sm animate-shake">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <p className="font-medium">{error}</p>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Email Address</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
-                  <Mail className="w-[18px] h-[18px]" />
-                </div>
-                <input
-                  type="email"
-                  required
-                  placeholder="name@example.com"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Password</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
-                  <Lock className="w-[18px] h-[18px]" />
-                </div>
-                <input
-                  type="password"
-                  required
-                  placeholder="Minimum 6 characters"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Confirm Password</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
-                  <Lock className="w-[18px] h-[18px]" />
-                </div>
-                <input
-                  type="password"
-                  required
-                  placeholder="Re-type password"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading || !!success}
-              className="w-full flex items-center justify-center gap-3 py-4 bg-primary hover:bg-primary-hover disabled:bg-primary/50 text-white text-[15px] font-bold rounded-rs shadow-lg shadow-primary/20 transform active:scale-[0.98] transition-all"
-            >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><UserPlus className="w-5 h-5" /> Create Account</>}
-            </button>
-          </form>
 
           <div className="relative my-9">
             <div className="absolute inset-0 flex items-center">

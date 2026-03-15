@@ -9,6 +9,7 @@ const subtaskRoutes = require('./routes/subtasks');
 const uploadRoutes = require('./routes/upload');
 const userRoutes = require('./routes/users');
 const notificationRoutes = require('./routes/notifications');
+const analyticsRoutes = require('./routes/analytics');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -42,6 +43,7 @@ const mountRoutes = (basePath) => {
   app.use(`${basePath}/upload`, uploadRoutes);
   app.use(`${basePath}/users`, userRoutes);
   app.use(`${basePath}/notifications`, notificationRoutes);
+  app.use(`${basePath}/analytics`, analyticsRoutes);
 };
 
 mountRoutes('/api'); // Standard
