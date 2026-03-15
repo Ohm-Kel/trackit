@@ -62,7 +62,7 @@ export default function Settings() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [showExport]);
-  const { data: profileData, isLoading: loadingProfile, isError: profileError, refetch: refetchProfile } = useProfile();
+  const { data: profileData, isLoading: loadingProfile, isError: profileError, error: profileErrorObj, refetch: refetchProfile } = useProfile();
   const updateProfileMutation = useUpdateProfile();
   const { addToast } = useToast();
 
@@ -209,11 +209,11 @@ export default function Settings() {
                     <div className="text-[24px] mb-2">⚠️</div>
                     <p className="text-[13px] font-semibold text-text-1">Failed to load profile</p>
                     <p className="text-[12px] text-text-3 mb-2 max-w-[240px]">
-                      {profileError ? (useProfile().error?.message || "We couldn't reach the server.") : "Profile data is empty."}
+                      {profileError ? (profileErrorObj?.message || "We couldn't reach the server.") : "Profile data is empty."}
                     </p>
-                    {useProfile().error?.details && (
+                    {profileErrorObj?.details && (
                       <p className="text-[10px] text-red-500 mb-4 font-mono bg-red-50 p-2 rounded max-w-[300px] overflow-auto mx-auto">
-                        {useProfile().error.details}
+                        {profileErrorObj.details}
                       </p>
                     )}
                     <button 
