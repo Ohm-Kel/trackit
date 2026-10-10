@@ -2,7 +2,7 @@
 
 Trackit is a full-stack web application that helps university students manage assignments, track exams, and plan study sessions using AI. Upload your timetable, chat with an AI that knows your workload, and never miss a deadline again.
 
-**Live Demo:** [trackit-app.vercel.app](https://trackit-2i0yr5y6d-ohm-kels-projects.vercel.app)
+**Live Demo:** [trackit-app-smoky.vercel.app](https://trackit-app-smoky.vercel.app)
 
 ---
 
