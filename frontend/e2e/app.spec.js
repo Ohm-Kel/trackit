@@ -90,3 +90,16 @@ for (const [path, signedIn] of [
     ).toEqual([]);
   });
 }
+
+for (const path of ['/', '/tasks', '/exams', '/chat', '/upload', '/focus', '/analytics', '/add', '/settings']) {
+  test(`has no contrast violations in dark mode on ${path}`, async ({ page, api, signIn }) => {
+    seed(api);
+    await signIn();
+    await page.addInitScript(() => localStorage.setItem('trackit_theme', 'dark'));
+    await page.goto(path);
+    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    const { violations } = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
+    expect(violations.flatMap((v) => v.nodes.map((n) => `${n.target.join(' ')}: ${n.any[0]?.message}`))).toEqual([]);
+  });
+}

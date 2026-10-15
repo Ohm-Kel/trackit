@@ -40,7 +40,7 @@
 
   --color-text-1: #E8ECF4;
   --color-text-2: #A0AECB;
-  --color-text-3: #7A86A3; /* 4.8:1 or better on dark surfaces (WCAG AA) */
+  --color-text-3: #8B97B3; /* 4.5:1 or better on dark surfaces and tints (WCAG AA) */
 
   --color-success: #4ADE80;
   --color-success-bg: rgba(74, 222, 128, 0.1);
@@ -73,6 +73,64 @@
 [data-theme="dark"] .bg-warning-bg { background-color: var(--color-warning-bg) !important; }
 [data-theme="dark"] .border-warning-border { border-color: var(--color-warning-border) !important; }
 [data-theme="dark"] .border-error-border { border-color: var(--color-error-border) !important; }
+
+/* Dark mode for colours hard-coded in pages. Light tints become translucent
+   tints of the same hue, and text colours that meet WCAG AA on light
+   surfaces become lighter shades that meet it (4.5:1 or better) on dark
+   ones. Checked by the Playwright dark-mode contrast tests. */
+[data-theme="dark"] .bg-\[\#FEF2F2\],
+[data-theme="dark"] .bg-red-50 { background-color: rgba(248, 113, 113, 0.12) !important; }
+[data-theme="dark"] .bg-\[\#FFFBEB\],
+[data-theme="dark"] .bg-amber-50 { background-color: rgba(251, 191, 36, 0.12) !important; }
+[data-theme="dark"] .bg-green-50\/50,
+[data-theme="dark"] .bg-\[\#F0FDF4\],
+[data-theme="dark"] .bg-\[\#DCFCE7\],
+[data-theme="dark"] .bg-green-50 { background-color: rgba(74, 222, 128, 0.12) !important; }
+[data-theme="dark"] .bg-\[\#EEF2FF\],
+[data-theme="dark"] .bg-primary-light,
+[data-theme="dark"] .bg-primary-faint,
+[data-theme="dark"] .bg-blue-50 { background-color: rgba(129, 140, 248, 0.14) !important; }
+[data-theme="dark"] .bg-\[\#F8FAFC\],
+[data-theme="dark"] .bg-\[\#FAFBFC\],
+[data-theme="dark"] .bg-\[\#F1F5F9\],
+[data-theme="dark"] .bg-\[\#E2E8F0\] { background-color: #1A1E2E !important; }
+[data-theme="dark"] .border-red-100,
+[data-theme="dark"] .border-red-200,
+[data-theme="dark"] .border-\[\#FCA5A5\],
+[data-theme="dark"] .border-\[\#FDE68A\],
+[data-theme="dark"] .border-\[\#BBF7D0\],
+[data-theme="dark"] .border-green-100,
+[data-theme="dark"] .border-primary-mid { border-color: rgba(148, 163, 184, 0.25) !important; }
+[data-theme="dark"] .text-\[\#0F172A\],
+[data-theme="dark"] .text-\[\#19191D\],
+[data-theme="dark"] .text-\[\#334155\] { color: var(--color-text-1) !important; }
+[data-theme="dark"] .text-\[\#475569\] { color: var(--color-text-2) !important; }
+[data-theme="dark"] .text-\[\#5E6E84\],
+[data-theme="dark"] .text-\[\#64748B\],
+[data-theme="dark"] .text-\[\#5B6682\] { color: var(--color-text-3) !important; }
+[data-theme="dark"] .text-\[\#B91C1C\],
+[data-theme="dark"] .text-\[\#991B1B\],
+[data-theme="dark"] .text-\[\#7F1D1D\],
+[data-theme="dark"] .text-\[\#DC2626\],
+[data-theme="dark"] .text-red-500,
+[data-theme="dark"] .text-red-600,
+[data-theme="dark"] .text-red-700,
+[data-theme="dark"] .text-red-800,
+[data-theme="dark"] .text-red-900 { color: #FCA5A5 !important; }
+[data-theme="dark"] .text-\[\#B45309\],
+[data-theme="dark"] .text-\[\#92400E\],
+[data-theme="dark"] .text-\[\#78350F\],
+[data-theme="dark"] .text-amber-500,
+[data-theme="dark"] .text-amber-600 { color: #FCD34D !important; }
+[data-theme="dark"] .text-\[\#15803D\],
+[data-theme="dark"] .text-\[\#166534\],
+[data-theme="dark"] .text-green-500,
+[data-theme="dark"] .text-green-600,
+[data-theme="dark"] .text-green-800 { color: #86EFAC !important; }
+[data-theme="dark"] .text-blue-500,
+[data-theme="dark"] .text-blue-600 { color: #93C5FD !important; }
+[data-theme="dark"] .text-primary,
+[data-theme="dark"] .text-\[\#4F46E5\] { color: var(--color-primary-mid) !important; }
 
 /* Primary banner dark mode adjustments */
 [data-theme="dark"] .bg-primary {
