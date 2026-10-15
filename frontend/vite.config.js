@@ -62,7 +62,7 @@ export default defineConfig(({ mode }) => {
         provider: 'v8',
         include: ['src/**/*.{js,jsx}'],
         exclude: ['src/test/**', 'src/main.jsx', 'src/**/*.test.{js,jsx}'],
-        thresholds: { lines: 65 },
+        thresholds: { lines: 75 },
       },
     },
   };

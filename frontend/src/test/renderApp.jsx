@@ -16,12 +16,13 @@ import { resetSupabase, signInAs } from './fakeSupabase';
  *   vi.mock('../lib/supabaseClient', () => import('../test/fakeSupabase'));
  *
  * @param {string} path
- * @param {{ signedIn?: boolean, setup?: (api: ReturnType<typeof createFakeApi>) => void }} [options]
+ * @param {{ signedIn?: boolean, tour?: boolean, setup?: (api: ReturnType<typeof createFakeApi>) => void }} [options]
+ *   tour: show the first-run onboarding tour (hidden by default).
  */
-export function renderApp(path, { signedIn = true, setup } = {}) {
+export function renderApp(path, { signedIn = true, setup, tour = false } = {}) {
   resetSupabase();
   if (signedIn) signInAs();
-  localStorage.setItem('trackit_onboarding_done', 'true');
+  if (!tour) localStorage.setItem('trackit_onboarding_done', 'true');
 
   const api = createFakeApi();
   setup?.(api);
