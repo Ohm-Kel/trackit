@@ -1,6 +1,7 @@
 import process from 'node:process'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import { preloadLazyPage } from './vite-plugins/preload.js'
 import { siteMetadata } from './vite-plugins/site.js'
 
 /**
@@ -51,6 +52,7 @@ export default defineConfig(({ mode }) => {
       react(),
       contentSecurityPolicy(env.VITE_SUPABASE_URL),
       siteMetadata(env.VITE_SITE_URL),
+      preloadLazyPage('src/pages/Landing.jsx'),
     ],
     build: {
       rollupOptions: {
