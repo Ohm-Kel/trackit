@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { exportExamsCSV, exportTasksCSV } from './export';
+import { exportExamsCSV, exportExamsPDF, exportTasksCSV, exportTasksPDF } from './export';
 
 let downloads;
 
@@ -47,5 +47,49 @@ describe('CSV export', () => {
     ]);
     const [, row] = await lastCsv();
     expect(row).toBe('Calculus,MATH201,,low,40,Limits; Series');
+  });
+});
+
+describe('CSV formula injection', () => {
+  it('prefixes cells that a spreadsheet would run as formulas', async () => {
+    exportTasksCSV([{ title: '=HYPERLINK("https://evil.example","x")', course_code: '@SUM(A1)', status: 'done', grade_weight: 5 }]);
+    const [, row] = await lastCsv();
+    expect(row).toBe(`"'=HYPERLINK(""https://evil.example"",""x"")",done,,'@SUM(A1),5,,`);
+  });
+});
+
+describe('PDF export', () => {
+  let written;
+  beforeEach(() => {
+    written = '';
+    vi.spyOn(window, 'open').mockReturnValue({
+      document: { write: (html) => (written += html), close: () => {} },
+      print: () => {},
+    });
+  });
+
+  const payload = '<img src=x onerror="alert(document.cookie)">';
+
+  it('escapes task text so it cannot run as script in the print window', () => {
+    exportTasksPDF([
+      { title: payload, description: payload, course_code: payload, status: '"><script>x</script>' },
+    ]);
+    expect(written).not.toContain('<img');
+    expect(written).not.toContain('<script>x');
+    expect(written).toContain('&lt;img src=x onerror=&quot;alert(document.cookie)&quot;&gt;');
+    expect(written).toContain('status-not_started');
+  });
+
+  it('escapes exam text, including topics', () => {
+    exportExamsPDF([
+      { subject: payload, course_code: payload, topics: [payload], confidence_level: '"><b>' },
+    ]);
+    expect(written).not.toContain('<img');
+    expect(written).not.toContain('"><b>');
+  });
+
+  it('does nothing when the pop-up is blocked', () => {
+    window.open.mockReturnValue(null);
+    expect(() => exportTasksPDF([{ title: 'x' }])).not.toThrow();
   });
 });
