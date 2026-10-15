@@ -54,23 +54,23 @@ export function ToastProvider({ children }) {
         {toasts.map(toast => {
           const Icon = ICONS[toast.type] || Info;
           return (
-            <div
-              key={toast.id}
-              role="status"
-              className={`pointer-events-auto flex items-start gap-2.5 p-3 px-3.5 border rounded-r shadow-md animate-[slideIn_0.25s_ease] ${STYLES[toast.type] || STYLES.info}`}
-            >
-              <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${ICON_COLORS[toast.type] || ICON_COLORS.info}`} />
-              <div className="flex-1 min-w-0">
-                {toast.title && <div className="text-[12px] font-bold mb-0.5">{toast.title}</div>}
-                <div className="text-[12.5px] leading-relaxed">{toast.message}</div>
+            // The opaque layer keeps text readable: dark mode turns the
+            // tinted backgrounds translucent.
+            <div key={toast.id} role="status" className="pointer-events-auto bg-white rounded-r shadow-md animate-[slideIn_0.25s_ease]">
+              <div className={`flex items-start gap-2.5 p-3 px-3.5 border rounded-r ${STYLES[toast.type] || STYLES.info}`}>
+                <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${ICON_COLORS[toast.type] || ICON_COLORS.info}`} />
+                <div className="flex-1 min-w-0">
+                  {toast.title && <div className="text-[12px] font-bold mb-0.5">{toast.title}</div>}
+                  <div className="text-[12.5px] leading-relaxed">{toast.message}</div>
+                </div>
+                <button
+                  onClick={() => removeToast(toast.id)}
+                  aria-label="Dismiss notification"
+                  className="w-[44px] h-[44px] -my-3 -mr-3.5 flex items-center justify-center bg-transparent border-none cursor-pointer opacity-60 hover:opacity-100 transition-opacity shrink-0"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
-              <button
-                onClick={() => removeToast(toast.id)}
-                aria-label="Dismiss notification"
-                className="w-[44px] h-[44px] -my-3 -mr-3.5 flex items-center justify-center bg-transparent border-none cursor-pointer opacity-60 hover:opacity-100 transition-opacity shrink-0"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
             </div>
           );
         })}

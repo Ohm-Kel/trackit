@@ -73,7 +73,7 @@ test('keeps the notification menu and toasts on a phone screen', async ({ page, 
   await page.setViewportSize({ width: 375, height: 740 });
   await page.goto('/');
   // The deadline reminder for the task due tomorrow.
-  const toast = page.getByText(/is due TOMORROW/);
+  const toast = page.getByRole('status').filter({ hasText: 'is due TOMORROW' });
   await expect(toast).toBeVisible();
   await expect(toast).toBeInViewport({ ratio: 1 });
 
@@ -129,3 +129,14 @@ for (const theme of ['light', 'dark']) {
       .toEqual({ style: 'solid', width: '2px', tag: 'BUTTON' });
   });
 }
+
+test('keeps toast text on an opaque surface in dark mode', async ({ page, api, signIn }) => {
+  seedLong(api);
+  await signIn();
+  await page.addInitScript(() => localStorage.setItem('trackit_theme', 'dark'));
+  await page.goto('/');
+  const toast = page.getByRole('status').filter({ hasText: 'is due TOMORROW' });
+  await expect(toast).toBeVisible();
+  const background = await toast.evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(background).toMatch(/^rgb\(/); // rgba(...) would let the page show through
+});
