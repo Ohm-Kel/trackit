@@ -2,7 +2,7 @@
 
 ## Workflow
 
-1. Branch off `main` using `feat/<name>`, `fix/<name>`, `docs/<name>` or `chore/<name>`. Never commit directly to `main`.
+1. Branch off `master` using `feat/<name>`, `fix/<name>`, `docs/<name>` or `chore/<name>`. Never commit directly to `master`.
 2. Keep each commit to one logical change.
 3. Open a pull request. CI must pass and another person must review it before merging.
 
