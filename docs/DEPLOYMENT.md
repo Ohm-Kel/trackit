@@ -68,6 +68,10 @@ task list and chat before merging.
 - Sign in, open Tasks, Exams and Analytics, and send one chat message.
 - In the browser's developer tools, the page has a `Content-Security-Policy`
   `<meta>` tag and no CSP errors in the console.
+- The app is installable: in Chrome's developer tools, Application →
+  Manifest shows no errors, and Service workers shows `sw.js` activated.
+  On a phone, "Add to Home Screen" opens it full screen. After one online
+  visit, airplane mode still shows the task list with an offline banner.
 - In Vercel → Logs, look for `Shared rate-limit store unavailable` (means
   migration 002 is missing) or `SUPABASE_ANON_KEY is not set`.
 
