@@ -18,7 +18,7 @@ export default function Layout() {
           </div>
           <span className="text-[15px] font-bold text-text-1 tracking-[-0.3px]">Trackit</span>
         </div>
-        <button onClick={() => setSidebarOpen(true)} aria-label="Open menu" className="p-2 -mr-2 text-text-2 bg-transparent border-none">
+        <button onClick={() => setSidebarOpen(true)} aria-label="Open menu" className="w-[44px] h-[44px] -mr-[10px] flex items-center justify-center text-text-2 bg-transparent border-none">
           <Menu className="w-6 h-6" />
         </button>
       </div>

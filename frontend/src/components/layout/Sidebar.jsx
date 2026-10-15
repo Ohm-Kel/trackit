@@ -67,7 +67,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <span className="text-[10px] font-bold tracking-[0.1em] text-primary uppercase bg-primary-light px-2 py-0.5 rounded-full">Pro Edition</span>
           <div className="ml-auto flex items-center gap-1">
             <NotificationCenter />
-            <button onClick={onClose} aria-label="Close menu" className="md:hidden p-1 text-text-3 border-none bg-transparent">
+            <button onClick={onClose} aria-label="Close menu" className="md:hidden w-[44px] h-[44px] -my-3 flex items-center justify-center text-text-3 border-none bg-transparent">
               <X className="w-5 h-5" />
             </button>
           </div>

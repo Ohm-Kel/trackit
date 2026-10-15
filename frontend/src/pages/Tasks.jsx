@@ -203,7 +203,7 @@ export default function Tasks() {
                       type="button"
                       aria-label={isDone ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
                       onClick={e => { e.stopPropagation(); toggleComplete(task); }}
-                      className={`w-[17px] h-[17px] p-0 rounded-full border-[1.5px] shrink-0 mt-[2px] flex items-center justify-center transition-colors cursor-pointer ${isDone ? 'border-primary bg-primary' : 'border-border2 bg-white hover:border-primary hover:bg-primary-light'}`}
+                      className={`relative before:absolute before:-inset-[14px] before:content-[''] w-[17px] h-[17px] p-0 rounded-full border-[1.5px] shrink-0 mt-[2px] flex items-center justify-center transition-colors cursor-pointer ${isDone ? 'border-primary bg-primary' : 'border-border2 bg-white hover:border-primary hover:bg-primary-light'}`}
                     >
                       {isDone && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
                     </button>
@@ -243,7 +243,7 @@ export default function Tasks() {
                       <button
                         aria-label={expandedRow === task.id ? 'Hide details' : 'Show details'}
                         aria-expanded={expandedRow === task.id}
-                        className="w-[28px] h-[28px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 hover:bg-primary-light hover:text-primary"
+                        className="w-[44px] h-[44px] shrink-0 -mr-2 rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 hover:bg-primary-light hover:text-primary"
                         onClick={() => setExpandedRow(expandedRow === task.id ? null : task.id)}
                       >
                         {expandedRow === task.id ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -306,7 +306,7 @@ export default function Tasks() {
                       type="button"
                       aria-label={`Mark "${task.title}" as not done`}
                       onClick={e => { e.stopPropagation(); toggleComplete(task); }}
-                      className="w-[17px] h-[17px] p-0 rounded-full border-[1.5px] border-primary bg-primary shrink-0 mt-[2px] flex items-center justify-center cursor-pointer"
+                      className="relative before:absolute before:-inset-[14px] before:content-[''] w-[17px] h-[17px] p-0 rounded-full border-[1.5px] border-primary bg-primary shrink-0 mt-[2px] flex items-center justify-center cursor-pointer"
                     >
                       <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                     </button>
