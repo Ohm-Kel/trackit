@@ -11,9 +11,15 @@ check=0
 [ "${1:-}" = --check ] && check=1
 dir=supabase/migrations
 
-declare -A want=()
+# Parallel lists of link names and their targets (no associative arrays, so
+# this runs on the bash 3.2 that macOS ships).
+names=()
+targets=()
 # The CLI applies files in name order, so the position becomes the version.
-add() { want["$((20260101000000 + $2))_$3.sql"]="../../$1"; }
+add() {
+  names+=("$((20260101000000 + $2))_$3.sql")
+  targets+=("../../$1")
+}
 
 add supabase_schema.sql 0 schema
 add supabase_migrations.sql 1 migrations
@@ -30,8 +36,9 @@ for file in supabase_migrations_*.sql; do
 done
 
 problems=0
-for name in "${!want[@]}"; do
-  target=${want[$name]}
+for i in "${!names[@]}"; do
+  name=${names[$i]}
+  target=${targets[$i]}
   [ "$(readlink "$dir/$name" 2>/dev/null)" = "$target" ] && continue
   if ((check)); then
     echo "Missing link: $dir/$name -> $target" >&2
@@ -44,7 +51,7 @@ done
 
 for link in "$dir"/*.sql; do
   [ -e "$link" ] || [ -L "$link" ] || continue
-  [ -n "${want[$(basename "$link")]:-}" ] && continue
+  case " ${names[*]} " in *" $(basename "$link") "*) continue ;; esac
   if ((check)) || [ ! -L "$link" ]; then
     # Never delete a real file: migrations belong at the repository root.
     echo "Stale migration: $link (not one of the root SQL files)" >&2
