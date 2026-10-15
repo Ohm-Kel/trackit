@@ -1,0 +1,1 @@
+../../supabase_migrations_002.sql
