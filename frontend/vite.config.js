@@ -23,8 +23,8 @@ export function contentSecurityPolicy(supabaseUrl) {
       const policy = [
         "default-src 'self'",
         "script-src 'self'",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' https://fonts.gstatic.com data:",
+        "style-src 'self' 'unsafe-inline'",
+        "font-src 'self' data:",
         "img-src 'self' data: blob: https:",
         `connect-src 'self' ${supabase.origin} ${realtime}`,
         "base-uri 'self'",
@@ -49,6 +49,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), contentSecurityPolicy(env.VITE_SUPABASE_URL)],
     test: {
       environment: 'jsdom',
+      exclude: ['e2e/**', 'node_modules/**'],
       setupFiles: ['./src/test/setup.js'],
       env: {
         VITE_SUPABASE_URL: 'https://test.supabase.co',

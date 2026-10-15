@@ -33,4 +33,10 @@ export default defineConfig([
       ],
     },
   },
+  {
+    // Playwright tests and config run in Node; Playwright's `use` is not a React hook.
+    files: ['e2e/**/*.js', 'playwright.config.js'],
+    languageOptions: { globals: globals.node },
+    rules: { 'react-hooks/rules-of-hooks': 'off' },
+  },
 ])

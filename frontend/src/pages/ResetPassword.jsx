@@ -81,21 +81,21 @@ export default function ResetPassword() {
                   New Password
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#5E6E84] group-focus-within:text-primary transition-colors">
                     <Lock className="w-[18px] h-[18px]" />
                   </div>
                   <input id="resetpassword-new-password"
                     type={showPassword ? 'text' : 'password'}
                     required
                     placeholder="At least 6 characters"
-                    className="block w-full pl-12 pr-12 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
+                    className="block w-full pl-12 pr-12 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#5E6E84] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#94A3B8] hover:text-primary transition-colors bg-transparent border-none cursor-pointer"
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#5E6E84] hover:text-primary transition-colors bg-transparent border-none cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
                   </button>
@@ -107,14 +107,14 @@ export default function ResetPassword() {
                   Confirm Password
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#5E6E84] group-focus-within:text-primary transition-colors">
                     <Lock className="w-[18px] h-[18px]" />
                   </div>
                   <input id="resetpassword-confirm-password"
                     type={showPassword ? 'text' : 'password'}
                     required
                     placeholder="Re-enter your password"
-                    className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
+                    className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#5E6E84] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                   />

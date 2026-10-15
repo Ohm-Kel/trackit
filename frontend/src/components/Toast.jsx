@@ -20,11 +20,11 @@ const STYLES = {
 };
 
 const ICON_COLORS = {
-  success: 'text-[#16A34A]',
-  warning: 'text-[#D97706]',
-  error: 'text-[#EF4444]',
+  success: 'text-[#15803D]',
+  warning: 'text-[#B45309]',
+  error: 'text-[#B91C1C]',
   info: 'text-primary',
-  reminder: 'text-[#D97706]',
+  reminder: 'text-[#B45309]',
 };
 
 export function ToastProvider({ children }) {

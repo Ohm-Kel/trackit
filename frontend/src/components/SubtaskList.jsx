@@ -73,7 +73,7 @@ export default function SubtaskList({ parentId, parentType = 'task' }) {
             </span>
             <button
               onClick={() => deleteSubtask.mutate(sub.id, { onError: showError('delete the subtask') })}
-              className="bg-transparent border-none cursor-pointer p-0 opacity-0 group-hover:opacity-100 transition-opacity text-text-3 hover:text-[#EF4444]"
+              className="bg-transparent border-none cursor-pointer p-0 opacity-0 group-hover:opacity-100 transition-opacity text-text-3 hover:text-[#B91C1C]"
             >
               <Trash2 className="w-3 h-3" />
             </button>

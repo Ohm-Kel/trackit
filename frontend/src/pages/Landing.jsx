@@ -140,7 +140,7 @@ function Hero({ onGetStarted, onLearnMore }) {
             className="inline-flex items-center gap-2 bg-white hover:bg-[#F8FAFC] text-[#19191D] px-6 py-3.5 rounded-xl text-[15px] font-semibold border border-[#E8ECF0] cursor-pointer transition-all shadow-sm"
           >
             See How It Works
-            <ChevronRight className="w-4 h-4 text-[#94A3B8]" />
+            <ChevronRight className="w-4 h-4 text-[#5E6E84]" />
           </button>
         </div>
 
@@ -154,7 +154,7 @@ function Hero({ onGetStarted, onLearnMore }) {
               <div className="w-3 h-3 rounded-full bg-[#F59E0B]/60" />
               <div className="w-3 h-3 rounded-full bg-[#22C55E]/60" />
               <div className="flex-1 flex justify-center">
-                <div className="bg-white rounded-md px-12 py-1 text-[11px] text-[#94A3B8] border border-[#E8ECF0]">trackit.app</div>
+                <div className="bg-white rounded-md px-12 py-1 text-[11px] text-[#5E6E84] border border-[#E8ECF0]">trackit.app</div>
               </div>
             </div>
             {/* Mock app content */}
@@ -179,7 +179,7 @@ function Hero({ onGetStarted, onLearnMore }) {
                 <div className="flex items-center justify-between mb-5">
                   <div>
                     <div className="text-[16px] font-bold text-[#19191D] mb-0.5">Good morning, Student</div>
-                    <div className="text-[11px] text-[#94A3B8]">Friday, 14 March · 3 tasks due this week</div>
+                    <div className="text-[11px] text-[#5E6E84]">Friday, 14 March · 3 tasks due this week</div>
                   </div>
                   <div className="bg-[#4F46E5] text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg">+ Add Task</div>
                 </div>
@@ -188,7 +188,7 @@ function Hero({ onGetStarted, onLearnMore }) {
                   {[{ n: '5', l: 'Active Tasks' }, { n: '3', l: 'Due This Week' }, { n: '2', l: 'Exams Coming' }].map((s, i) => (
                     <div key={i} className="bg-[#F8FAFC] rounded-xl p-3 border border-[#F1F5F9]">
                       <div className="text-[20px] font-bold text-[#19191D]">{s.n}</div>
-                      <div className="text-[10px] text-[#94A3B8] font-medium">{s.l}</div>
+                      <div className="text-[10px] text-[#5E6E84] font-medium">{s.l}</div>
                     </div>
                   ))}
                 </div>
@@ -196,8 +196,8 @@ function Hero({ onGetStarted, onLearnMore }) {
                 <div className="bg-[#F8FAFC] rounded-xl p-3 border border-[#F1F5F9]">
                   {[
                     { t: 'Data Structures Assignment', d: '2 days', s: 'in_progress', c: '#4F46E5' },
-                    { t: 'Linear Algebra Problem Set', d: 'Tomorrow', s: 'stuck', c: '#EF4444' },
-                    { t: 'Physics Lab Report', d: '5 days', s: 'not_started', c: '#94A3B8' },
+                    { t: 'Linear Algebra Problem Set', d: 'Tomorrow', s: 'stuck', c: '#B91C1C' },
+                    { t: 'Physics Lab Report', d: '5 days', s: 'not_started', c: '#5E6E84' },
                   ].map((task, i) => (
                     <div key={i} className={`flex items-center gap-3 py-2.5 px-2 ${i < 2 ? 'border-b border-[#E8ECF0]/60' : ''}`}>
                       <div className={`w-3 h-3 rounded-full border-2`} style={{ borderColor: task.c }} />
@@ -225,7 +225,7 @@ function LogoBar() {
   return (
     <section className="py-10 border-y border-[#F1F5F9]">
       <div className="max-w-[1200px] mx-auto px-6 text-center">
-        <p className="text-[11.5px] font-semibold text-[#94A3B8] uppercase tracking-[0.1em] mb-5">
+        <p className="text-[11.5px] font-semibold text-[#5E6E84] uppercase tracking-[0.1em] mb-5">
           Trusted by students at leading universities
         </p>
         <div className="flex flex-wrap items-center justify-center gap-8 md:gap-14 opacity-40">
@@ -408,7 +408,7 @@ function AISection({ onTry }) {
                   knows your workload
                 </span>
               </h2>
-              <p className="text-[15px] text-[#94A3B8] leading-relaxed mb-7">
+              <p className="text-[15px] text-[#5E6E84] leading-relaxed mb-7">
                 Ask anything about your schedule, get advice on stuck tasks, or let it prioritise your week. It sees all your deadlines, exams, and progress in real time.
               </p>
               <button
@@ -490,7 +490,7 @@ function Stats() {
             <div key={i} className="text-center">
               <s.icon className="w-5 h-5 text-[#4F46E5] mx-auto mb-3" strokeWidth={1.6} />
               <div className="text-[32px] md:text-[38px] font-bold tracking-[-1px] bg-gradient-to-b from-[#19191D] to-[#475569] bg-clip-text text-transparent">{s.value}</div>
-              <div className="text-[13px] text-[#94A3B8] font-medium mt-1">{s.label}</div>
+              <div className="text-[13px] text-[#5E6E84] font-medium mt-1">{s.label}</div>
             </div>
           ))}
         </div>
@@ -555,7 +555,7 @@ function Testimonials() {
                 </div>
                 <div>
                   <div className="text-[13px] font-bold text-[#19191D]">{r.name}</div>
-                  <div className="text-[11.5px] text-[#94A3B8]">{r.role}</div>
+                  <div className="text-[11.5px] text-[#5E6E84]">{r.role}</div>
                 </div>
               </div>
             </div>
@@ -596,7 +596,7 @@ function FinalCTA({ onGetStarted }) {
           Get Started — It's Free
           <ArrowRight className="w-5 h-5" />
         </button>
-        <p className="text-[12px] text-[#94A3B8] mt-4">No credit card required · Set up in 2 minutes</p>
+        <p className="text-[12px] text-[#5E6E84] mt-4">No credit card required · Set up in 2 minutes</p>
       </div>
     </section>
   );
@@ -629,7 +629,7 @@ function Footer() {
             <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#64748B] mb-3">Product</div>
             <div className="space-y-2">
               {['Features', 'AI Chat', 'Focus Plan', 'Analytics'].map(l => (
-                <a key={l} href="#features" className="block text-[13px] text-[#94A3B8] hover:text-white transition-colors no-underline">{l}</a>
+                <a key={l} href="#features" className="block text-[13px] text-[#5E6E84] hover:text-white transition-colors no-underline">{l}</a>
               ))}
             </div>
           </div>
@@ -638,7 +638,7 @@ function Footer() {
             <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#64748B] mb-3">Resources</div>
             <div className="space-y-2">
               {['How It Works', 'Student Guide', 'FAQ', 'Blog'].map(l => (
-                <a key={l} href="#how-it-works" className="block text-[13px] text-[#94A3B8] hover:text-white transition-colors no-underline">{l}</a>
+                <a key={l} href="#how-it-works" className="block text-[13px] text-[#5E6E84] hover:text-white transition-colors no-underline">{l}</a>
               ))}
             </div>
           </div>
@@ -647,7 +647,7 @@ function Footer() {
             <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#64748B] mb-3">Legal</div>
             <div className="space-y-2">
               {['Privacy Policy', 'Terms of Service', 'Contact Us'].map(l => (
-                <a key={l} href="#" className="block text-[13px] text-[#94A3B8] hover:text-white transition-colors no-underline">{l}</a>
+                <a key={l} href="#" className="block text-[13px] text-[#5E6E84] hover:text-white transition-colors no-underline">{l}</a>
               ))}
             </div>
           </div>

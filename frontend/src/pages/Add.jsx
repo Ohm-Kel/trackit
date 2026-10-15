@@ -160,7 +160,7 @@ export default function Add() {
     return (
       <div className="min-h-full flex flex-col items-center justify-center gap-4 animate-[fadeIn_0.2s_ease]">
         <div className="w-14 h-14 rounded-full bg-[#F0FDF4] border-2 border-[#16A34A] flex items-center justify-center">
-          <Check className="w-7 h-7 text-[#16A34A]" strokeWidth={2.5} />
+          <Check className="w-7 h-7 text-[#15803D]" strokeWidth={2.5} />
         </div>
         <div className="text-[16px] font-bold text-text-1">{isEditMode ? 'Updated successfully!' : 'Saved successfully!'}</div>
         <div className="text-[13px] text-text-3">Redirecting…</div>

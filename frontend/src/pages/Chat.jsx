@@ -152,7 +152,7 @@ export default function Chat() {
         {messages.length > 1 && (
           <button
             onClick={handleClearHistory}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border2 text-text-3 hover:text-[#EF4444] hover:border-[#FCA5A5] rounded-rs text-[11px] font-semibold cursor-pointer transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border2 text-text-3 hover:text-[#B91C1C] hover:border-[#FCA5A5] rounded-rs text-[11px] font-semibold cursor-pointer transition-all"
             title="Clear chat history"
           >
             <Trash2 className="w-3 h-3" /> Clear

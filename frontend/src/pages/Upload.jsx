@@ -220,7 +220,7 @@ export default function Upload() {
             ) : examImported ? (
               <div className="animate-[fadeIn_0.2s_ease]">
                 <div className="flex items-center gap-3 bg-[#F0FDF4] p-4 rounded-rs border border-[#BBF7D0] mb-4">
-                  <CheckCircle2 className="w-5 h-5 text-[#16A34A] shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-[#15803D] shrink-0" />
                   <div>
                     <div className="text-[13px] font-bold text-[#166534]">{examResults.length} exam{examResults.length !== 1 ? 's' : ''} imported successfully!</div>
                     <div className="text-[12px] text-[#15803D]">Countdown cards are now live on your Exams page.</div>
@@ -241,7 +241,7 @@ export default function Upload() {
                     <div className="text-[13px] font-bold text-text-1 truncate">{examFile.name}</div>
                     <div className="text-[11px] text-text-3">{formatSize(examFile.size)}</div>
                   </div>
-                  <button onClick={resetExam} className="p-1 text-text-3 hover:text-[#EF4444] bg-transparent border-none cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={resetExam} className="p-1 text-text-3 hover:text-[#B91C1C] bg-transparent border-none cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
 
                 {examResults.length === 0 ? (
@@ -283,7 +283,7 @@ export default function Upload() {
 
             {examError && (
               <div className="mt-3 bg-[#FEF2F2] border border-[#FCA5A5] rounded-rs p-3 text-[12.5px] text-[#991B1B] flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#EF4444]" />
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#B91C1C]" />
                 <div>{examError} <button onClick={resetExam} className="text-primary underline bg-transparent border-none cursor-pointer ml-1">Try again</button></div>
               </div>
             )}
@@ -329,7 +329,7 @@ export default function Upload() {
             ) : schedSaved ? (
               <div className="animate-[fadeIn_0.2s_ease]">
                 <div className="flex items-center gap-3 bg-[#F0FDF4] p-4 rounded-rs border border-[#BBF7D0] mb-4">
-                  <CheckCircle2 className="w-5 h-5 text-[#16A34A] shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-[#15803D] shrink-0" />
                   <div>
                     <div className="text-[13px] font-bold text-[#166534]">Schedule saved!</div>
                     <div className="text-[12px] text-[#15803D]">Your free windows are now visible in the Focus Plan.</div>
@@ -350,7 +350,7 @@ export default function Upload() {
                     <div className="text-[13px] font-bold text-text-1 truncate">{schedFile.name}</div>
                     <div className="text-[11px] text-text-3">{formatSize(schedFile.size)}</div>
                   </div>
-                  <button onClick={resetSched} className="p-1 text-text-3 hover:text-[#EF4444] bg-transparent border-none cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={resetSched} className="p-1 text-text-3 hover:text-[#B91C1C] bg-transparent border-none cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
 
                 <div className="bg-primary-faint border border-primary-mid rounded-rs p-4 mb-4">
@@ -378,7 +378,7 @@ export default function Upload() {
 
             {schedError && (
               <div className="mt-3 bg-[#FEF2F2] border border-[#FCA5A5] rounded-rs p-3 text-[12.5px] text-[#991B1B] flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#EF4444]" />
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#B91C1C]" />
                 <div>{schedError} <button onClick={resetSched} className="text-primary underline bg-transparent border-none cursor-pointer ml-1">Try again</button></div>
               </div>
             )}

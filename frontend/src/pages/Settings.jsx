@@ -260,7 +260,7 @@ export default function Settings() {
                     Save Profile
                   </button>
                   {saved && (
-                    <div className="flex items-center gap-1.5 text-[13px] text-[#16A34A] font-semibold animate-[fadeIn_0.2s_ease]">
+                    <div className="flex items-center gap-1.5 text-[13px] text-[#15803D] font-semibold animate-[fadeIn_0.2s_ease]">
                       <Check className="w-4 h-4" /> Saved!
                     </div>
                   )}
@@ -299,10 +299,10 @@ export default function Settings() {
                   <div className="text-[12px] text-text-3 leading-relaxed">
                     💡 Notification settings are stored on this device. Browser notifications require your browser's permission — you'll be prompted when you enable them.
                     {typeof Notification !== 'undefined' && Notification.permission === 'granted' && (
-                      <span className="block mt-1 text-[#16A34A] font-semibold">✓ Browser notification permission granted</span>
+                      <span className="block mt-1 text-[#15803D] font-semibold">✓ Browser notification permission granted</span>
                     )}
                     {typeof Notification !== 'undefined' && Notification.permission === 'denied' && (
-                      <span className="block mt-1 text-[#EF4444] font-semibold">✗ Browser notifications blocked — update in browser settings</span>
+                      <span className="block mt-1 text-[#B91C1C] font-semibold">✗ Browser notifications blocked — update in browser settings</span>
                     )}
                   </div>
                 </div>
@@ -435,7 +435,7 @@ export default function Settings() {
                           setNotif(DEFAULT_NOTIF);
                         }
                       }}
-                      className="px-3 py-1.5 bg-white border border-[#FCA5A5] text-[#EF4444] rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all shrink-0 ml-3"
+                      className="px-3 py-1.5 bg-white border border-[#FCA5A5] text-[#B91C1C] rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all shrink-0 ml-3"
                     >
                       Clear
                     </button>

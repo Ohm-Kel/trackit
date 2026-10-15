@@ -9,8 +9,8 @@ import { useToast } from '../components/Toast';
 function blockColor(task) {
   const d = daysUntil(task.due_date);
   if (d !== null && d < 0) return { border: '#991B1B', bg: 'bg-[#FEF2F2]', text: 'text-[#991B1B]', badgeBg: 'bg-[#FEF2F2]', label: 'OVERDUE', labelClass: 'text-[#991B1B]' };
-  if (d !== null && d <= 1) return { border: '#EF4444', bg: 'bg-[#FEF2F2]', text: 'text-[#EF4444]', badgeBg: 'bg-[#FEF2F2]', label: 'Due Today/Tomorrow', labelClass: 'text-[#EF4444]' };
-  if (d !== null && d <= 4) return { border: '#D97706', bg: 'bg-[#FFFBEB]', text: 'text-[#D97706]', badgeBg: 'bg-[#FFFBEB]', label: `Due in ${d} days`, labelClass: 'text-[#D97706]' };
+  if (d !== null && d <= 1) return { border: '#EF4444', bg: 'bg-[#FEF2F2]', text: 'text-[#B91C1C]', badgeBg: 'bg-[#FEF2F2]', label: 'Due Today/Tomorrow', labelClass: 'text-[#B91C1C]' };
+  if (d !== null && d <= 4) return { border: '#D97706', bg: 'bg-[#FFFBEB]', text: 'text-[#B45309]', badgeBg: 'bg-[#FFFBEB]', label: `Due in ${d} days`, labelClass: 'text-[#B45309]' };
   return { border: null, bg: 'bg-white', text: 'text-primary', badgeBg: 'bg-primary-light', label: `Due in ${d ?? '—'} days`, labelClass: 'text-primary' };
 }
 
@@ -266,7 +266,7 @@ export default function FocusPlan() {
                               <span className={`font-semibold ${labelClass}`}>{label}</span>
                               {task.course_code && <span>· {task.course_code}</span>}
                               {task.estimated_hours && <span>· {task.estimated_hours} hrs</span>}
-                              {task.status === 'stuck' && <span className="text-[#EF4444] font-semibold">· Stuck</span>}
+                              {task.status === 'stuck' && <span className="text-[#B91C1C] font-semibold">· Stuck</span>}
                             </div>
                             {task.description && !isDone && (
                               <div className={`text-[13px] text-text-2 px-3 py-2 rounded-rs border ${border ? 'bg-white border-border2' : 'bg-bg border-border2'}`}>
@@ -323,7 +323,7 @@ export default function FocusPlan() {
                 <>
                   <div className="text-[13px] text-text-2 leading-relaxed mb-3">
                     You have <strong>{activeTasks.length} active task{activeTasks.length !== 1 ? 's' : ''}</strong>.
-                    {overdueTasks.length > 0 && <span className="text-[#EF4444] font-semibold"> {overdueTasks.length} overdue!</span>}
+                    {overdueTasks.length > 0 && <span className="text-[#B91C1C] font-semibold"> {overdueTasks.length} overdue!</span>}
                     {' '}Most urgent: <strong>{activeTasks[0]?.title}</strong>.
                   </div>
                   <button onClick={() => navigate('/chat')} className="w-full bg-primary text-white text-[12px] font-semibold py-1.5 rounded-[6px] border-none shadow-xs hover:bg-primary-hover transition-colors cursor-pointer">Chat with AI →</button>
@@ -359,7 +359,7 @@ export default function FocusPlan() {
                   return (
                     <div key={exam.id} className="flex items-center justify-between py-1.5 border-b border-border last:border-b-0 text-[12.5px]">
                       <span className="font-medium text-text-1 truncate mr-2">{exam.subject}</span>
-                      <span className={`font-bold shrink-0 ${days <= 3 ? 'text-[#EF4444]' : 'text-primary'}`}>{days}d</span>
+                      <span className={`font-bold shrink-0 ${days <= 3 ? 'text-[#B91C1C]' : 'text-primary'}`}>{days}d</span>
                     </div>
                   );
                 })}

@@ -60,7 +60,7 @@ export default function Exams() {
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
               >
                 <Download className="w-[13px] h-[13px]" />
-                <span className="hidden sm:inline">Export</span>
+                <span className="sr-only sm:not-sr-only">Export</span>
               </button>
               {showExport && (
                 <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-rs shadow-md z-10 py-1 min-w-[140px]">
@@ -75,7 +75,7 @@ export default function Exams() {
             className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
           >
             <Plus className="w-[13px] h-[13px]" />
-            <span className="hidden sm:inline">Add Exam</span>
+            <span className="sr-only sm:not-sr-only">Add Exam</span>
           </button>
         </div>
       </div>
@@ -166,7 +166,7 @@ export default function Exams() {
                         <SubtaskList parentId={exam.id} parentType="exam" />
                       )}
 
-                      <button onClick={e => handleDelete(e, exam.id)} className="mt-1 w-full text-[11.5px] text-text-3 hover:text-[#EF4444] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
+                      <button onClick={e => handleDelete(e, exam.id)} className="mt-1 w-full text-[11.5px] text-text-3 hover:text-[#B91C1C] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
                     </div>
                   );
                 })}

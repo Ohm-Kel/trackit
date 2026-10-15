@@ -98,7 +98,7 @@ export default function Tasks() {
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
               >
                 <Download className="w-[13px] h-[13px]" />
-                <span className="hidden sm:inline">Export</span>
+                <span className="sr-only sm:not-sr-only">Export</span>
               </button>
               {showExport && (
                 <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-rs shadow-md z-10 py-1 min-w-[140px]">
@@ -113,7 +113,7 @@ export default function Tasks() {
             className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
           >
             <Plus className="w-[13px] h-[13px]" />
-            <span className="hidden sm:inline">Add Task</span>
+            <span className="sr-only sm:not-sr-only">Add Task</span>
           </button>
         </div>
       </div>
@@ -126,7 +126,7 @@ export default function Tasks() {
             <span className="text-error font-semibold">{overdueCount} task{overdueCount !== 1 ? 's' : ''} overdue</span>
             <button
               onClick={() => setFilterStatus('overdue')}
-              className="ml-auto text-[11.5px] font-semibold text-[#EF4444] hover:underline bg-transparent border-none cursor-pointer"
+              className="ml-auto text-[11.5px] font-semibold text-[#B91C1C] hover:underline bg-transparent border-none cursor-pointer"
             >
               Show overdue
             </button>
@@ -212,7 +212,7 @@ export default function Tasks() {
                       <div className="text-[11.5px] text-text-3 mt-0.5">
                         {task.course_code && <span>{task.course_code}</span>}
                         <span className="hidden md:inline">{task.subtasks_count > 0 ? ` · ${task.subtasks_count} subtasks` : ''}</span>
-                        <span className="md:hidden"> · <span className={`font-semibold ${dueBadge.includes('EF') ? 'text-[#EF4444]' : dueBadge.includes('D97') ? 'text-[#D97706]' : 'text-text-3'}`}>{rel}</span></span>
+                        <span className="md:hidden"> · <span className={`font-semibold ${dueBadge.includes('EF') ? 'text-[#B91C1C]' : dueBadge.includes('D97') ? 'text-[#B45309]' : 'text-text-3'}`}>{rel}</span></span>
                       </div>
                     </div>
                     <div className="hidden md:flex">
@@ -232,7 +232,7 @@ export default function Tasks() {
                         <Edit2 className="w-[13px] h-[13px]" />
                       </button>
                       <button
-                        className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#EF4444]"
+                        className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#B91C1C]"
                         onClick={e => handleDelete(e, task.id)}
                         title="Delete"
                       >
@@ -281,7 +281,7 @@ export default function Tasks() {
                       )}
                       <div className="flex gap-2">
                         <button onClick={() => navigate(`/add?edit=${task.id}`)} className="flex-1 bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Edit</button>
-                        <button onClick={e => handleDelete(e, task.id)} className="flex-1 bg-white text-[#EF4444] border border-[#FCA5A5] px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all">Delete</button>
+                        <button onClick={e => handleDelete(e, task.id)} className="flex-1 bg-white text-[#B91C1C] border border-[#FCA5A5] px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all">Delete</button>
                       </div>
                       <SubtaskList parentId={task.id} parentType="task" />
                     </div>
@@ -315,17 +315,17 @@ export default function Tasks() {
                       <div className="text-[11.5px] text-text-3 mt-0.5">
                         {task.course_code && <span className="hidden md:inline">{task.course_code} · </span>}
                         <span className="hidden md:inline">completed</span>
-                        <span className="md:hidden text-[#16A34A] font-semibold">Done</span>
+                        <span className="md:hidden text-[#15803D] font-semibold">Done</span>
                       </div>
                     </div>
                     <div className="hidden md:flex text-[12.5px] text-text-3">{task.due_date ? new Date(task.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}</div>
                     <div className="hidden md:block text-[12.5px] text-text-3">{task.estimated_hours ? `${task.estimated_hours} hrs` : '—'}</div>
                     <div className="hidden md:block text-[12.5px] text-text-3">{task.grade_weight ? `${task.grade_weight}%` : '—'}</div>
                     <div className="hidden md:flex">
-                      <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F0FDF4] text-[#16A34A] tracking-[0.01em]">Done</span>
+                      <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F0FDF4] text-[#15803D] tracking-[0.01em]">Done</span>
                     </div>
                     <div className="hidden md:flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
-                      <button title="Delete" className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#EF4444]" onClick={e => handleDelete(e, task.id)}><Trash2 className="w-[13px] h-[13px]" /></button>
+                      <button title="Delete" className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#B91C1C]" onClick={e => handleDelete(e, task.id)}><Trash2 className="w-[13px] h-[13px]" /></button>
                     </div>
                     <div className="md:hidden"></div>
                   </div>
