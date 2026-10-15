@@ -58,6 +58,7 @@ flowchart LR
 
 - The **frontend** signs in with Supabase Auth and calls the API with the user's access token. It reads notifications directly through Supabase Realtime, protected by Row Level Security.
 - The **API** verifies every token, validates every request with Zod, and queries Supabase as the signed-in user, so Row Level Security applies on top of explicit `user_id` filters. It is the only component holding the Anthropic and Supabase service keys.
+- The **frontend** is served with a strict Content-Security-Policy, and CI audits production dependencies, with Dependabot proposing updates weekly.
 - **AI calls** are rate-limited per user, with counters shared across serverless instances in Postgres. Chat history sent to the model is capped, and token usage is logged.
 
 Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):

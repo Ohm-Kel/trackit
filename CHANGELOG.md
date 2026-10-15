@@ -12,6 +12,8 @@ All notable changes to this project are documented here. The format follows
 - Frontend test suite with Vitest and React Testing Library (30 tests), run in CI with a coverage summary
 - Database CI job: applies the schema and migrations to Postgres 16 and runs Row Level Security checks
 - `supabase_migrations_002.sql`
+- Content-Security-Policy and security headers on the frontend (Vercel and Docker)
+- Dependency audit in CI for production dependencies, and weekly Dependabot updates
 
 ### Changed
 
@@ -22,11 +24,17 @@ All notable changes to this project are documented here. The format follows
 ### Fixed
 
 - `supabase_schema.sql` failed on a fresh database (`ON table ALL` instead of `FOR ALL`)
+- Velocity analytics failed on every request because `tasks.completed_at` did not exist; it is now added and maintained by a trigger
+- Notifications and analytics called relative API URLs, which failed in local development
 
 ### Security
 
 - Subtasks can no longer reference another user's task or exam, even through direct Supabase access
 - Rate-limit counters are readable and writable by the service role only
+- Stored XSS in the PDF export: task and exam text (including text read from uploaded timetables) is now HTML-escaped
+- CSV export neutralises spreadsheet formulas (`=`, `+`, `-`, `@`)
+- Patched vulnerable dependencies, including proxy-addr (IP spoofing, critical), path-to-regexp, ws, body-parser, qs, react-router and vite
+- The browser console no longer logs the user's email and profile metadata
 
 ### Upgrade notes
 
