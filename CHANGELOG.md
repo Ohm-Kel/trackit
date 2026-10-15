@@ -4,6 +4,23 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org).
 
+## [Unreleased]
+
+### Added
+
+- Calendar subscription: Settings → Calendar creates a private link that Google Calendar, Apple Calendar and Outlook can subscribe to, with open tasks as all-day events on their due date and exams as events. The link can be copied, rotated and revoked; only a SHA-256 hash of its token is stored (`supabase_migrations_003.sql`, ADR 0006)
+- `GET /api/calendar/:token.ics` (the feed), `POST`/`GET`/`DELETE /api/calendar/feed` (manage the link) and `GET /api/calendar/export.ics` (one-off download), documented in the OpenAPI document
+- "Download .ics" in the Export menu of the Tasks and Exams pages
+- `supabase_migrations_003_rollback.sql`; CI applies, re-runs and rolls back migration 003 and checks its Row Level Security
+
+### Changed
+
+- Request and error logs replace calendar feed tokens with `[token]`
+
+### Fixed
+
+- The toast dismiss button had no accessible name
+
 ## [1.2.0] - 2026-10-15
 
 ### Added

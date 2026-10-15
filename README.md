@@ -28,7 +28,8 @@ Trackit closes that gap in three steps:
 - **Focus plan**: a schedule-aware daily plan built around class times
 - **Analytics**: completion velocity, deadline-cluster ("burnout") detection and workload by grade weight
 - **Notifications**: in-app and browser reminders for upcoming deadlines, delivered in real time
-- **Export**: tasks and exams as CSV or PDF, plus a full JSON backup
+- **Calendar subscription**: a private link that Google Calendar, Apple Calendar or Outlook subscribe to, so deadlines and exams update in the student's own calendar, plus one-off `.ics` downloads
+- **Export**: tasks and exams as CSV, PDF or iCalendar, plus a full JSON backup
 - **Dark mode** and a guided onboarding tour
 
 ## Architecture
@@ -66,7 +67,8 @@ Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 [rate limiting AI endpoints with shared counters](docs/adr/0002-rate-limit-ai-endpoints.md),
 [the API as the authorisation boundary, with RLS on API queries](docs/adr/0003-api-as-authorization-boundary.md),
 [streaming chat with server-sent events](docs/adr/0004-stream-chat-with-server-sent-events.md),
-[a Content-Security-Policy built from the Supabase URL](docs/adr/0005-frontend-content-security-policy.md).
+[a Content-Security-Policy built from the Supabase URL](docs/adr/0005-frontend-content-security-policy.md),
+[calendar subscription through a secret, hashed feed URL](docs/adr/0006-calendar-feed.md).
 Release and rollback steps are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Tech stack
@@ -77,7 +79,7 @@ Release and rollback steps are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 | Backend | Node.js 22, Express 5, Zod 4, pino, helmet, express-rate-limit |
 | AI | Anthropic SDK (Claude Haiku 4.5 by default), vision and PDF input, forced tool use |
 | Data and auth | Supabase Postgres with Row Level Security, Supabase Auth and Realtime |
-| Quality | Jest and Supertest (121 backend tests, 95% line coverage), Vitest and React Testing Library (124 frontend tests, 77% line coverage), Playwright end-to-end and axe accessibility checks, SQL RLS checks, ESLint, Prettier, pre-commit, GitHub Actions |
+| Quality | Jest and Supertest (159 backend tests, 96% line coverage), Vitest and React Testing Library (138 frontend tests, 78% line coverage), Playwright end-to-end and axe accessibility checks, SQL RLS checks, ESLint, Prettier, pre-commit, GitHub Actions |
 | Delivery | Vercel (frontend and serverless API), Docker and Docker Compose |
 
 ## Getting started
@@ -100,7 +102,7 @@ cd trackit
 
 ### 2. Set up the database
 
-In the Supabase SQL editor, run `supabase_schema.sql`, then `supabase_migrations.sql`, then `supabase_migrations_002.sql` (see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for Auth settings and rollback). They create the tables, Row Level Security policies, the trigger that creates a profile on sign-up, and the shared rate-limit counters.
+In the Supabase SQL editor, run `supabase_schema.sql`, then `supabase_migrations.sql`, `supabase_migrations_002.sql` and `supabase_migrations_003.sql` (see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for Auth settings and rollback). They create the tables, Row Level Security policies, the trigger that creates a profile on sign-up, the shared rate-limit counters and the calendar feed tokens.
 
 ### 3. Configure environment variables
 
@@ -112,7 +114,7 @@ cp frontend/.env.example frontend/.env   # Supabase URL and anon key
 | Variable | Where | Purpose |
 |---|---|---|
 | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | backend | Token verification and rate-limit counters (service role; server only) |
-| `SUPABASE_ANON_KEY` | backend | Queries run as the signed-in user so Row Level Security applies |
+| `SUPABASE_ANON_KEY` | backend | Queries run as the signed-in user so Row Level Security applies; the calendar feed is looked up with it |
 | `ANTHROPIC_API_KEY` | backend | Claude API |
 | `ANTHROPIC_MODEL` | backend | Optional model override |
 | `ALLOWED_ORIGINS` | backend | Comma-separated CORS allowlist |
@@ -173,6 +175,10 @@ curl -N -X POST http://localhost:3001/api/chat/stream \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"message": "What should I work on first this week?"}'
 
+# Create a calendar subscription link (returns the token once), then fetch the feed
+curl -X POST http://localhost:3001/api/calendar/feed -H "Authorization: Bearer $TOKEN"
+curl http://localhost:3001/api/calendar/<token>.ics
+
 # Extract exams from a PDF timetable
 curl -X POST http://localhost:3001/api/upload/parse \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
@@ -212,6 +218,7 @@ trackit/
 ├── supabase_schema.sql       # Tables, RLS policies, triggers
 ├── supabase_migrations.sql   # Later additions (subtasks, chat history, schedule)
 ├── supabase_migrations_002.sql # Rate-limit counters and RLS fixes (v1.2.0)
+├── supabase_migrations_003.sql # Calendar feed tokens (each migration has a _rollback.sql)
 └── docker-compose.yml
 ```
 
