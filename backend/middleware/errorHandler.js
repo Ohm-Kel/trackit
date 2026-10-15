@@ -11,8 +11,7 @@ function notFound(req, res) {
  * everything else is logged and returned as a generic 500 so internal details
  * (database messages, stack traces) never reach the client.
  */
-// Express identifies error handlers by their four-argument signature.
-// eslint-disable-next-line no-unused-vars
+// Express identifies error handlers by their four-argument signature, so `_next` stays.
 function errorHandler(err, req, res, _next) {
   if (err instanceof HttpError) {
     return res.status(err.status).json({ error: err.message });
