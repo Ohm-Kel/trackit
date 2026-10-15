@@ -62,7 +62,7 @@ CREATE TABLE public.tasks (
 
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can fully manage their own tasks"
-  ON public.tasks ALL USING (auth.uid() = user_id);
+  ON public.tasks FOR ALL USING (auth.uid() = user_id);
 
 -- 3. Create the exams table
 CREATE TABLE public.exams (
@@ -82,7 +82,7 @@ CREATE TABLE public.exams (
 
 ALTER TABLE public.exams ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can fully manage their own exams"
-  ON public.exams ALL USING (auth.uid() = user_id);
+  ON public.exams FOR ALL USING (auth.uid() = user_id);
 
 -- 4. Create the subtasks table
 CREATE TABLE public.subtasks (
@@ -106,7 +106,7 @@ CREATE TABLE public.subtasks (
 
 ALTER TABLE public.subtasks ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can fully manage their own subtasks"
-  ON public.subtasks ALL USING (auth.uid() = user_id);
+  ON public.subtasks FOR ALL USING (auth.uid() = user_id);
 
 -- 5. Create the chat_history table
 CREATE TABLE public.chat_history (
@@ -119,7 +119,7 @@ CREATE TABLE public.chat_history (
 
 ALTER TABLE public.chat_history ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can fully manage their own chat history"
-  ON public.chat_history ALL USING (auth.uid() = user_id);
+  ON public.chat_history FOR ALL USING (auth.uid() = user_id);
 
 -- Functions to automatically update the 'updated_at' timestamp
 CREATE OR REPLACE FUNCTION public.set_current_timestamp_updated_at()
