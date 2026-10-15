@@ -18,6 +18,11 @@ Each run writes a JSON report and a Markdown summary to `eval/results/`
 seed, git commit, token usage, per-case scores, and every field-level error,
 so any run can be reproduced and compared. A full run is 20 API calls.
 
+To run it on GitHub instead, add the repository secret `ANTHROPIC_API_KEY`
+and start the **Evaluate timetable parser** workflow from the Actions tab.
+The summary appears on the run page and the full report is attached as an
+artifact.
+
 The oracle mode feeds the ground truth back in as predictions. CI runs it on
 every push to prove the dataset, loader and scorer are consistent.
 
