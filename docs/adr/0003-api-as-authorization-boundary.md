@@ -24,7 +24,9 @@ Treat the API as the authorisation boundary for everything it does:
 - Request bodies are validated with Zod, which strips unknown fields, so a
   client cannot set `user_id` or other protected columns.
 - Integration tests use a Supabase fake that records each query and assert
-  the `user_id` filter is present.
+  the `user_id` filter is present. `backend/tests/db` also runs
+  every endpoint against a real Supabase stack and checks that one user cannot
+  reach another's rows ([ADR 0006](0006-real-database-integration-tests.md)).
 
 ## Consequences
 
