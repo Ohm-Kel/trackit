@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org).
 
+## [Unreleased]
+
+### Added
+
+- Real-database integration tests (`backend/tests/db`, `npm run test:db`): the API runs against Postgres, PostgREST and GoTrue from the Supabase CLI, with the repository's SQL files as migrations, real users and real JWTs. They cover every route's database path, the `completed_at` trigger, shared rate-limit counters across two app instances, and cross-user isolation through every endpoint and through PostgREST directly
+- `scripts/db/integration.sh` to run them locally in one command, and a CI job that runs it
+- ADR 0006 on running the API's tests against a real Supabase stack
+
+### Fixed
+
+- A malformed id in `/tasks/:id`, `/exams/:id`, `/subtasks/:id` or `/notifications/:id/read` returned 500; it now returns 404
+- Chat history could show a reply above the question it answered, because both turns are saved with the same `created_at`
+
 ## [1.2.0] - 2026-10-15
 
 ### Added
@@ -108,6 +121,7 @@ See `docs/DEPLOYMENT.md` for the full checklist.
 
 - Initial release: tasks, exams, subtasks, AI chat, timetable upload, focus plan, analytics, notifications, export, dark mode and onboarding
 
+[Unreleased]: https://github.com/Ohm-Kel/trackit/compare/v1.2.0...HEAD
 [1.2.0]: https://github.com/Ohm-Kel/trackit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Ohm-Kel/trackit/compare/5b4e017...v1.1.0
 [1.0.0]: https://github.com/Ohm-Kel/trackit/tree/5b4e017
