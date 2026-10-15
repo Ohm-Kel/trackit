@@ -35,6 +35,8 @@ jobs:
         run: npm run test:coverage -- --coverageReporters=text --coverageReporters=json-summary
         env:
           NODE_ENV: test
+      - name: Evaluation harness self-check (oracle, no API calls)
+        run: npm run eval -- --oracle
       - name: Publish coverage summary
         if: always()
         run: |
