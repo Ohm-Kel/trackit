@@ -52,6 +52,14 @@ confusing or below an accessibility bar, and **P3** is polish.
 | 15 | P2 | `/login`, `/signup` | all | dark | The logo sits in a white box, and the "Or continue with" rules are bright `#F1F5F9` lines. | Fixed |
 | 16 | P2 | `/chat` | 768 | both | The context panel takes 256px of a 548px column, so the conversation and input are about 200px wide and wrap every few words. | Fixed: panel from 1024px |
 | 17 | P2 | all signed-in routes | all | both | Toasts aren't announced to screen readers (no live region), and the close button has no accessible name. | Fixed |
+| 27 | P1 | `/tasks` | 375 | both | The phone row picked its due colour by searching the badge classes for hex fragments the token classes no longer contain, so "Overdue" was never red. | Fixed: `getDueUrgency()` drives every due colour |
+| 28 | P2 | `/tasks` | 375 | both | A task without a course code shows a leading "·" before its due date. | Fixed |
+| 29 | P2 | `/` | all | both | Every Priority Queue row has a red dot, even when due in ten days. | Fixed: the dot matches the due badge |
+| 30 | P2 | all signed-in routes | all | both | The sidebar says "Pro Edition", but there is no paid tier. | Fixed: removed |
+| 31 | P2 | all signed-in routes | all | both | The sidebar footer says "Set up profile" whenever the course is empty, even for a named profile. | Fixed |
+| 32 | P2 | `/settings` | all | both | The footer reads "Trackit v0.1.0 — BETA · Data Structures Student Edition". | Fixed: the version from package.json, injected at build |
+| 33 | P2 | `/analytics` | all | dark | Velocity bars are nearly invisible on the dark card, counts appear only on hover, and the chart has no text alternative. | Fixed |
+| 34 | P2 | `/exams` | all | both | The preparation track is invisible at 0%, and "0% prepared … Exam day" reads oddly. | Fixed |
 | 18 | P3 | `/add` | 375 | both | The "or fill in manually" rules are fixed 42% widths that run through the label. | Fixed |
 | 19 | P3 | `/analytics` | all | both | The header is 28px extra-bold with hard-coded colours and its own padding; every other page uses 20 to 22px bold with the page padding. | Fixed |
 | 20 | P3 | `/tasks`, `/exams` | 375 | both | The icon-only Export and Add buttons in the header are 32px tall. | Not fixed |
@@ -60,7 +68,13 @@ confusing or below an accessibility bar, and **P3** is polish.
 | 23 | P3 | `/` | 375 | both | The stat card labels are 10px. | Not fixed |
 | 24 | P3 | `/add` | 375 | both | The Assignment/Exam switch stacks vertically on phones and reads as two list items, not a switch. | Not fixed |
 | 25 | P3 | all signed-in routes | all | light | The logo PNG's background is slightly off-white, so a faint grey square shows in the sidebar. | Not fixed |
-| 26 | P3 | `/analytics` | all | both | "Advanced Analytics", "Mastery Velocity" and "Pro Edition" are marketing copy rather than plain labels. | Not fixed |
+| 26 | P3 | `/analytics` | all | both | "Advanced Analytics" and "Mastery Velocity" are marketing copy rather than plain labels. | Not fixed |
+| 35 | P3 | all signed-in routes | 375 vs 768+ | both | The mobile header uses a grid-icon mark while the sidebar uses the raster logo, so branding differs by width. | Not fixed: needs a design decision |
+
+Items 27 to 35 came from a second screenshot pass by the coordinating
+session (1280px and Pixel 7, light and dark), each verified in the code. It
+also asked whether "Ask AI for Better Plan" on `/focus` was a dead control:
+it isn't, it opens the chat.
 
 ## What changed
 
@@ -87,7 +101,7 @@ confusing or below an accessibility bar, and **P3** is polish.
 
 ## Not fixed
 
-Items 20 to 26 are cosmetic or need a design decision. Items 20 and 21 are
+Items 20 to 26 and 35 are cosmetic or need a design decision. Items 20 and 21 are
 left for now because parallel work (the PWA and calendar tracks) is editing
 the Tasks and Exams headers and actions, and changing them here would
 conflict. They are good candidates for a follow-up once those tracks merge.

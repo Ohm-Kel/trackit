@@ -16,6 +16,9 @@ All notable changes to this project are documented here. The format follows
   - Analytics shows an error with a retry when it can't load, instead of reporting low burnout risk, and its "View Focus Plan" button works
   - A visible keyboard focus ring on every control, and 44px tap targets for the mobile menu, task rows and toast close buttons
   - The logo and auth-page dividers are readable in dark mode
+  - Due dates are coloured by urgency on phone task rows and the dashboard queue, which no longer marks every task with a red dot
+  - The sidebar drops the "Pro Edition" badge and asks to set up the profile only when it has no name or course; Settings shows the real version
+  - The Analytics velocity chart shows each week's count and has a text alternative, and the exam preparation track is visible at 0%
 
 ### Added
 
