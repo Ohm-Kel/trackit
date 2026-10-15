@@ -73,7 +73,7 @@ Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 | Backend | Node.js 22, Express 5, Zod 4, pino, helmet, express-rate-limit |
 | AI | Anthropic SDK (Claude Haiku 4.5 by default), vision and PDF input, forced tool use |
 | Data and auth | Supabase Postgres with Row Level Security, Supabase Auth and Realtime |
-| Quality | Jest and Supertest (102 tests, 95% line coverage), ESLint, Prettier, pre-commit, GitHub Actions |
+| Quality | Jest and Supertest (115 backend tests, 95% line coverage), Vitest and React Testing Library (30 frontend tests), SQL RLS checks, ESLint, Prettier, pre-commit, GitHub Actions |
 | Delivery | Vercel (frontend and serverless API), Docker and Docker Compose |
 
 ## Getting started

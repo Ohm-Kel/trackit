@@ -4,6 +4,35 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org).
 
+## [1.2.0] - 2026-10-15
+
+### Added
+
+- Streamed chat replies: `POST /api/chat/stream` sends the reply as server-sent events, and the chat page shows it as it is generated
+- Frontend test suite with Vitest and React Testing Library (30 tests), run in CI with a coverage summary
+- Database CI job: applies the schema and migrations to Postgres 16 and runs Row Level Security checks
+- `supabase_migrations_002.sql`
+
+### Changed
+
+- AI rate-limit counters are shared across serverless instances in Postgres, falling back to memory if the database is unavailable (`RATE_LIMIT_STORE`)
+- API queries run as the signed-in user, so Row Level Security applies on top of the `user_id` filters (`SUPABASE_ANON_KEY`)
+- The onboarding tour starts the first time the user reaches the dashboard, not only when the app opens there
+
+### Fixed
+
+- `supabase_schema.sql` failed on a fresh database (`ON table ALL` instead of `FOR ALL`)
+
+### Security
+
+- Subtasks can no longer reference another user's task or exam, even through direct Supabase access
+- Rate-limit counters are readable and writable by the service role only
+
+### Upgrade notes
+
+- Run `supabase_migrations_002.sql` in the Supabase SQL editor
+- Add `SUPABASE_ANON_KEY` to the API's environment (on Vercel, Project settings → Environment Variables). Until it is set, the API keeps using the service role and logs a warning
+
 ## [1.1.0] - 2026-10-15
 
 ### Added
@@ -46,5 +75,6 @@ All notable changes to this project are documented here. The format follows
 
 - Initial release: tasks, exams, subtasks, AI chat, timetable upload, focus plan, analytics, notifications, export, dark mode and onboarding
 
+[1.2.0]: https://github.com/Ohm-Kel/trackit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Ohm-Kel/trackit/compare/5b4e017...v1.1.0
 [1.0.0]: https://github.com/Ohm-Kel/trackit/tree/5b4e017
