@@ -9,7 +9,9 @@ psql_run() { psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q "$@"; }
 psql_run -f scripts/db/supabase-stub.sql
 psql_run -f supabase_schema.sql
 psql_run -f supabase_migrations.sql
+psql_run -f scripts/db/backfill-seed.sql
 psql_run -f supabase_migrations_002.sql
+psql_run -f scripts/db/backfill-check.sql
 psql_run -f supabase_migrations_002.sql
 psql_run -f supabase_migrations_002_rollback.sql
 psql_run -f supabase_migrations_002_rollback.sql

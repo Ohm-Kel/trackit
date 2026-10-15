@@ -49,20 +49,4 @@ const apiLimiter = rateLimit({
   message: { error: 'Too many requests. Please slow down.' },
 });
 
-/**
- * Per-IP limit on failed authentication only. Every request with a token
- * costs a call to Supabase Auth, so this stops token guessing and floods of
- * bad tokens. Successful requests are not counted, so students sharing a
- * campus IP are unaffected.
- */
-const authFailureLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: config.rateLimit.authFailuresPerIp,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-  skipSuccessfulRequests: true,
-  requestWasSuccessful: (req, res) => res.statusCode !== 401,
-  message: { error: 'Too many failed sign-in attempts. Please try again later.' },
-});
-
-module.exports = { aiRateLimit, chatLimiter, uploadLimiter, apiLimiter, authFailureLimiter };
+module.exports = { aiRateLimit, chatLimiter, uploadLimiter, apiLimiter };

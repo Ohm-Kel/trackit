@@ -1,6 +1,7 @@
 const supabase = require('../supabaseClient');
 const { createUserClient } = require('../supabaseUserClient');
 const logger = require('../lib/logger');
+const { recordFailure } = require('../lib/authFailures');
 
 /**
  * Verify the Supabase access token in the `Authorization: Bearer <token>`
@@ -25,6 +26,7 @@ async function authMiddleware(req, res, next) {
     } = await supabase.auth.getUser(token);
 
     if (error || !user) {
+      recordFailure(req.ip);
       logger.info({ reason: error?.message }, 'Rejected invalid or expired token');
       return res.status(401).json({ error: 'Invalid or expired token' });
     }

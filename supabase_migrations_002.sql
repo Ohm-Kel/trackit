@@ -80,9 +80,13 @@ CREATE POLICY "Subtask parent must belong to the user" ON public.subtasks
 -- but the column did not exist, so the endpoint always failed.
 ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
 
--- Best available estimate for tasks already done.
+-- Best available estimate for tasks already done. The updated_at trigger
+-- is paused so the backfill does not overwrite every done task's last-edit
+-- time with the migration time.
+ALTER TABLE public.tasks DISABLE TRIGGER set_tasks_updated_at;
 UPDATE public.tasks SET completed_at = updated_at
 WHERE status = 'done' AND completed_at IS NULL;
+ALTER TABLE public.tasks ENABLE TRIGGER set_tasks_updated_at;
 
 -- Stamp the time a task becomes done; clear it if the task is reopened.
 CREATE OR REPLACE FUNCTION public.set_task_completed_at()

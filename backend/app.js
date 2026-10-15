@@ -6,7 +6,7 @@ const helmet = require('helmet');
 const config = require('./config');
 const logger = require('./lib/logger');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
-const { authFailureLimiter } = require('./middleware/rateLimit');
+const { rejectBlockedIps } = require('./lib/authFailures');
 
 const taskRoutes = require('./routes/tasks');
 const examRoutes = require('./routes/exams');
@@ -62,6 +62,8 @@ function createApp() {
 
   app.use(helmet());
   app.use(cors({ origin: corsOrigin, credentials: true }));
+  // Before the body parser, so a blocked IP's request body is never read.
+  app.use(rejectBlockedIps);
   // Uploads arrive as base64 JSON; keep the limit just above the upload cap.
   app.use(express.json({ limit: '10mb' }));
 
@@ -91,8 +93,6 @@ function createApp() {
     });
     next();
   });
-
-  app.use(authFailureLimiter);
 
   const api = buildApiRouter();
   app.use('/api', api);
