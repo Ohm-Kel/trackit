@@ -254,7 +254,7 @@ export default function Add() {
                     </div>
                   )}
 
-                  <div className="text-center text-[11.5px] text-text-3 my-3 mb-4.5 relative before:content-[''] before:absolute before:top-1/2 before:w-[42%] before:h-px before:bg-border before:left-0 after:content-[''] after:absolute after:top-1/2 after:w-[42%] after:h-px after:bg-border after:right-0">
+                  <div className="flex items-center gap-3 text-[11.5px] text-text-3 my-3 mb-4.5 before:content-[''] before:flex-1 before:h-px before:bg-border after:content-[''] after:flex-1 after:h-px after:bg-border">
                     or fill in manually
                   </div>
                 </>

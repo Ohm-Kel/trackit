@@ -94,6 +94,7 @@
 [data-theme="dark"] .bg-\[\#FAFBFC\],
 [data-theme="dark"] .bg-\[\#F1F5F9\],
 [data-theme="dark"] .bg-\[\#E2E8F0\] { background-color: #1A1E2E !important; }
+[data-theme="dark"] .border-\[\#F1F5F9\] { border-color: var(--color-border2) !important; }
 [data-theme="dark"] .border-red-100,
 [data-theme="dark"] .border-red-200,
 [data-theme="dark"] .border-\[\#FCA5A5\],
@@ -131,6 +132,14 @@
 [data-theme="dark"] .text-blue-600 { color: #93C5FD !important; }
 [data-theme="dark"] .text-primary,
 [data-theme="dark"] .text-\[\#4F46E5\] { color: var(--color-primary-mid) !important; }
+
+/* The logo is dark artwork on white, blended away with mix-blend-multiply,
+   which on a dark surface leaves it nearly black on black. Invert it (the
+   hue rotation keeps the gold) and screen the now-black background away. */
+[data-theme="dark"] img.mix-blend-multiply {
+  filter: invert(1) hue-rotate(180deg);
+  mix-blend-mode: screen;
+}
 
 /* Primary banner dark mode adjustments */
 [data-theme="dark"] .bg-primary {
@@ -243,7 +252,9 @@ main { overflow-wrap: anywhere; }
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.2s ease forwards;
+    /* backwards, not forwards: a fill that outlives the animation keeps a
+       stacking context, which stops the dark-mode logo blending. */
+    animation: fadeIn 0.2s ease backwards;
   }
   .animate-scale-in {
     animation: scaleIn 0.25s ease forwards;
