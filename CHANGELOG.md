@@ -10,6 +10,7 @@ All notable changes to this project are documented here. The format follows
 
 - Real-database integration tests (`backend/tests/db`, `npm run test:db`): the API runs against Postgres, PostgREST and GoTrue from the Supabase CLI, with the repository's SQL files as migrations, real users and real JWTs. They cover every route's database path, the `completed_at` trigger, shared rate-limit counters across two app instances, and cross-user isolation through every endpoint and through PostgREST directly
 - `scripts/db/integration.sh` to run them locally in one command, and a CI job that runs it
+- `scripts/db/sync-migrations.sh`: links every `supabase_migrations_NNN.sql` into the local stack in order, and fails CI when a link is missing
 - ADR 0008 on running the API's tests against a real Supabase stack
 
 ### Fixed

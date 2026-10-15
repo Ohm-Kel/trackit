@@ -56,7 +56,7 @@ SQL files, and `npx supabase stop` when done. See
 - Validate every request body with a Zod schema exported from its controller; the OpenAPI document is generated from these schemas.
 - Query the database through `req.db`, which acts as the signed-in user so Row Level Security applies, and still filter every query by `req.user.id` (see [ADR 0003](docs/adr/0003-api-as-authorization-boundary.md)). Add a test that asserts the filter. Never import the service-role client into a controller.
 - A new table or a new kind of write needs an RLS policy, and a check in `scripts/db/rls-test.sql`.
-- A new route or query needs a test in `backend/tests/db` that runs it against the real stack, including a check that another user cannot reach the rows. A new migration file also needs a symlink in `supabase/migrations`.
+- A new route or query needs a test in `backend/tests/db` that runs it against the real stack, including a check that another user cannot reach the rows. Name a new migration `supabase_migrations_NNN.sql`; `scripts/db/integration.sh` links it into `supabase/migrations` (or run `scripts/db/sync-migrations.sh`), and CI fails until the link is committed.
 - Throw `HttpError` for client-facing errors. Let anything else reach the central error handler, which logs it and returns a generic message.
 - Log with the shared pino logger, never `console`.
 - Runtime dependencies added to `backend/package.json` must also be added to the root `package.json`, which Vercel uses for the API function. `npm run check:deps` enforces this.

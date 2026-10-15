@@ -25,8 +25,9 @@ Migration 002 adds the shared rate-limit counters, `tasks.completed_at`, and
 two Row Level Security policies. Every migration is tested in CI against
 Postgres 16 (`scripts/db/test.sh`), including its rollback, and the API's
 database tests run against the migrations on a local Supabase stack
-(`scripts/db/integration.sh`). A new migration file needs a matching symlink
-in `supabase/migrations`.
+(`scripts/db/integration.sh`). That script links every
+`supabase_migrations_NNN.sql` into `supabase/migrations` in order, and CI
+checks the committed links.
 
 ## 2. Supabase Auth settings
 

@@ -27,9 +27,12 @@ app (`createApp()`) against a local Supabase stack:
   are started; Studio, Realtime, Storage, the edge runtime, analytics and the
   mail server are turned off.
 - **The migrations are the files production uses.** `supabase/migrations`
-  holds symlinks to `supabase_schema.sql`, `supabase_migrations.sql` and
-  `supabase_migrations_002.sql`, in the order `docs/DEPLOYMENT.md` gives, so
-  there is no second copy to drift.
+  holds symlinks to `supabase_schema.sql`, `supabase_migrations.sql` and every
+  `supabase_migrations_NNN.sql` (rollbacks excluded), in the order
+  `docs/DEPLOYMENT.md` gives, so there is no second copy to drift.
+  `scripts/db/sync-migrations.sh` creates the links, `integration.sh` runs it
+  first (resetting the database when the set changed), and CI runs it with
+  `--check` so a new migration without a committed link fails.
 - **Real users and tokens.** Each test file creates confirmed users with the
   GoTrue admin API, signs them in with a password to get access tokens, and
   calls the API with them through supertest. `SUPABASE_URL`,
@@ -74,5 +77,7 @@ app (`createApp()`) against a local Supabase stack:
   editing the SQL files, and `supabase stop` shuts it down.
 - `supabase/config.toml` pins Postgres 17. It should match the hosted
   project's major version (`SHOW server_version;`).
+- The demo keys of the local stack are never committed; the scripts read them
+  from `supabase status` at run time.
 - Symlinked migrations need a checkout that keeps symlinks (the default on
   Linux and macOS; on Windows, enable `core.symlinks`).

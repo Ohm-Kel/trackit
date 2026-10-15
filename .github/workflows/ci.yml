@@ -123,6 +123,8 @@ jobs:
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
+      - name: Every root migration is linked into supabase/migrations
+        run: scripts/db/sync-migrations.sh --check
       - name: Apply schema and migrations, then run RLS checks
         run: scripts/db/test.sh
         env:

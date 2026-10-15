@@ -17,10 +17,15 @@ fi
 # Only what the API uses; the rest of the local stack is not started.
 EXCLUDE=vector,logflare,imgproxy,postgres-meta,supavisor,mailpit,studio,realtime,storage-api,edge-runtime
 
+# Pick up every root migration file (supabase_migrations_NNN.sql) in order.
+linked=$(scripts/db/sync-migrations.sh)
+[ -n "$linked" ] && echo "$linked"
+
 if ! supabase status >/dev/null 2>&1; then
   supabase start -x "$EXCLUDE"
-elif [ "${RESET_DB:-0}" = 1 ]; then
-  # Re-apply the migrations to an empty database after editing the SQL files.
+elif [ -n "$linked" ] || [ "${RESET_DB:-0}" = 1 ]; then
+  # Re-apply the migrations to an empty database when the set changed, or
+  # after editing the SQL files.
   supabase db reset
 fi
 
