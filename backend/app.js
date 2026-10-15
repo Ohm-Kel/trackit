@@ -66,7 +66,12 @@ function createApp() {
     res.on('finish', () => {
       const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
       logger.info(
-        { method: req.method, path: req.path, status: res.statusCode, durationMs },
+        {
+          method: req.method,
+          path: req.originalUrl.split('?')[0],
+          status: res.statusCode,
+          durationMs,
+        },
         'request completed',
       );
     });
