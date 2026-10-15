@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { onlineManager } from '@tanstack/react-query';
 import { supabase, signInAs, resetSupabase } from '../test/fakeSupabase';
 
 vi.mock('../lib/supabaseClient', () => import('../test/fakeSupabase'));
@@ -40,5 +41,26 @@ describe('apiJson', () => {
     const error = await apiJson('/users/profile', { fallbackError: 'Failed to load profile' }).catch((e) => e);
     expect(error.message).toBe('Failed to load profile (404)');
     expect(error.details).toMatch(/non-JSON/);
+  });
+});
+
+describe('apiRequest offline', () => {
+  afterEach(() => onlineManager.setOnline(true));
+
+  it('refuses writes while offline without calling the API', async () => {
+    signInAs();
+    vi.stubGlobal('fetch', vi.fn());
+    onlineManager.setOnline(false);
+    await expect(apiJson('/tasks', { method: 'POST', body: { title: 'x' } })).rejects.toMatchObject({
+      message: expect.stringMatching(/offline/),
+      offline: true,
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('still lets reads through, for the browser to answer or fail', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json([])));
+    onlineManager.setOnline(false);
+    await expect(apiJson('/tasks')).resolves.toEqual([]);
   });
 });

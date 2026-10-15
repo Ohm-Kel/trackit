@@ -1,3 +1,4 @@
+import { onlineManager } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
 import { API_URL } from './baseUrl';
 
@@ -19,6 +20,12 @@ export async function authHeaders() {
  * @returns {Promise<Response>}
  */
 export async function apiRequest(path, { method = 'GET', body, headers = {}, signal, fallbackError } = {}) {
+  // Controls that write are disabled offline; this catches any that are not.
+  if (method !== 'GET' && !onlineManager.isOnline()) {
+    const error = new Error("You're offline. Reconnect to save changes.");
+    error.offline = true;
+    throw error;
+  }
   const res = await fetch(`${API_URL}${path}`, {
     method,
     headers: {

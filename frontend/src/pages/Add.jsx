@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, Check } from 'lucide-react';
 import { useCreateTask, useUpdateTask, useTasks } from '../hooks/useTasks';
 import { useCreateExam, useUpdateExam, useExams } from '../hooks/useExams';
+import { useOnline } from '../hooks/useOnline';
+import OfflineNotice from '../pwa/OfflineNotice';
 
 export default function Add() {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ export default function Add() {
   const isEditMode = !!(editTaskId || editExamId);
 
   const initialTab = editExamId ? 'exam' : searchParams.get('tab') === 'exam' ? 'exam' : 'task';
+  const online = useOnline();
   const [activeTab, setActiveTab] = useState(initialTab);
   const [confidence, setConfidence] = useState('medium');
   const [topics, setTopics] = useState([]);
@@ -428,10 +431,12 @@ export default function Add() {
         )}
 
         {/* Action Buttons */}
+        <OfflineNotice id="add-offline" className="mt-5" />
         <div className="flex flex-col sm:flex-row gap-2.5 mt-5.5 pt-5 border-t border-border">
           <button
             onClick={activeTab === 'task' ? handleSaveTask : handleSaveExam}
-            disabled={isLoading}
+            disabled={isLoading || !online}
+            aria-describedby={online ? undefined : 'add-offline'}
             className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-rs text-[13px] font-semibold shadow-xs border-none cursor-pointer transition-colors w-full sm:w-auto disabled:opacity-60"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}

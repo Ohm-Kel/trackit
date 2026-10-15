@@ -8,6 +8,8 @@ import { useProfile, useUpdateProfile } from '../hooks/useProfile';
 import { requestNotificationPermission } from '../components/NotificationManager';
 import { useToast } from '../components/Toast';
 import { exportTasksCSV, exportExamsCSV } from '../utils/export';
+import { useOnline } from '../hooks/useOnline';
+import OfflineNotice from '../pwa/OfflineNotice';
 
 const PROFILE_KEY = 'trackit_profile';
 const NOTIF_KEY = 'trackit_notif';
@@ -51,6 +53,7 @@ function Toggle({ label, description, checked, onChange }) {
 export default function Settings() {
   const { theme, setTheme, accent, setAccent, ACCENTS } = useTheme();
   const { user } = useAuth();
+  const online = useOnline();
   const { data: allTasks = [] } = useTasks();
   const { data: allExams = [] } = useExams();
   const [showExport, setShowExport] = useState(false);
@@ -253,12 +256,14 @@ export default function Settings() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleSaveProfile}
-                    disabled={updateProfileMutation.isPending}
+                    disabled={updateProfileMutation.isPending || !online}
+                    aria-describedby={online ? undefined : 'settings-offline'}
                     className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-rs text-[13px] font-semibold border-none cursor-pointer shadow-xs transition-colors disabled:opacity-60"
                   >
                     {updateProfileMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Save Profile
                   </button>
+                  <OfflineNotice id="settings-offline" />
                   {saved && (
                     <div className="flex items-center gap-1.5 text-[13px] text-[#15803D] font-semibold animate-[fadeIn_0.2s_ease]">
                       <Check className="w-4 h-4" /> Saved!

@@ -28,7 +28,7 @@ export function renderApp(path, { signedIn = true, setup, tour = false } = {}) {
 
   window.history.pushState({}, '', path);
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false, networkMode: 'always' } },
   });
   const utils = render(
     <AppProviders queryClient={queryClient}>

@@ -7,6 +7,7 @@ import { exportTasksCSV, exportTasksPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
 import { TasksSkeleton } from '../components/Skeleton';
 import { useToast } from '../components/Toast';
+import { useOnline } from '../hooks/useOnline';
 
 function getStatusClass(status) {
   if (status === 'in_progress') return 'bg-primary-light text-primary';
@@ -21,6 +22,7 @@ export default function Tasks() {
   const { data: tasks = [], isLoading } = useTasks();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const online = useOnline();
 
   const [expandedRow, setExpandedRow] = useState(null);
   const [search, setSearch] = useState('');
@@ -63,6 +65,7 @@ export default function Tasks() {
   const done = useMemo(() => filtered.filter(t => t.status === 'done'), [filtered]);
 
   function toggleComplete(task) {
+    if (!online) return;
     const isDone = task.status === 'done';
     updateTask.mutate(
       { id: task.id, updates: { status: isDone ? 'not_started' : 'done' } },
@@ -72,7 +75,7 @@ export default function Tasks() {
 
   function handleDelete(e, taskId) {
     e.stopPropagation();
-    if (window.confirm('Delete this task?')) deleteTask.mutate(taskId, { onError: err => addToast(err.message, { type: 'error', title: "Couldn't delete the task" }) });
+    if (online && window.confirm('Delete this task?')) deleteTask.mutate(taskId, { onError: err => addToast(err.message, { type: 'error', title: "Couldn't delete the task" }) });
   }
 
   const totalCount = tasks.length;
@@ -200,10 +203,11 @@ export default function Tasks() {
                     className={`grid grid-cols-[32px_1fr_36px] md:grid-cols-[32px_1fr_100px_80px_90px_90px_60px] py-3 px-3 md:px-4 border-b border-border items-center gap-2 cursor-pointer transition-colors ${expandedRow === task.id ? 'bg-primary-faint' : 'hover:bg-bg'}`}
                   >
                     <button
+                      disabled={!online}
                       type="button"
                       aria-label={isDone ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
                       onClick={e => { e.stopPropagation(); toggleComplete(task); }}
-                      className={`w-[17px] h-[17px] p-0 rounded-full border-[1.5px] shrink-0 mt-[2px] flex items-center justify-center transition-colors cursor-pointer ${isDone ? 'border-primary bg-primary' : 'border-border2 bg-white hover:border-primary hover:bg-primary-light'}`}
+                      className={`disabled:opacity-50 disabled:cursor-not-allowed w-[17px] h-[17px] p-0 rounded-full border-[1.5px] shrink-0 mt-[2px] flex items-center justify-center transition-colors cursor-pointer ${isDone ? 'border-primary bg-primary' : 'border-border2 bg-white hover:border-primary hover:bg-primary-light'}`}
                     >
                       {isDone && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
                     </button>
@@ -232,7 +236,8 @@ export default function Tasks() {
                         <Edit2 className="w-[13px] h-[13px]" />
                       </button>
                       <button
-                        className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#B91C1C]"
+                        disabled={!online}
+                        className="disabled:opacity-50 disabled:cursor-not-allowed w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#B91C1C]"
                         onClick={e => handleDelete(e, task.id)}
                         title="Delete"
                       >
@@ -281,7 +286,7 @@ export default function Tasks() {
                       )}
                       <div className="flex gap-2">
                         <button onClick={() => navigate(`/add?edit=${task.id}`)} className="flex-1 bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Edit</button>
-                        <button onClick={e => handleDelete(e, task.id)} className="flex-1 bg-white text-[#B91C1C] border border-[#FCA5A5] px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all">Delete</button>
+                        <button disabled={!online} onClick={e => handleDelete(e, task.id)} className="disabled:opacity-50 disabled:cursor-not-allowed flex-1 bg-white text-[#B91C1C] border border-[#FCA5A5] px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all">Delete</button>
                       </div>
                       <SubtaskList parentId={task.id} parentType="task" />
                     </div>
@@ -303,10 +308,11 @@ export default function Tasks() {
                     onClick={() => toggleComplete(task)}
                   >
                     <button
+                      disabled={!online}
                       type="button"
                       aria-label={`Mark "${task.title}" as not done`}
                       onClick={e => { e.stopPropagation(); toggleComplete(task); }}
-                      className="w-[17px] h-[17px] p-0 rounded-full border-[1.5px] border-primary bg-primary shrink-0 mt-[2px] flex items-center justify-center cursor-pointer"
+                      className="disabled:opacity-50 disabled:cursor-not-allowed w-[17px] h-[17px] p-0 rounded-full border-[1.5px] border-primary bg-primary shrink-0 mt-[2px] flex items-center justify-center cursor-pointer"
                     >
                       <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                     </button>
@@ -325,7 +331,7 @@ export default function Tasks() {
                       <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F0FDF4] text-[#15803D] tracking-[0.01em]">Done</span>
                     </div>
                     <div className="hidden md:flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
-                      <button title="Delete" className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#B91C1C]" onClick={e => handleDelete(e, task.id)}><Trash2 className="w-[13px] h-[13px]" /></button>
+                      <button disabled={!online} title="Delete" className="disabled:opacity-50 disabled:cursor-not-allowed w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#B91C1C]" onClick={e => handleDelete(e, task.id)}><Trash2 className="w-[13px] h-[13px]" /></button>
                     </div>
                     <div className="md:hidden"></div>
                   </div>

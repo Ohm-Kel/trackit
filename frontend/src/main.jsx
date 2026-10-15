@@ -19,6 +19,9 @@ const queryClient = new QueryClient({
   defaultOptions: {
     // Keep unused queries long enough to be saved for offline use (ADR 0006).
     queries: { gcTime: MAX_AGE },
+    // Fail at once while offline, with a clear message (api/http.js), rather
+    // than queue the change silently until the connection returns.
+    mutations: { networkMode: 'always' },
   },
 })
 

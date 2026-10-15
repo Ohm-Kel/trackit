@@ -4,6 +4,7 @@ import { Menu, X } from 'lucide-react';
 import Sidebar from './Sidebar';
 import NotificationManager from '../NotificationManager';
 import OnboardingTour from '../OnboardingTour';
+import OfflineBanner from '../../pwa/OfflineBanner';
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,9 +34,12 @@ export default function Layout() {
         />
       )}
 
-      <main className="flex-1 overflow-y-auto custom-scrollbar pt-[60px] md:pt-0">
-        <Outlet />
-      </main>
+      <div className="flex-1 min-w-0 flex flex-col pt-[60px] md:pt-0">
+        <OfflineBanner />
+        <main className="flex-1 overflow-y-auto custom-scrollbar">
+          <Outlet />
+        </main>
+      </div>
 
       <NotificationManager />
       <OnboardingTour />
