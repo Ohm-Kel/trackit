@@ -24,6 +24,7 @@ const channel = { on: vi.fn(() => channel), subscribe: vi.fn(() => channel) };
 
 export const supabase = {
   auth: {
+    storageKey: 'sb-test-auth-token',
     getSession: vi.fn(async () => ({ data: { session } })),
     onAuthStateChange: vi.fn((listener) => {
       listeners.add(listener);

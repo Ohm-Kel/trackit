@@ -1,14 +1,28 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { onlineManager, useQueryClient } from '@tanstack/react-query';
+import { isAuthRetryableFetchError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { clearPersistedQueries } from '../lib/queryPersistence';
 
 const AuthContext = createContext({});
 
+/** The user of the session supabase-js has saved on this device, if any. */
+function savedSessionUser() {
+  try {
+    return JSON.parse(localStorage.getItem(supabase.auth.storageKey))?.user ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Offline, an expired access token cannot be refreshed: supabase-js keeps
+  // the session to refresh later, but retries for up to 30 seconds and then
+  // reports no session. Its user can still read their saved data (ADR 0006),
+  // so start with them rather than wait or sign them out.
+  const [user, setUser] = useState(() => (onlineManager.isOnline() ? null : savedSessionUser()));
   const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => user === null);
   const queryClient = useQueryClient();
 
   const syncUserProfile = async (sessionUser) => {
@@ -37,22 +51,24 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
       setSession(session);
-      const currentUser = session?.user ?? null;
+      const currentUser = session?.user ?? (isAuthRetryableFetchError(error) ? savedSessionUser() : null);
       setUser(currentUser);
-      if (currentUser) syncUserProfile(currentUser);
+      if (session) syncUserProfile(currentUser);
       setLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        // The initial session is handled above, including the offline case.
+        if (event === 'INITIAL_SESSION') return;
         setSession(session);
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         
-        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        if (event === 'SIGNED_IN') {
           if (currentUser) syncUserProfile(currentUser);
         }
         

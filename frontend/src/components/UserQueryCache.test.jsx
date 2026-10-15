@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { onlineManager } from '@tanstack/react-query';
+import { AuthRetryableFetchError } from '@supabase/supabase-js';
 import { renderApp } from '../test/renderApp';
 import { inDays, task } from '../test/fakeApi';
 import { signInAs, supabase, USER } from '../test/fakeSupabase';
@@ -67,6 +68,44 @@ describe('saved data', () => {
     goOffline();
     await user.click(screen.getByRole('button', { name: /Sign out/ }));
     await waitFor(async () => expect(await readUserCache(USER.id)).toBeUndefined());
+  });
+
+  it('is shown offline even after the access token has expired', async () => {
+    const first = renderApp('/tasks', { setup: seed });
+    await screen.findByText('Statistics assignment');
+    await waitForSavedTasks();
+    first.unmount();
+
+    // supabase-js keeps the saved session but cannot refresh its token offline.
+    onlineManager.setOnline(false);
+    renderApp('/tasks', {
+      signedIn: false,
+      setup: () => {
+        localStorage.setItem(supabase.auth.storageKey, JSON.stringify({ access_token: 'expired', user: USER }));
+        supabase.auth.getSession.mockResolvedValueOnce({
+          data: { session: null },
+          error: new AuthRetryableFetchError('Failed to fetch', 0),
+        });
+      },
+    });
+    expect(await screen.findByText('Statistics assignment')).toBeInTheDocument();
+  });
+
+  it('is shown offline without waiting for supabase-js to give up refreshing the token', async () => {
+    const first = renderApp('/tasks', { setup: seed });
+    await screen.findByText('Statistics assignment');
+    await waitForSavedTasks();
+    first.unmount();
+
+    onlineManager.setOnline(false);
+    renderApp('/tasks', {
+      signedIn: false,
+      setup: () => {
+        localStorage.setItem(supabase.auth.storageKey, JSON.stringify({ access_token: 'expired', user: USER }));
+        supabase.auth.getSession.mockReturnValueOnce(new Promise(() => {})); // still retrying
+      },
+    });
+    expect(await screen.findByText('Statistics assignment')).toBeInTheDocument();
   });
 
   it('is never restored for a different user', async () => {
