@@ -52,18 +52,18 @@ flowchart LR
     UI -- sign-in --> AUTH
     RT -- notifications --> UI
     API -- verify token --> AUTH
-    API -- queries scoped to user_id --> DB
+    API -- queries as the user, RLS applies --> DB
     API -- chat and forced tool use --> CLAUDE
 ```
 
 - The **frontend** signs in with Supabase Auth and calls the API with the user's access token. It reads notifications directly through Supabase Realtime, protected by Row Level Security.
-- The **API** verifies every token, validates every request with Zod, scopes every query to the signed-in user, and is the only component holding the Anthropic and Supabase service keys.
+- The **API** verifies every token, validates every request with Zod, and queries Supabase as the signed-in user, so Row Level Security applies on top of explicit `user_id` filters. It is the only component holding the Anthropic and Supabase service keys.
 - **AI calls** are rate-limited per user, with counters shared across serverless instances in Postgres. Chat history sent to the model is capped, and token usage is logged.
 
 Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 [structured output through tool use](docs/adr/0001-structured-output-via-tool-use.md),
 [rate limiting AI endpoints with shared counters](docs/adr/0002-rate-limit-ai-endpoints.md),
-[the API as the authorisation boundary](docs/adr/0003-api-as-authorization-boundary.md).
+[the API as the authorisation boundary, with RLS on API queries](docs/adr/0003-api-as-authorization-boundary.md).
 
 ## Tech stack
 
@@ -107,7 +107,8 @@ cp frontend/.env.example frontend/.env   # Supabase URL and anon key
 
 | Variable | Where | Purpose |
 |---|---|---|
-| `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | backend | Database access (service role; server only) |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | backend | Token verification and rate-limit counters (service role; server only) |
+| `SUPABASE_ANON_KEY` | backend | Queries run as the signed-in user so Row Level Security applies |
 | `ANTHROPIC_API_KEY` | backend | Claude API |
 | `ANTHROPIC_MODEL` | backend | Optional model override |
 | `ALLOWED_ORIGINS` | backend | Comma-separated CORS allowlist |
@@ -139,6 +140,9 @@ npm test                 # unit and integration tests
 npm run test:coverage    # with coverage (85% line gate)
 npm run lint && npm run format:check
 npm run eval -- --oracle # evaluation harness self-check (no API calls)
+
+# Schema, migrations and RLS policies, against an empty Postgres database
+DATABASE_URL=postgres://postgres@localhost:5432/postgres ../scripts/db/test.sh
 ```
 
 ## Usage examples
@@ -187,17 +191,16 @@ trackit/
 ├── frontend/
 │   └── src/                  # Pages, components, hooks, API client
 ├── docs/adr/                 # Architecture decision records
-├── scripts/                  # Repository checks
+├── scripts/                  # Repository checks; db/ holds the RLS test suite
 ├── supabase_schema.sql       # Tables, RLS policies, triggers
 ├── supabase_migrations.sql   # Later additions (subtasks, chat history, schedule)
-├── supabase_migrations_002.sql # Rate-limit counters (v1.2.0)
+├── supabase_migrations_002.sql # Rate-limit counters and RLS fixes (v1.2.0)
 └── docker-compose.yml
 ```
 
 ## Roadmap
 
 - Add anonymised real-world timetables (scans, photos, multi-page PDFs) as evaluation set v2
-- Forward the user's JWT to Supabase so Row Level Security also applies to API queries
 - Stream chat replies for faster perceived response time
 - Frontend component tests with Vitest and React Testing Library
 

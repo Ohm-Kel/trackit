@@ -1,5 +1,4 @@
 const { z } = require('zod');
-const supabase = require('../supabaseClient');
 const anthropic = require('../lib/anthropic');
 const config = require('../config');
 const logger = require('../lib/logger');
@@ -101,7 +100,7 @@ exports.importExams = async (req, res) => {
     topics: [],
   }));
 
-  const { data, error } = await supabase.from('exams').insert(rows).select();
+  const { data, error } = await req.db.from('exams').insert(rows).select();
   if (error) throw error;
   res.status(201).json({ imported: data.length, exams: data });
 };
@@ -113,7 +112,7 @@ exports.importExams = async (req, res) => {
 exports.saveSchedule = async (req, res) => {
   const { schedule } = validate(saveScheduleSchema, req.body);
 
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('users')
     .update({ weekly_schedule: schedule })
     .eq('id', req.user.id)

@@ -1,5 +1,4 @@
 const { z } = require('zod');
-const supabase = require('../supabaseClient');
 const anthropic = require('../lib/anthropic');
 const config = require('../config');
 const logger = require('../lib/logger');
@@ -32,12 +31,12 @@ exports.chat = async (req, res) => {
   const userId = req.user.id;
 
   const [tasksResult, examsResult] = await Promise.all([
-    supabase
+    req.db
       .from('tasks')
       .select('title, status, due_date, grade_weight, estimated_hours, course_code, description')
       .eq('user_id', userId)
       .order('due_date', { ascending: true }),
-    supabase
+    req.db
       .from('exams')
       .select('subject, exam_date, confidence_level, topics, course_code')
       .eq('user_id', userId)
@@ -82,7 +81,7 @@ exports.chat = async (req, res) => {
     'chat reply generated',
   );
 
-  const { error: saveError } = await supabase.from('chat_history').insert([
+  const { error: saveError } = await req.db.from('chat_history').insert([
     { user_id: userId, role: 'user', content: message },
     { user_id: userId, role: 'assistant', content: reply },
   ]);
@@ -94,7 +93,7 @@ exports.chat = async (req, res) => {
 
 /** GET /api/chat/history — the user's latest 100 messages, oldest first. */
 exports.getHistory = async (req, res) => {
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('chat_history')
     .select('role, content, created_at')
     .eq('user_id', req.user.id)
@@ -107,7 +106,7 @@ exports.getHistory = async (req, res) => {
 
 /** DELETE /api/chat/history */
 exports.clearHistory = async (req, res) => {
-  const { error } = await supabase.from('chat_history').delete().eq('user_id', req.user.id);
+  const { error } = await req.db.from('chat_history').delete().eq('user_id', req.user.id);
   if (error) throw error;
   res.json({ success: true });
 };

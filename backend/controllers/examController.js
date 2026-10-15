@@ -1,5 +1,4 @@
 const { z } = require('zod');
-const supabase = require('../supabaseClient');
 const { HttpError } = require('../lib/errors');
 const { validate, throwIfDbError } = require('../lib/validate');
 const { optionalDate } = require('../lib/schemas');
@@ -34,7 +33,7 @@ const NOT_FOUND = 'Exam not found';
 
 /** GET /api/exams */
 exports.getExams = async (req, res) => {
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('exams')
     .select('*')
     .eq('user_id', req.user.id)
@@ -46,7 +45,7 @@ exports.getExams = async (req, res) => {
 
 /** GET /api/exams/:id */
 exports.getExamById = async (req, res) => {
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('exams')
     .select('*')
     .eq('id', req.params.id)
@@ -60,7 +59,7 @@ exports.getExamById = async (req, res) => {
 /** POST /api/exams */
 exports.createExam = async (req, res) => {
   const body = validate(createExamSchema, req.body);
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('exams')
     .insert([{ ...body, user_id: req.user.id }])
     .select()
@@ -73,7 +72,7 @@ exports.createExam = async (req, res) => {
 /** PATCH /api/exams/:id */
 exports.updateExam = async (req, res) => {
   const body = validate(updateExamSchema, req.body);
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('exams')
     .update(body)
     .eq('id', req.params.id)
@@ -87,7 +86,7 @@ exports.updateExam = async (req, res) => {
 
 /** DELETE /api/exams/:id */
 exports.deleteExam = async (req, res) => {
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('exams')
     .delete()
     .eq('id', req.params.id)

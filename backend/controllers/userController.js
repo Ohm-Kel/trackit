@@ -1,5 +1,4 @@
 const { z } = require('zod');
-const supabase = require('../supabaseClient');
 const logger = require('../lib/logger');
 const { validate } = require('../lib/validate');
 
@@ -16,13 +15,13 @@ exports.getProfile = async (req, res) => {
   const { id: userId, email } = req.user;
   const meta = req.user.user_metadata || {};
 
-  const { data, error } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
+  const { data, error } = await req.db.from('users').select('*').eq('id', userId).maybeSingle();
   if (error) throw error;
   if (data) return res.json(data);
 
   // The auth trigger normally creates this row; repair it if it is missing.
   logger.info({ userId }, 'Creating missing profile row');
-  const { data: created, error: insertError } = await supabase
+  const { data: created, error: insertError } = await req.db
     .from('users')
     .insert({
       id: userId,
@@ -40,7 +39,7 @@ exports.getProfile = async (req, res) => {
 /** PATCH /api/users/profile */
 exports.updateProfile = async (req, res) => {
   const updates = validate(updateProfileSchema, req.body);
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('users')
     .upsert({ ...updates, id: req.user.id, email: req.user.email })
     .select('*')

@@ -62,5 +62,13 @@ describe('authentication', () => {
     const res = await ctx.api().get('/api/tasks').set('Authorization', 'Bearer wrong');
     expect(res.status).toBe(401);
     expect(res.body).toEqual({ error: 'Invalid or expired token' });
+    expect(ctx.createUserClient).not.toHaveBeenCalled();
+  });
+
+  it('queries as the signed-in user so Row Level Security applies', async () => {
+    const res = await ctx.api().get('/api/tasks').set(ctx.auth);
+    expect(res.status).toBe(200);
+    expect(ctx.createUserClient).toHaveBeenCalledTimes(1);
+    expect(ctx.createUserClient).toHaveBeenCalledWith(ctx.TOKEN);
   });
 });

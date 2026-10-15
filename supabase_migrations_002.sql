@@ -50,3 +50,27 @@ REVOKE EXECUTE ON FUNCTION public.rate_limit_decrement(TEXT) FROM PUBLIC, anon, 
 GRANT EXECUTE ON FUNCTION public.rate_limit_hit(TEXT, BIGINT) TO service_role;
 GRANT EXECUTE ON FUNCTION public.rate_limit_decrement(TEXT) TO service_role;
 GRANT ALL ON public.rate_limits TO service_role;
+
+-- 2. Row Level Security gaps
+-- From v1.2.0 the API queries as the signed-in user, so RLS must allow every
+-- operation the API performs and nothing more.
+
+-- The API creates workload suggestions for the signed-in user.
+DROP POLICY IF EXISTS "Users can insert their own notifications" ON public.notifications;
+CREATE POLICY "Users can insert their own notifications" ON public.notifications
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- The subtask policies only check the subtask's own user_id, so a user could
+-- attach a subtask to someone else's task or exam by id. A restrictive policy
+-- is ANDed with the existing permissive ones.
+DROP POLICY IF EXISTS "Subtask parent must belong to the user" ON public.subtasks;
+CREATE POLICY "Subtask parent must belong to the user" ON public.subtasks
+  AS RESTRICTIVE FOR ALL
+  USING (true)
+  WITH CHECK (
+    (subtasks.task_id IS NOT NULL AND EXISTS (
+      SELECT 1 FROM public.tasks t WHERE t.id = subtasks.task_id AND t.user_id = auth.uid()))
+    OR
+    (subtasks.exam_id IS NOT NULL AND EXISTS (
+      SELECT 1 FROM public.exams e WHERE e.id = subtasks.exam_id AND e.user_id = auth.uid()))
+  );

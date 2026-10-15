@@ -1,5 +1,4 @@
 const { z } = require('zod');
-const supabase = require('../supabaseClient');
 const { HttpError } = require('../lib/errors');
 const { validate, throwIfDbError } = require('../lib/validate');
 
@@ -32,13 +31,13 @@ const listQuerySchema = z.object({
 const NOT_FOUND = 'Subtask not found';
 
 /**
- * Confirm the parent task or exam belongs to the user. The service-role client
- * bypasses RLS, so without this a user could attach subtasks to another
- * user's record by guessing its id.
+ * Confirm the parent task or exam belongs to the user. RLS on subtasks only
+ * checks the subtask's own user_id, so without this a user could attach
+ * subtasks to another user's record by guessing its id.
  */
-async function assertParentOwned(userId, { task_id: taskId, exam_id: examId }) {
+async function assertParentOwned(db, userId, { task_id: taskId, exam_id: examId }) {
   const table = taskId ? 'tasks' : 'exams';
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from(table)
     .select('id')
     .eq('id', taskId || examId)
@@ -53,7 +52,7 @@ async function assertParentOwned(userId, { task_id: taskId, exam_id: examId }) {
 exports.getSubtasks = async (req, res) => {
   const { task_id: taskId, exam_id: examId } = validate(listQuerySchema, req.query);
 
-  let query = supabase
+  let query = req.db
     .from('subtasks')
     .select('*')
     .eq('user_id', req.user.id)
@@ -70,9 +69,9 @@ exports.getSubtasks = async (req, res) => {
 /** POST /api/subtasks */
 exports.createSubtask = async (req, res) => {
   const body = validate(createSubtaskSchema, req.body);
-  await assertParentOwned(req.user.id, body);
+  await assertParentOwned(req.db, req.user.id, body);
 
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('subtasks')
     .insert({ ...body, user_id: req.user.id })
     .select()
@@ -85,7 +84,7 @@ exports.createSubtask = async (req, res) => {
 /** PATCH /api/subtasks/:id */
 exports.updateSubtask = async (req, res) => {
   const body = validate(updateSubtaskSchema, req.body);
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('subtasks')
     .update(body)
     .eq('id', req.params.id)
@@ -99,7 +98,7 @@ exports.updateSubtask = async (req, res) => {
 
 /** DELETE /api/subtasks/:id */
 exports.deleteSubtask = async (req, res) => {
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('subtasks')
     .delete()
     .eq('id', req.params.id)

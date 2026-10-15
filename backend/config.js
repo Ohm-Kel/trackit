@@ -35,6 +35,7 @@ const config = Object.freeze({
 
   supabaseUrl: process.env.SUPABASE_URL,
   supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
+  supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
 
   anthropicApiKey: process.env.ANTHROPIC_API_KEY,
   anthropicModel: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',

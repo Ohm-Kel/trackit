@@ -14,6 +14,10 @@ const mockSupabase = createSupabaseMock();
 const mockAnthropic = { messages: { create: jest.fn() } };
 
 jest.mock('../../supabaseClient', () => mockSupabase.client);
+// Handlers query through the per-request user client; in tests it is the same
+// fake, and the mock records which token each client was created with.
+const mockCreateUserClient = jest.fn(() => mockSupabase.client);
+jest.mock('../../supabaseUserClient', () => ({ createUserClient: mockCreateUserClient }));
 jest.mock('../../lib/anthropic', () => mockAnthropic);
 
 const request = require('supertest');
@@ -30,6 +34,7 @@ function signIn() {
 function resetMocks() {
   mockSupabase.reset();
   mockAnthropic.messages.create.mockReset();
+  mockCreateUserClient.mockClear();
   signIn();
 }
 
@@ -45,6 +50,7 @@ module.exports = {
   TOKEN,
   auth,
   supabase: mockSupabase,
+  createUserClient: mockCreateUserClient,
   anthropic: mockAnthropic,
   resetMocks,
   api,
