@@ -124,9 +124,9 @@ export default function Analytics() {
                 <div key={i} className="p-4 bg-red-50/50 border border-red-100 rounded-2xl">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h4 className="text-[13px] font-bold text-red-900 leading-none">
+                      <h3 className="text-[13px] font-bold text-red-900 leading-none">
                         Critical Cluster: {new Date(zone.start_date).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                      </h4>
+                      </h3>
                       <p className="text-[11px] text-red-700 mt-2 font-medium">3+ items due within 48 hours</p>
                     </div>
                     <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">{zone.task_count} Tasks</span>
@@ -153,7 +153,7 @@ export default function Analytics() {
             <Sparkles className="w-8 h-8 text-primary" />
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h3 className="text-xl font-bold mb-1">AI Recommendation</h3>
+            <h2 className="text-xl font-bold mb-1">AI Recommendation</h2>
             <p className="text-white/70 text-[14px]">
               {burnout.length > 0 
                 ? "Your workload is peaking. We recommend postponing non-critical tasks and using the 'Focus Plan' to tackle one priority at a time."
@@ -183,7 +183,7 @@ function StatCard({ icon: Icon, title, value, description, color }) {
       <div className={`w-12 h-12 rounded-2xl ${colors[color]} flex items-center justify-center mb-4`}>
         <Icon className="w-6 h-6" />
       </div>
-      <h3 className="text-[13px] font-bold text-text-3 uppercase tracking-wider mb-1">{title}</h3>
+      <h2 className="text-[13px] font-bold text-text-3 uppercase tracking-wider mb-1">{title}</h2>
       <div className="text-[28px] font-extrabold text-[#0F172A] leading-tight mb-2">{value}</div>
       <p className="text-[13px] text-text-3 font-medium">{description}</p>
     </div>
@@ -198,7 +198,7 @@ function ContentCard({ icon: Icon, title, subtitle, children }) {
           <Icon className="w-5 h-5 text-text-2" />
         </div>
         <div>
-          <h3 className="text-[16px] font-extrabold text-[#0F172A]">{title}</h3>
+          <h2 className="text-[16px] font-extrabold text-[#0F172A]">{title}</h2>
           <p className="text-[12px] text-text-3 font-medium">{subtitle}</p>
         </div>
       </div>

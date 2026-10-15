@@ -241,6 +241,8 @@ export default function Tasks() {
                     </div>
                     <div className="md:hidden flex justify-end" onClick={e => e.stopPropagation()}>
                       <button
+                        aria-label={expandedRow === task.id ? 'Hide details' : 'Show details'}
+                        aria-expanded={expandedRow === task.id}
                         className="w-[28px] h-[28px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 hover:bg-primary-light hover:text-primary"
                         onClick={() => setExpandedRow(expandedRow === task.id ? null : task.id)}
                       >
@@ -323,7 +325,7 @@ export default function Tasks() {
                       <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F0FDF4] text-[#16A34A] tracking-[0.01em]">Done</span>
                     </div>
                     <div className="hidden md:flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
-                      <button className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#EF4444]" onClick={e => handleDelete(e, task.id)}><Trash2 className="w-[13px] h-[13px]" /></button>
+                      <button title="Delete" className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#EF4444]" onClick={e => handleDelete(e, task.id)}><Trash2 className="w-[13px] h-[13px]" /></button>
                     </div>
                     <div className="md:hidden"></div>
                   </div>

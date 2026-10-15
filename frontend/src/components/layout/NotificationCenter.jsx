@@ -110,7 +110,9 @@ export default function NotificationCenter() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button 
+      <button
+        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+        aria-expanded={isOpen} 
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full hover:bg-bg transition-colors border-none bg-transparent cursor-pointer group"
       >

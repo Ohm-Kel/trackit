@@ -64,14 +64,14 @@ export default function ForgotPassword() {
               )}
 
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">
+                <label htmlFor="forgotpassword-email-address" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">
                   Email Address
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
                     <Mail className="w-[18px] h-[18px]" />
                   </div>
-                  <input
+                  <input id="forgotpassword-email-address"
                     type="email"
                     required
                     placeholder="name@example.com"

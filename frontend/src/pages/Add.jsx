@@ -261,40 +261,40 @@ export default function Add() {
               )}
 
               <div className="mb-3.5">
-                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Task Name *</label>
-                <input type="text" className={inputClass} placeholder="e.g. Statistics Assignment 2" value={taskForm.title} onChange={e => setTaskForm(f => ({ ...f, title: e.target.value }))} />
+                <label htmlFor="add-task-name" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Task Name *</label>
+                <input id="add-task-name" type="text" className={inputClass} placeholder="e.g. Statistics Assignment 2" value={taskForm.title} onChange={e => setTaskForm(f => ({ ...f, title: e.target.value }))} />
               </div>
 
               <div className="mb-3.5">
-                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Description</label>
-                <textarea className={`${inputClass} resize-none min-h-[60px]`} placeholder="Additional notes or context…" value={taskForm.description} onChange={e => setTaskForm(f => ({ ...f, description: e.target.value }))} />
+                <label htmlFor="add-description" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Description</label>
+                <textarea id="add-description" className={`${inputClass} resize-none min-h-[60px]`} placeholder="Additional notes or context…" value={taskForm.description} onChange={e => setTaskForm(f => ({ ...f, description: e.target.value }))} />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
                 <div>
-                  <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Due Date</label>
-                  <input type="date" className={inputClass} value={taskForm.due_date} onChange={e => setTaskForm(f => ({ ...f, due_date: e.target.value }))} />
+                  <label htmlFor="add-due-date" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Due Date</label>
+                  <input id="add-due-date" type="date" className={inputClass} value={taskForm.due_date} onChange={e => setTaskForm(f => ({ ...f, due_date: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course Code</label>
-                  <input type="text" className={inputClass} placeholder="e.g. STAT 201" value={taskForm.course_code} onChange={e => setTaskForm(f => ({ ...f, course_code: e.target.value }))} />
+                  <label htmlFor="add-course-code" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course Code</label>
+                  <input id="add-course-code" type="text" className={inputClass} placeholder="e.g. STAT 201" value={taskForm.course_code} onChange={e => setTaskForm(f => ({ ...f, course_code: e.target.value }))} />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
                 <div>
-                  <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Grade Weight (%)</label>
-                  <input type="number" className={inputClass} placeholder="25" value={taskForm.grade_weight} onChange={e => setTaskForm(f => ({ ...f, grade_weight: e.target.value }))} />
+                  <label htmlFor="add-grade-weight" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Grade Weight (%)</label>
+                  <input id="add-grade-weight" type="number" className={inputClass} placeholder="25" value={taskForm.grade_weight} onChange={e => setTaskForm(f => ({ ...f, grade_weight: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Estimated Hours</label>
-                  <input type="number" className={inputClass} placeholder="4" step="0.5" value={taskForm.estimated_hours} onChange={e => setTaskForm(f => ({ ...f, estimated_hours: e.target.value }))} />
+                  <label htmlFor="add-estimated-hours" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Estimated Hours</label>
+                  <input id="add-estimated-hours" type="number" className={inputClass} placeholder="4" step="0.5" value={taskForm.estimated_hours} onChange={e => setTaskForm(f => ({ ...f, estimated_hours: e.target.value }))} />
                 </div>
               </div>
 
               <div className="mb-3.5">
-                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Status</label>
-                <select
+                <label htmlFor="add-status" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Status</label>
+                <select id="add-status"
                   className={inputClass}
                   value={taskForm.status}
                   onChange={e => setTaskForm(f => ({ ...f, status: e.target.value }))}
@@ -336,18 +336,18 @@ export default function Add() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <div className="mb-3.5">
-                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Subject / Course Name *</label>
-                <input type="text" className={inputClass} placeholder="e.g. Calculus II" value={examForm.subject} onChange={e => setExamForm(f => ({ ...f, subject: e.target.value }))} />
+                <label htmlFor="add-subject-course-name" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Subject / Course Name *</label>
+                <input id="add-subject-course-name" type="text" className={inputClass} placeholder="e.g. Calculus II" value={examForm.subject} onChange={e => setExamForm(f => ({ ...f, subject: e.target.value }))} />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
                 <div>
-                  <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Exam Date</label>
-                  <input type="date" className={inputClass} value={examForm.exam_date} onChange={e => setExamForm(f => ({ ...f, exam_date: e.target.value }))} />
+                  <label htmlFor="add-exam-date" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Exam Date</label>
+                  <input id="add-exam-date" type="date" className={inputClass} value={examForm.exam_date} onChange={e => setExamForm(f => ({ ...f, exam_date: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course Code</label>
-                  <input type="text" className={inputClass} placeholder="e.g. MATH 201" value={examForm.course_code} onChange={e => setExamForm(f => ({ ...f, course_code: e.target.value }))} />
+                  <label htmlFor="add-course-code-2" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course Code</label>
+                  <input id="add-course-code-2" type="text" className={inputClass} placeholder="e.g. MATH 201" value={examForm.course_code} onChange={e => setExamForm(f => ({ ...f, course_code: e.target.value }))} />
                 </div>
               </div>
 
@@ -357,6 +357,8 @@ export default function Add() {
                   {['low', 'medium', 'high'].map(c => (
                     <button
                       key={c}
+                      type="button"
+                      aria-pressed={confidence === c}
                       onClick={() => setConfidence(c)}
                       className={`flex-1 p-[9px] border-[1.5px] rounded-rs text-center cursor-pointer text-[13px] font-semibold transition-all font-sans capitalize ${confidence === c ? 'bg-primary-light border-primary text-primary' : 'bg-white border-border text-text-2 hover:border-primary-mid hover:text-primary'}`}
                     >
@@ -367,9 +369,9 @@ export default function Add() {
               </div>
 
               <div className="mb-3.5">
-                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Topics to Revise</label>
+                <label htmlFor="add-topics-to-revise" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Topics to Revise</label>
                 <div className="flex gap-2 mb-2">
-                  <input
+                  <input id="add-topics-to-revise"
                     type="text"
                     value={topicInput}
                     onChange={e => setTopicInput(e.target.value)}
@@ -384,7 +386,7 @@ export default function Add() {
                     {topics.map((topic, idx) => (
                       <span key={idx} className="bg-primary-light rounded-[20px] px-2.5 py-[3px] text-[12px] text-primary flex items-center gap-1.5 font-medium">
                         {topic}
-                        <span onClick={() => handleRemoveTopic(idx)} className="cursor-pointer text-primary-mid text-[14px] leading-none font-normal hover:text-primary">×</span>
+                        <button type="button" aria-label={`Remove topic ${topic}`} onClick={() => handleRemoveTopic(idx)} className="p-0 bg-transparent border-none cursor-pointer text-primary-mid text-[14px] leading-none font-normal hover:text-primary">×</button>
                       </span>
                     ))}
                   </div>
@@ -392,8 +394,8 @@ export default function Add() {
               </div>
 
               <div className="mb-3.5">
-                <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Daily Study Time Available (hours)</label>
-                <input type="number" className={inputClass} placeholder="e.g. 2" step="0.5" value={examForm.daily_study_hours} onChange={e => setExamForm(f => ({ ...f, daily_study_hours: e.target.value }))} />
+                <label htmlFor="add-daily-study-time-available-hou" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Daily Study Time Available (hours)</label>
+                <input id="add-daily-study-time-available-hou" type="number" className={inputClass} placeholder="e.g. 2" step="0.5" value={examForm.daily_study_hours} onChange={e => setExamForm(f => ({ ...f, daily_study_hours: e.target.value }))} />
               </div>
             </div>
 

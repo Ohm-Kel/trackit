@@ -187,6 +187,7 @@ export default function Upload() {
 
             <input
               ref={examInputRef}
+              aria-label="Exam timetable file"
               type="file"
               accept={ACCEPTED}
               className="hidden"
@@ -295,6 +296,7 @@ export default function Upload() {
 
             <input
               ref={schedInputRef}
+              aria-label="Class schedule file"
               type="file"
               accept={ACCEPTED}
               className="hidden"

@@ -77,14 +77,14 @@ export default function ResetPassword() {
               )}
 
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">
+                <label htmlFor="resetpassword-new-password" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">
                   New Password
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
                     <Lock className="w-[18px] h-[18px]" />
                   </div>
-                  <input
+                  <input id="resetpassword-new-password"
                     type={showPassword ? 'text' : 'password'}
                     required
                     placeholder="At least 6 characters"
@@ -103,14 +103,14 @@ export default function ResetPassword() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">
+                <label htmlFor="resetpassword-confirm-password" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">
                   Confirm Password
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
                     <Lock className="w-[18px] h-[18px]" />
                   </div>
-                  <input
+                  <input id="resetpassword-confirm-password"
                     type={showPassword ? 'text' : 'password'}
                     required
                     placeholder="Re-enter your password"

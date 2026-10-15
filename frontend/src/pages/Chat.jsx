@@ -219,6 +219,7 @@ export default function Chat() {
           {/* Input */}
           <div className="bg-white border-[1.5px] border-border rounded-r p-3 px-3.5 transition-colors focus-within:border-primary shadow-xs">
             <textarea
+              aria-label="Message"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -229,7 +230,7 @@ export default function Chat() {
             />
             <div className="flex justify-between items-center mt-2">
               <span className="text-[11px] text-text-3 hidden sm:block">Enter to send · Shift+Enter for new line</span>
-              <button onClick={sendMessage} disabled={sending || !input.trim()} className="bg-primary hover:bg-primary-hover disabled:opacity-50 border-none w-[30px] h-[30px] rounded-[7px] cursor-pointer flex items-center justify-center transition-colors shrink-0 ml-auto">
+              <button onClick={sendMessage} aria-label="Send message" disabled={sending || !input.trim()} className="bg-primary hover:bg-primary-hover disabled:opacity-50 border-none w-[30px] h-[30px] rounded-[7px] cursor-pointer flex items-center justify-center transition-colors shrink-0 ml-auto">
                 <Send className="w-3 h-3 text-white" />
               </button>
             </div>

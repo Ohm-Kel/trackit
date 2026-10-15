@@ -99,12 +99,12 @@ const Signup = () => {
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Email Address</label>
+                  <label htmlFor="signup-email-address" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Email Address</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
                       <Mail className="w-[18px] h-[18px]" />
                     </div>
-                    <input
+                    <input id="signup-email-address"
                       type="email"
                       required
                       placeholder="name@example.com"
@@ -116,12 +116,12 @@ const Signup = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Password</label>
+                  <label htmlFor="signup-password" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Password</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
                       <Lock className="w-[18px] h-[18px]" />
                     </div>
-                    <input
+                    <input id="signup-password"
                       type="password"
                       required
                       placeholder="8+ chars, number, special char"
@@ -136,12 +136,12 @@ const Signup = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Confirm Password</label>
+                  <label htmlFor="signup-confirm-password" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Confirm Password</label>
                   <div className="relative group">
                     <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
                       <Lock className="w-[18px] h-[18px]" />
                     </div>
-                    <input
+                    <input id="signup-confirm-password"
                       type="password"
                       required
                       placeholder="Re-type password"

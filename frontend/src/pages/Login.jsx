@@ -60,12 +60,12 @@ const Login = () => {
             )}
 
             <div className="space-y-2">
-              <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Email Address</label>
+              <label htmlFor="login-email-address" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Email Address</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
                   <Mail className="w-[18px] h-[18px]" />
                 </div>
-                <input
+                <input id="login-email-address"
                   type="email"
                   required
                   placeholder="name@example.com"
@@ -78,7 +78,7 @@ const Login = () => {
 
             <div className="space-y-2">
               <div className="flex justify-between items-center ml-1">
-                <label className="text-[13px] font-bold text-[#334155] uppercase tracking-wider">Password</label>
+                <label htmlFor="login-password" className="text-[13px] font-bold text-[#334155] uppercase tracking-wider">Password</label>
                 <Link
                   to="/forgot-password"
                   className="text-xs font-bold text-primary hover:text-primary-hover transition-colors"
@@ -90,7 +90,7 @@ const Login = () => {
                 <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
                   <Lock className="w-[18px] h-[18px]" />
                 </div>
-                <input
+                <input id="login-password"
                   type="password"
                   required
                   placeholder="••••••••"

@@ -219,25 +219,25 @@ export default function Settings() {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Full Name</label>
-                      <input type="text" className={inputClass} placeholder="e.g. Kwame Mensah" value={localProfile.name} onChange={e => setLocalProfile(p => ({ ...p, name: e.target.value }))} />
+                      <label htmlFor="settings-full-name" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Full Name</label>
+                      <input id="settings-full-name" type="text" className={inputClass} placeholder="e.g. Kwame Mensah" value={localProfile.name} onChange={e => setLocalProfile(p => ({ ...p, name: e.target.value }))} />
                     </div>
                     <div>
-                      <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Email Address</label>
-                      <input type="email" disabled className={`${inputClass} opacity-60 cursor-not-allowed`} placeholder="you@university.edu" value={localProfile.email} />
+                      <label htmlFor="settings-email-address" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Email Address</label>
+                      <input id="settings-email-address" type="email" disabled className={`${inputClass} opacity-60 cursor-not-allowed`} placeholder="you@university.edu" value={localProfile.email} />
                       <p className="text-[10px] text-text-3 mt-1 italic">Email is managed via your login provider</p>
                     </div>
                     <div>
-                      <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">University / Institution</label>
-                      <input type="text" className={inputClass} placeholder="e.g. University of Ghana" value={localProfile.university} onChange={e => setLocalProfile(p => ({ ...p, university: e.target.value}))} />
+                      <label htmlFor="settings-university-institution" className="text-[12px] font-semibold text-text-2 mb-1.5 block">University / Institution</label>
+                      <input id="settings-university-institution" type="text" className={inputClass} placeholder="e.g. University of Ghana" value={localProfile.university} onChange={e => setLocalProfile(p => ({ ...p, university: e.target.value}))} />
                     </div>
                     <div>
-                      <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course / Program</label>
-                      <input type="text" className={inputClass} placeholder="e.g. BSc Computer Science" value={localProfile.course} onChange={e => setLocalProfile(p => ({ ...p, course: e.target.value }))} />
+                      <label htmlFor="settings-course-program" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course / Program</label>
+                      <input id="settings-course-program" type="text" className={inputClass} placeholder="e.g. BSc Computer Science" value={localProfile.course} onChange={e => setLocalProfile(p => ({ ...p, course: e.target.value }))} />
                     </div>
                     <div>
-                      <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Year / Level</label>
-                      <select className={inputClass} value={localProfile.year} onChange={e => setLocalProfile(p => ({ ...p, year: e.target.value }))}>
+                      <label htmlFor="settings-year-level" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Year / Level</label>
+                      <select id="settings-year-level" className={inputClass} value={localProfile.year} onChange={e => setLocalProfile(p => ({ ...p, year: e.target.value }))}>
                         <option value="">Select year…</option>
                         <option>Year 1 / Freshman</option>
                         <option>Year 2 / Sophomore</option>
