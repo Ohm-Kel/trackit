@@ -14,6 +14,7 @@ const uploadRoutes = require('./routes/upload');
 const userRoutes = require('./routes/users');
 const notificationRoutes = require('./routes/notifications');
 const analyticsRoutes = require('./routes/analytics');
+const docsRoutes = require('./routes/docs');
 
 /**
  * Decide whether a cross-origin request may call the API. Requests without an
@@ -40,6 +41,7 @@ function buildApiRouter() {
   api.use('/users', userRoutes);
   api.use('/notifications', notificationRoutes);
   api.use('/analytics', analyticsRoutes);
+  api.use('/', docsRoutes);
 
   return api;
 }
