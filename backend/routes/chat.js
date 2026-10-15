@@ -7,6 +7,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.post('/', chatLimiter, chatController.chat);
+router.post('/stream', chatLimiter, chatController.chatStream);
 router.get('/history', chatController.getHistory);
 router.delete('/history', chatController.clearHistory);
 

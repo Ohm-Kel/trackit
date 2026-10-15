@@ -31,6 +31,7 @@ describe('API documentation', () => {
       '/exams/{id}',
       '/subtasks/{id}',
       '/upload/parse',
+      '/chat/stream',
       '/analytics/burnout',
     ]) {
       expect(body.paths).toHaveProperty([path]);

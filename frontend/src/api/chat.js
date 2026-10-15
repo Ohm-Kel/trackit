@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { readEvents } from './sse';
 
 const API_URL = import.meta.env.PROD
   ? '/api'
@@ -11,29 +12,38 @@ async function getAuthHeader() {
 }
 
 /**
- * Send a chat message to the AI and receive a reply.
+ * Send a chat message and stream the reply as it is generated.
  *
  * @param {string} message - The user's current message.
  * @param {Array<{role: 'user'|'assistant', content: string}>} history - Prior turns, excluding `message`.
- * @returns {Promise<{reply: string}>}
+ * @param {{ onDelta?: (text: string) => void, signal?: AbortSignal }} [options]
+ *   `onDelta` receives each fragment of the reply in order.
+ * @returns {Promise<{reply: string}>} The complete reply, once it has been saved.
  */
-export async function sendChatMessage(message, history = []) {
+export async function streamChatMessage(message, history = [], { onDelta, signal } = {}) {
   const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/chat`, {
+  const res = await fetch(`${API_URL}/chat/stream`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
       ...headers,
     },
     body: JSON.stringify({ message, history }),
+    signal,
   });
 
-  if (!res.ok) {
+  if (!res.ok || !res.body) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || 'Failed to get AI response');
   }
 
-  return res.json();
+  for await (const { event, data } of readEvents(res.body)) {
+    if (event === 'delta') onDelta?.(data.text);
+    else if (event === 'done') return { reply: data.reply };
+    else if (event === 'error') throw new Error(data.error || 'The AI response was interrupted');
+  }
+  throw new Error('The AI response was interrupted');
 }
 
 /**

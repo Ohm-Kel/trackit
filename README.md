@@ -23,7 +23,7 @@ Trackit closes that gap in three steps:
 ## Features
 
 - **Timetable extraction**: PDF, PNG, JPG or WebP to exams or a weekly schedule, with row-level validation and a review step before import
-- **Grounded study assistant**: chat with Claude, using the student's tasks and exams as context, with prompt-injection hardening
+- **Grounded study assistant**: chat with Claude, using the student's tasks and exams as context; replies stream in as they are generated, with prompt-injection hardening
 - **Tasks and exams**: due dates, grade weights, effort estimates, confidence levels and subtasks
 - **Focus plan**: a schedule-aware daily plan built around class times
 - **Analytics**: completion velocity, deadline-cluster ("burnout") detection and workload by grade weight
@@ -53,7 +53,7 @@ flowchart LR
     RT -- notifications --> UI
     API -- verify token --> AUTH
     API -- queries as the user, RLS applies --> DB
-    API -- chat and forced tool use --> CLAUDE
+    API -- streamed chat and forced tool use --> CLAUDE
 ```
 
 - The **frontend** signs in with Supabase Auth and calls the API with the user's access token. It reads notifications directly through Supabase Realtime, protected by Row Level Security.
@@ -157,6 +157,11 @@ curl -X POST http://localhost:3001/api/chat \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"message": "What should I work on first this week?"}'
 
+# Same question, with the reply streamed as server-sent events
+curl -N -X POST http://localhost:3001/api/chat/stream \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"message": "What should I work on first this week?"}'
+
 # Extract exams from a PDF timetable
 curl -X POST http://localhost:3001/api/upload/parse \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
@@ -201,7 +206,6 @@ trackit/
 ## Roadmap
 
 - Add anonymised real-world timetables (scans, photos, multi-page PDFs) as evaluation set v2
-- Stream chat replies for faster perceived response time
 - Frontend component tests with Vitest and React Testing Library
 
 ## Contributors
