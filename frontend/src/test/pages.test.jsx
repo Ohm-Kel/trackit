@@ -167,3 +167,23 @@ describe('due-date urgency', () => {
     expect(dot('Essay')).toHaveClass('bg-border2');
   });
 });
+
+describe('sidebar and settings copy', () => {
+  it('shows the email, not "Set up profile", for a named profile without a course', async () => {
+    renderApp('/');
+    const footer = await screen.findByRole('link', { name: /Ama Owusu/ });
+    await waitFor(() => expect(footer).toHaveTextContent('ama@example.edu'));
+    expect(footer).not.toHaveTextContent('Set up profile');
+    expect(screen.queryByText(/pro edition/i)).not.toBeInTheDocument();
+  });
+
+  it('asks a new user without a name or course to set up their profile', async () => {
+    renderApp('/', { setup: (fake) => Object.assign(fake.db.profile, { display_name: null }) });
+    expect(await screen.findByText('Set up profile')).toBeInTheDocument();
+  });
+
+  it('shows the release version in Settings', async () => {
+    renderApp('/settings');
+    expect(await screen.findByText('Trackit v1.2.0')).toBeInTheDocument();
+  });
+});
