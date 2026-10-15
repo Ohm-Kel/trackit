@@ -116,13 +116,10 @@ export default function Exams() {
                         </div>
                       </div>
 
-                      <div className="h-[5px] bg-bg rounded-[3px] overflow-hidden my-2.5">
+                      <div className="h-[5px] bg-border2 rounded-[3px] overflow-hidden my-2.5">
                         <div className="h-full rounded-[3px] bg-primary transition-[width] duration-300" style={{ width: `${prep}%` }}></div>
                       </div>
-                      <div className="flex justify-between text-[11px] text-text-3 mb-3.5">
-                        <span>{prep}% prepared</span>
-                        <span>Exam day</span>
-                      </div>
+                      <div className="text-[11px] text-text-3 mb-3.5">Revision {prep}% done</div>
 
                       <div className="flex items-center justify-between mb-3.5 pb-3.5 border-b border-border">
                         <span className="text-[12px] font-semibold text-text-2">Confidence</span>

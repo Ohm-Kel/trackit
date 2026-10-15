@@ -187,3 +187,12 @@ describe('sidebar and settings copy', () => {
     expect(await screen.findByText('Trackit v1.2.0')).toBeInTheDocument();
   });
 });
+
+describe('charts and progress', () => {
+  it('labels each Analytics velocity bar and describes the chart in text', async () => {
+    renderApp('/analytics');
+    const chart = await screen.findByRole('img', { name: /tasks completed per week/i });
+    expect(chart).toHaveAccessibleName(/Week of 8 Oct, 2/);
+    expect(chart).toHaveTextContent('2');
+  });
+});

@@ -111,18 +111,19 @@ export default function Analytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Study Velocity Chart (Simplified Visual) */}
         <ContentCard icon={BarChart2} title="Mastery Velocity" subtitle="Recent task completion output">
-          <div className="h-64 flex items-end justify-between gap-4 mt-8 px-4">
+          <div
+            role="img"
+            aria-label={`Tasks completed per week: ${velocity.map(v => `${v.name}, ${v.tasks}`).join('; ')}`}
+            className="h-64 flex items-end justify-between gap-4 mt-8 px-4"
+          >
             {velocity.map((v, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center group">
-                <div className="w-full relative">
-                   <div 
-                    className="w-full bg-primary/20 hover:bg-primary/40 transition-all rounded-t-lg relative group-hover:block"
+              <div key={i} className="flex-1 flex flex-col items-center">
+                <div className="text-[12px] font-bold text-text-1 mb-1.5">{v.tasks}</div>
+                <div className="w-full">
+                  <div
+                    className="w-full min-h-[2px] bg-primary/60 rounded-t-lg"
                     style={{ height: `${(v.tasks / (Math.max(...velocity.map(v=>v.tasks)) || 1)) * 160}px` }}
-                   >
-                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#0F172A] text-white text-[10px] font-bold px-2 py-1 rounded hidden group-hover:block shrink-0 whitespace-nowrap">
-                        {v.tasks} tasks
-                     </div>
-                   </div>
+                  />
                 </div>
                 <div className="text-[10px] text-text-3 font-bold mt-3 transform -rotate-45 md:rotate-0 text-center uppercase tracking-wider">
                   {v.name.replace('Week of ', '')}
