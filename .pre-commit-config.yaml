@@ -1,0 +1,40 @@
+# Install once with `pip install pre-commit && pre-commit install`.
+# Runs the same checks as CI on staged files before each commit.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: detect-private-key
+
+  - repo: local
+    hooks:
+      - id: backend-eslint
+        name: backend eslint
+        entry: bash -c 'cd backend && npx eslint --max-warnings=0 .'
+        language: system
+        files: ^backend/.*\.js$
+        pass_filenames: false
+      - id: backend-prettier
+        name: backend prettier
+        entry: bash -c 'cd backend && npx prettier --check .'
+        language: system
+        files: ^backend/
+        pass_filenames: false
+      - id: frontend-eslint
+        name: frontend eslint
+        entry: bash -c 'cd frontend && npx eslint .'
+        language: system
+        files: ^frontend/src/.*\.(js|jsx)$
+        pass_filenames: false
+      - id: deps-sync
+        name: root/backend dependency sync
+        entry: node scripts/check-deps-sync.js
+        language: system
+        files: package\.json$
+        pass_filenames: false

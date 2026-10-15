@@ -1,5 +1,3 @@
-// Vercel Serverless Function entry point
-// Vercel only executes files in the /api directory as serverless functions.
-// This file imports the Express app from the backend and exports it as a handler.
-require('dotenv').config();
+// Vercel serverless function entry point. Vercel only runs files in /api as
+// functions, so this re-exports the Express app built in the backend package.
 module.exports = require('../backend/index');

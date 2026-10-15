@@ -1,0 +1,58 @@
+name: Evaluate timetable parser
+
+# Runs the parser against the evaluation set with the real Anthropic API.
+# Manual only, because each run costs API credits (about 20 calls).
+# Needs the repository secret ANTHROPIC_API_KEY.
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Model id (leave empty for the default in backend/config.js)
+        required: false
+        default: ''
+      dataset:
+        description: Dataset version
+        required: false
+        default: v1
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Check the API key is configured
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Add ANTHROPIC_API_KEY under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+      - name: Run evaluation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ inputs.model }}
+          LOG_LEVEL: warn
+        run: npm run eval -- --dataset "${{ inputs.dataset }}"
+      - name: Publish summary
+        if: always()
+        run: cat eval/results/*.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+      - name: Upload full report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report-${{ github.run_number }}
+          path: backend/eval/results/
+          if-no-files-found: ignore

@@ -76,16 +76,17 @@ export default function Chat() {
     setSending(true);
 
     try {
+      // Prior turns only: skip the static greeting and local error notices.
+      // The new message is sent separately as `message`.
       const history = messages
-        .filter((_, i) => i > 0)
-        .concat(userEntry)
+        .filter((m, i) => i > 0 && !m.isError)
         .map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text }));
 
       const { reply } = await sendChatMessage(userMsg, history);
       const replyTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
       setMessages(m => [...m, { role: 'ai', text: reply, time: replyTime }]);
     } catch (err) {
-      setMessages(m => [...m, { role: 'ai', text: `Sorry, I couldn't get a response right now. ${err.message}`, time: now }]);
+      setMessages(m => [...m, { role: 'ai', text: `Sorry, I couldn't get a response right now. ${err.message}`, time: now, isError: true }]);
     } finally {
       setSending(false);
     }

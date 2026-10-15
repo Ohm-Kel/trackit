@@ -1,0 +1,1218 @@
+{
+  "version": "v1",
+  "seed": 20261015,
+  "generated_by": "eval/generate-dataset.js",
+  "cases": [
+    {
+      "id": "exam-01-table-iso",
+      "type": "exam",
+      "file": "cases/exam-01-table-iso.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["table", "date:iso", "time:h12", "lang:en", "pdf"],
+      "expected": [
+        {
+          "subject": "Algorithms",
+          "course_code": "CS 230",
+          "exam_date": "2026-12-07",
+          "exam_time": "13:30",
+          "venue": null
+        },
+        {
+          "subject": "Technical Writing",
+          "course_code": "ENG 120",
+          "exam_date": "2026-12-10",
+          "exam_time": "10:00",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Innovation Management",
+          "course_code": "MGT 300",
+          "exam_date": "2026-12-13",
+          "exam_time": "10:30",
+          "venue": "Hall B"
+        },
+        {
+          "subject": "Signals and Systems",
+          "course_code": "EE 250",
+          "exam_date": "2026-12-14",
+          "exam_time": "09:00",
+          "venue": "Lab 3"
+        },
+        {
+          "subject": "Operating Systems",
+          "course_code": "CS 305",
+          "exam_date": "2026-12-15",
+          "exam_time": "14:00",
+          "venue": null
+        },
+        {
+          "subject": "French Language A2",
+          "course_code": "FR 101",
+          "exam_date": "2026-12-20",
+          "exam_time": "15:00",
+          "venue": "Main Auditorium"
+        }
+      ]
+    },
+    {
+      "id": "exam-02-table-dmy",
+      "type": "exam",
+      "file": "cases/exam-02-table-dmy.png",
+      "mimeType": "image/png",
+      "tags": ["table", "date:dmy", "time:h24", "lang:en", "image"],
+      "expected": [
+        {
+          "subject": "Data Structures",
+          "course_code": "CS 210",
+          "exam_date": "2026-12-07",
+          "exam_time": "13:00",
+          "venue": "Room 101"
+        },
+        {
+          "subject": "Digital Electronics",
+          "course_code": "EE 260",
+          "exam_date": "2026-12-13",
+          "exam_time": "08:30",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Natural Language Processing",
+          "course_code": "AI 430",
+          "exam_date": "2026-12-14",
+          "exam_time": "10:00",
+          "venue": "Room 101"
+        },
+        {
+          "subject": "French Language A2",
+          "course_code": "FR 101",
+          "exam_date": "2026-12-17",
+          "exam_time": "15:30",
+          "venue": "Room 204"
+        }
+      ]
+    },
+    {
+      "id": "exam-03-table-long",
+      "type": "exam",
+      "file": "cases/exam-03-table-long.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["table", "date:long", "time:h12", "lang:en", "pdf"],
+      "expected": [
+        {
+          "subject": "Microeconomics",
+          "course_code": "ECON 110",
+          "exam_date": "2026-12-09",
+          "exam_time": "09:00",
+          "venue": "Salle B12"
+        },
+        {
+          "subject": "Linear Algebra",
+          "course_code": "MATH 215",
+          "exam_date": "2026-12-10",
+          "exam_time": "08:00",
+          "venue": "Room 204"
+        },
+        {
+          "subject": "Machine Learning",
+          "course_code": "AI 410",
+          "exam_date": "2026-12-11",
+          "exam_time": "08:00",
+          "venue": "Room 101"
+        },
+        {
+          "subject": "Data Structures",
+          "course_code": "CS 210",
+          "exam_date": "2026-12-14",
+          "exam_time": "09:00",
+          "venue": "Hall B"
+        },
+        {
+          "subject": "French Language A2",
+          "course_code": "FR 101",
+          "exam_date": "2026-12-15",
+          "exam_time": "08:30",
+          "venue": "Amphi 2"
+        },
+        {
+          "subject": "Digital Electronics",
+          "course_code": "EE 260",
+          "exam_date": "2026-12-18",
+          "exam_time": "09:30",
+          "venue": "Main Auditorium"
+        },
+        {
+          "subject": "Calculus II",
+          "course_code": "MATH 201",
+          "exam_date": "2026-12-19",
+          "exam_time": "08:00",
+          "venue": "Main Auditorium"
+        },
+        {
+          "subject": "Natural Language Processing",
+          "course_code": "AI 430",
+          "exam_date": "2026-12-21",
+          "exam_time": "15:00",
+          "venue": "Room 204"
+        }
+      ]
+    },
+    {
+      "id": "exam-04-table-short",
+      "type": "exam",
+      "file": "cases/exam-04-table-short.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["table", "date:short", "time:h24", "lang:en", "pdf"],
+      "expected": [
+        {
+          "subject": "Probability and Statistics",
+          "course_code": "STAT 220",
+          "exam_date": "2026-12-07",
+          "exam_time": "13:00",
+          "venue": "Salle B12"
+        },
+        {
+          "subject": "Database Systems",
+          "course_code": "CS 320",
+          "exam_date": "2026-12-08",
+          "exam_time": "14:00",
+          "venue": null
+        },
+        {
+          "subject": "Technical Writing",
+          "course_code": "ENG 120",
+          "exam_date": "2026-12-09",
+          "exam_time": "09:00",
+          "venue": null
+        },
+        {
+          "subject": "Algorithms",
+          "course_code": "CS 230",
+          "exam_date": "2026-12-10",
+          "exam_time": "08:00",
+          "venue": null
+        },
+        {
+          "subject": "Digital Electronics",
+          "course_code": "EE 260",
+          "exam_date": "2026-12-17",
+          "exam_time": "15:30",
+          "venue": null
+        },
+        {
+          "subject": "Innovation Management",
+          "course_code": "MGT 300",
+          "exam_date": "2026-12-21",
+          "exam_time": "13:30",
+          "venue": null
+        }
+      ]
+    },
+    {
+      "id": "exam-05-list-iso",
+      "type": "exam",
+      "file": "cases/exam-05-list-iso.png",
+      "mimeType": "image/png",
+      "tags": ["list", "date:iso", "time:h12", "lang:en", "image"],
+      "expected": [
+        {
+          "subject": "Natural Language Processing",
+          "course_code": null,
+          "exam_date": "2026-12-08",
+          "exam_time": "15:00",
+          "venue": "Hall B"
+        },
+        {
+          "subject": "Calculus II",
+          "course_code": null,
+          "exam_date": "2026-12-17",
+          "exam_time": "13:00",
+          "venue": "Lab 3"
+        },
+        {
+          "subject": "Microeconomics",
+          "course_code": null,
+          "exam_date": "2026-12-19",
+          "exam_time": "08:00",
+          "venue": "Main Auditorium"
+        },
+        {
+          "subject": "French Language A2",
+          "course_code": null,
+          "exam_date": "2026-12-21",
+          "exam_time": "15:00",
+          "venue": "Hall A"
+        }
+      ]
+    },
+    {
+      "id": "exam-06-list-dmy",
+      "type": "exam",
+      "file": "cases/exam-06-list-dmy.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["list", "date:dmy", "time:h12", "lang:en", "pdf"],
+      "expected": [
+        {
+          "subject": "Machine Learning",
+          "course_code": "AI 410",
+          "exam_date": "2026-12-07",
+          "exam_time": "09:00",
+          "venue": "Hall B"
+        },
+        {
+          "subject": "Signals and Systems",
+          "course_code": "EE 250",
+          "exam_date": "2026-12-09",
+          "exam_time": "13:00",
+          "venue": "Room 101"
+        },
+        {
+          "subject": "Computer Networks",
+          "course_code": "CS 340",
+          "exam_date": "2026-12-16",
+          "exam_time": "13:30",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Linear Algebra",
+          "course_code": "MATH 215",
+          "exam_date": "2026-12-20",
+          "exam_time": "15:00",
+          "venue": "Main Auditorium"
+        },
+        {
+          "subject": "Microeconomics",
+          "course_code": "ECON 110",
+          "exam_date": "2026-12-21",
+          "exam_time": "13:00",
+          "venue": "Room 204"
+        }
+      ]
+    },
+    {
+      "id": "exam-07-list-long",
+      "type": "exam",
+      "file": "cases/exam-07-list-long.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["list", "date:long", "time:h12", "lang:en", "pdf"],
+      "expected": [
+        {
+          "subject": "Innovation Management",
+          "course_code": "MGT 300",
+          "exam_date": "2026-12-07",
+          "exam_time": "09:00",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Microeconomics",
+          "course_code": "ECON 110",
+          "exam_date": "2026-12-08",
+          "exam_time": "15:00",
+          "venue": "Hall B"
+        },
+        {
+          "subject": "Deep Learning",
+          "course_code": "AI 420",
+          "exam_date": "2026-12-16",
+          "exam_time": "14:30",
+          "venue": "Salle B12"
+        },
+        {
+          "subject": "Algorithms",
+          "course_code": "CS 230",
+          "exam_date": "2026-12-18",
+          "exam_time": "13:30",
+          "venue": "Salle B12"
+        },
+        {
+          "subject": "Probability and Statistics",
+          "course_code": "STAT 220",
+          "exam_date": "2026-12-20",
+          "exam_time": "08:30",
+          "venue": "Lab 3"
+        }
+      ]
+    },
+    {
+      "id": "exam-08-list-short",
+      "type": "exam",
+      "file": "cases/exam-08-list-short.png",
+      "mimeType": "image/png",
+      "tags": ["list", "date:short", "time:h24", "lang:en", "image"],
+      "expected": [
+        {
+          "subject": "Technical Writing",
+          "course_code": "ENG 120",
+          "exam_date": "2026-12-07",
+          "exam_time": "09:00",
+          "venue": "Salle B12"
+        },
+        {
+          "subject": "Deep Learning",
+          "course_code": "AI 420",
+          "exam_date": "2026-12-08",
+          "exam_time": "08:30",
+          "venue": "Room 101"
+        },
+        {
+          "subject": "Database Systems",
+          "course_code": "CS 320",
+          "exam_date": "2026-12-09",
+          "exam_time": "09:30",
+          "venue": "Lab 3"
+        },
+        {
+          "subject": "Computer Networks",
+          "course_code": "CS 340",
+          "exam_date": "2026-12-10",
+          "exam_time": "10:30",
+          "venue": "Main Auditorium"
+        },
+        {
+          "subject": "Linear Algebra",
+          "course_code": "MATH 215",
+          "exam_date": "2026-12-16",
+          "exam_time": "14:00",
+          "venue": "Room 204"
+        },
+        {
+          "subject": "Algorithms",
+          "course_code": "CS 230",
+          "exam_date": "2026-12-18",
+          "exam_time": "10:00",
+          "venue": "Salle B12"
+        },
+        {
+          "subject": "Signals and Systems",
+          "course_code": "EE 250",
+          "exam_date": "2026-12-19",
+          "exam_time": "10:00",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Innovation Management",
+          "course_code": "MGT 300",
+          "exam_date": "2026-12-20",
+          "exam_time": "10:30",
+          "venue": "Hall B"
+        }
+      ]
+    },
+    {
+      "id": "exam-09-grouped-iso",
+      "type": "exam",
+      "file": "cases/exam-09-grouped-iso.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["grouped", "date:iso", "time:h12", "lang:en", "pdf"],
+      "expected": [
+        {
+          "subject": "Signals and Systems",
+          "course_code": "EE 250",
+          "exam_date": "2026-12-07",
+          "exam_time": "08:00",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Linear Algebra",
+          "course_code": "MATH 215",
+          "exam_date": "2026-12-09",
+          "exam_time": "08:00",
+          "venue": "Amphi 2"
+        },
+        {
+          "subject": "Technical Writing",
+          "course_code": "ENG 120",
+          "exam_date": "2026-12-10",
+          "exam_time": "08:00",
+          "venue": "Amphi 2"
+        },
+        {
+          "subject": "Algorithms",
+          "course_code": "CS 230",
+          "exam_date": "2026-12-14",
+          "exam_time": "09:00",
+          "venue": "Room 204"
+        },
+        {
+          "subject": "Digital Electronics",
+          "course_code": "EE 260",
+          "exam_date": "2026-12-18",
+          "exam_time": "14:00",
+          "venue": "Room 204"
+        },
+        {
+          "subject": "Deep Learning",
+          "course_code": "AI 420",
+          "exam_date": "2026-12-19",
+          "exam_time": "08:00",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Operating Systems",
+          "course_code": "CS 305",
+          "exam_date": "2026-12-21",
+          "exam_time": "08:00",
+          "venue": "Salle B12"
+        }
+      ]
+    },
+    {
+      "id": "exam-10-grouped-dmy",
+      "type": "exam",
+      "file": "cases/exam-10-grouped-dmy.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["grouped", "date:dmy", "time:h12", "lang:en", "pdf"],
+      "expected": [
+        {
+          "subject": "Digital Electronics",
+          "course_code": null,
+          "exam_date": "2026-12-07",
+          "exam_time": "13:30",
+          "venue": "Hall B"
+        },
+        {
+          "subject": "Linear Algebra",
+          "course_code": null,
+          "exam_date": "2026-12-08",
+          "exam_time": "14:00",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Microeconomics",
+          "course_code": null,
+          "exam_date": "2026-12-14",
+          "exam_time": "09:30",
+          "venue": null
+        },
+        {
+          "subject": "Computer Networks",
+          "course_code": null,
+          "exam_date": "2026-12-18",
+          "exam_time": "10:00",
+          "venue": "Amphi 2"
+        }
+      ]
+    },
+    {
+      "id": "exam-11-grouped-long",
+      "type": "exam",
+      "file": "cases/exam-11-grouped-long.png",
+      "mimeType": "image/png",
+      "tags": ["grouped", "date:long", "time:h12", "lang:en", "image"],
+      "expected": [
+        {
+          "subject": "Database Systems",
+          "course_code": "CS 320",
+          "exam_date": "2026-12-09",
+          "exam_time": "10:30",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Digital Electronics",
+          "course_code": "EE 260",
+          "exam_date": "2026-12-10",
+          "exam_time": "08:00",
+          "venue": "Room 101"
+        },
+        {
+          "subject": "Probability and Statistics",
+          "course_code": "STAT 220",
+          "exam_date": "2026-12-11",
+          "exam_time": "09:00",
+          "venue": "Room 204"
+        },
+        {
+          "subject": "French Language A2",
+          "course_code": "FR 101",
+          "exam_date": "2026-12-12",
+          "exam_time": "13:30",
+          "venue": "Room 204"
+        },
+        {
+          "subject": "Calculus II",
+          "course_code": "MATH 201",
+          "exam_date": "2026-12-13",
+          "exam_time": "10:00",
+          "venue": "Room 204"
+        },
+        {
+          "subject": "Microeconomics",
+          "course_code": "ECON 110",
+          "exam_date": "2026-12-14",
+          "exam_time": "15:00",
+          "venue": "Main Auditorium"
+        },
+        {
+          "subject": "Deep Learning",
+          "course_code": "AI 420",
+          "exam_date": "2026-12-15",
+          "exam_time": "13:00",
+          "venue": "Main Auditorium"
+        },
+        {
+          "subject": "Machine Learning",
+          "course_code": "AI 410",
+          "exam_date": "2026-12-16",
+          "exam_time": "09:00",
+          "venue": "Room 101"
+        },
+        {
+          "subject": "Data Structures",
+          "course_code": "CS 210",
+          "exam_date": "2026-12-18",
+          "exam_time": "08:00",
+          "venue": "Amphi 2"
+        }
+      ]
+    },
+    {
+      "id": "exam-12-grouped-short",
+      "type": "exam",
+      "file": "cases/exam-12-grouped-short.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["grouped", "date:short", "time:h24", "lang:en", "pdf"],
+      "expected": [
+        {
+          "subject": "Database Systems",
+          "course_code": "CS 320",
+          "exam_date": "2026-12-08",
+          "exam_time": "08:30",
+          "venue": "Room 204"
+        },
+        {
+          "subject": "Deep Learning",
+          "course_code": "AI 420",
+          "exam_date": "2026-12-09",
+          "exam_time": "08:00",
+          "venue": "Amphi 2"
+        },
+        {
+          "subject": "Digital Electronics",
+          "course_code": "EE 260",
+          "exam_date": "2026-12-12",
+          "exam_time": "13:00",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Linear Algebra",
+          "course_code": "MATH 215",
+          "exam_date": "2026-12-13",
+          "exam_time": "09:00",
+          "venue": "Amphi 2"
+        },
+        {
+          "subject": "Microeconomics",
+          "course_code": "ECON 110",
+          "exam_date": "2026-12-14",
+          "exam_time": "08:00",
+          "venue": "Amphi 2"
+        },
+        {
+          "subject": "Innovation Management",
+          "course_code": "MGT 300",
+          "exam_date": "2026-12-17",
+          "exam_time": "08:00",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Electromagnetism",
+          "course_code": "PHYS 150",
+          "exam_date": "2026-12-19",
+          "exam_time": "09:30",
+          "venue": "Main Auditorium"
+        },
+        {
+          "subject": "Probability and Statistics",
+          "course_code": "STAT 220",
+          "exam_date": "2026-12-20",
+          "exam_time": "09:30",
+          "venue": "Room 101"
+        }
+      ]
+    },
+    {
+      "id": "exam-13-table-french",
+      "type": "exam",
+      "file": "cases/exam-13-table-french.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["table", "date:french", "time:french", "lang:fr", "pdf"],
+      "expected": [
+        {
+          "subject": "Natural Language Processing",
+          "course_code": "AI 430",
+          "exam_date": "2026-12-09",
+          "exam_time": "14:00",
+          "venue": null
+        },
+        {
+          "subject": "Algorithms",
+          "course_code": "CS 230",
+          "exam_date": "2026-12-12",
+          "exam_time": "10:00",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "French Language A2",
+          "course_code": "FR 101",
+          "exam_date": "2026-12-13",
+          "exam_time": "14:00",
+          "venue": null
+        },
+        {
+          "subject": "Data Structures",
+          "course_code": "CS 210",
+          "exam_date": "2026-12-14",
+          "exam_time": "10:30",
+          "venue": null
+        },
+        {
+          "subject": "Technical Writing",
+          "course_code": "ENG 120",
+          "exam_date": "2026-12-16",
+          "exam_time": "13:30",
+          "venue": null
+        },
+        {
+          "subject": "Signals and Systems",
+          "course_code": "EE 250",
+          "exam_date": "2026-12-17",
+          "exam_time": "14:00",
+          "venue": "Amphi 2"
+        },
+        {
+          "subject": "Microeconomics",
+          "course_code": "ECON 110",
+          "exam_date": "2026-12-18",
+          "exam_time": "10:30",
+          "venue": "Hall B"
+        },
+        {
+          "subject": "Probability and Statistics",
+          "course_code": "STAT 220",
+          "exam_date": "2026-12-21",
+          "exam_time": "14:30",
+          "venue": null
+        }
+      ]
+    },
+    {
+      "id": "exam-14-grouped-french",
+      "type": "exam",
+      "file": "cases/exam-14-grouped-french.png",
+      "mimeType": "image/png",
+      "tags": ["grouped", "date:french", "time:french", "lang:fr", "image"],
+      "expected": [
+        {
+          "subject": "Data Structures",
+          "course_code": "CS 210",
+          "exam_date": "2026-12-07",
+          "exam_time": "13:00",
+          "venue": "Hall A"
+        },
+        {
+          "subject": "Database Systems",
+          "course_code": "CS 320",
+          "exam_date": "2026-12-08",
+          "exam_time": "13:00",
+          "venue": "Salle B12"
+        },
+        {
+          "subject": "Calculus II",
+          "course_code": "MATH 201",
+          "exam_date": "2026-12-09",
+          "exam_time": "13:30",
+          "venue": "Lab 3"
+        },
+        {
+          "subject": "Technical Writing",
+          "course_code": "ENG 120",
+          "exam_date": "2026-12-10",
+          "exam_time": "13:00",
+          "venue": "Main Auditorium"
+        },
+        {
+          "subject": "Linear Algebra",
+          "course_code": "MATH 215",
+          "exam_date": "2026-12-17",
+          "exam_time": "10:00",
+          "venue": "Room 101"
+        },
+        {
+          "subject": "Computer Networks",
+          "course_code": "CS 340",
+          "exam_date": "2026-12-18",
+          "exam_time": "14:00",
+          "venue": "Room 101"
+        },
+        {
+          "subject": "Deep Learning",
+          "course_code": "AI 420",
+          "exam_date": "2026-12-19",
+          "exam_time": "08:00",
+          "venue": "Hall B"
+        }
+      ]
+    },
+    {
+      "id": "schedule-01-grid",
+      "type": "schedule",
+      "file": "cases/schedule-01-grid.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["grid", "time:h24", "pdf"],
+      "expected": {
+        "monday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "Signals and Systems",
+            "venue": "Salle B12"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "Innovation Management",
+            "venue": "Main Auditorium"
+          }
+        ],
+        "tuesday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "MGT 300",
+            "venue": "Main Auditorium"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "Innovation Management",
+            "venue": "Hall A"
+          }
+        ],
+        "wednesday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "Machine Learning",
+            "venue": "Room 101"
+          },
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "Innovation Management",
+            "venue": "Hall B"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "MGT 300",
+            "venue": "Hall A"
+          }
+        ],
+        "thursday": [
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "Microeconomics",
+            "venue": "Room 101"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "AI 410",
+            "venue": "Amphi 2"
+          }
+        ],
+        "friday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "STAT 220",
+            "venue": "Room 101"
+          }
+        ],
+        "saturday": [],
+        "sunday": []
+      }
+    },
+    {
+      "id": "schedule-02-by-day",
+      "type": "schedule",
+      "file": "cases/schedule-02-by-day.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["by-day", "time:h12", "pdf"],
+      "expected": {
+        "monday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "Electromagnetism",
+            "venue": "Room 101"
+          },
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "MATH 201",
+            "venue": null
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "PHYS 150",
+            "venue": "Main Auditorium"
+          }
+        ],
+        "tuesday": [
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "Electromagnetism",
+            "venue": "Hall B"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "Innovation Management",
+            "venue": "Room 101"
+          }
+        ],
+        "wednesday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "FR 101",
+            "venue": "Main Auditorium"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "Probability and Statistics",
+            "venue": null
+          }
+        ],
+        "thursday": [
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "Calculus II",
+            "venue": "Hall B"
+          }
+        ],
+        "friday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "Innovation Management",
+            "venue": "Hall A"
+          },
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "French Language A2",
+            "venue": "Hall A"
+          },
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "Electromagnetism",
+            "venue": "Lab 3"
+          }
+        ],
+        "saturday": [],
+        "sunday": []
+      }
+    },
+    {
+      "id": "schedule-03-grid",
+      "type": "schedule",
+      "file": "cases/schedule-03-grid.pdf",
+      "mimeType": "application/pdf",
+      "tags": ["grid", "time:h24", "pdf"],
+      "expected": {
+        "monday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "MGT 300",
+            "venue": "Lab 3"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "AI 410",
+            "venue": null
+          }
+        ],
+        "tuesday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "MATH 215",
+            "venue": "Hall B"
+          }
+        ],
+        "wednesday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "Computer Networks",
+            "venue": "Room 101"
+          },
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "CS 305",
+            "venue": "Room 204"
+          },
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "Linear Algebra",
+            "venue": "Amphi 2"
+          }
+        ],
+        "thursday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "Innovation Management",
+            "venue": "Main Auditorium"
+          },
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "MGT 300",
+            "venue": "Room 101"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "AI 420",
+            "venue": "Main Auditorium"
+          }
+        ],
+        "friday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "Linear Algebra",
+            "venue": null
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "CS 340",
+            "venue": "Room 101"
+          }
+        ],
+        "saturday": [],
+        "sunday": []
+      }
+    },
+    {
+      "id": "schedule-04-by-day",
+      "type": "schedule",
+      "file": "cases/schedule-04-by-day.png",
+      "mimeType": "image/png",
+      "tags": ["by-day", "time:h24", "image"],
+      "expected": {
+        "monday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "Signals and Systems",
+            "venue": "Hall B"
+          },
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "STAT 220",
+            "venue": "Room 204"
+          }
+        ],
+        "tuesday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "CS 210",
+            "venue": "Lab 3"
+          },
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "Innovation Management",
+            "venue": "Hall B"
+          }
+        ],
+        "wednesday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "ECON 110",
+            "venue": null
+          }
+        ],
+        "thursday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "CS 210",
+            "venue": "Lab 3"
+          }
+        ],
+        "friday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "STAT 220",
+            "venue": "Room 101"
+          }
+        ],
+        "saturday": [],
+        "sunday": []
+      }
+    },
+    {
+      "id": "schedule-05-grid",
+      "type": "schedule",
+      "file": "cases/schedule-05-grid.png",
+      "mimeType": "image/png",
+      "tags": ["grid", "time:h24", "image"],
+      "expected": {
+        "monday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "MATH 201",
+            "venue": "Hall A"
+          }
+        ],
+        "tuesday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "Signals and Systems",
+            "venue": null
+          },
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "Algorithms",
+            "venue": "Room 101"
+          }
+        ],
+        "wednesday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "CS 230",
+            "venue": "Lab 3"
+          },
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "Calculus II",
+            "venue": "Lab 3"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "ENG 120",
+            "venue": "Room 204"
+          }
+        ],
+        "thursday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "Technical Writing",
+            "venue": "Main Auditorium"
+          }
+        ],
+        "friday": [
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "CS 230",
+            "venue": "Lab 3"
+          }
+        ],
+        "saturday": [],
+        "sunday": []
+      }
+    },
+    {
+      "id": "schedule-06-by-day",
+      "type": "schedule",
+      "file": "cases/schedule-06-by-day.png",
+      "mimeType": "image/png",
+      "tags": ["by-day", "time:h12", "image"],
+      "expected": {
+        "monday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "EE 260",
+            "venue": "Room 101"
+          },
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "Probability and Statistics",
+            "venue": "Room 204"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "CS 305",
+            "venue": "Hall A"
+          }
+        ],
+        "tuesday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "CS 320",
+            "venue": null
+          }
+        ],
+        "wednesday": [
+          {
+            "start": "10:00",
+            "end": "12:00",
+            "subject": "EE 260",
+            "venue": "Hall A"
+          },
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "Database Systems",
+            "venue": null
+          }
+        ],
+        "thursday": [
+          {
+            "start": "08:00",
+            "end": "10:00",
+            "subject": "CS 320",
+            "venue": "Room 204"
+          },
+          {
+            "start": "13:00",
+            "end": "15:00",
+            "subject": "Technical Writing",
+            "venue": "Salle B12"
+          }
+        ],
+        "friday": [
+          {
+            "start": "15:00",
+            "end": "17:00",
+            "subject": "Digital Electronics",
+            "venue": "Hall B"
+          }
+        ],
+        "saturday": [],
+        "sunday": []
+      }
+    }
+  ]
+}

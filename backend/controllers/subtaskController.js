@@ -1,105 +1,114 @@
 const { z } = require('zod');
 const supabase = require('../supabaseClient');
+const { HttpError } = require('../lib/errors');
+const { validate, throwIfDbError } = require('../lib/validate');
 
-const createSubtaskSchema = z.object({
-  task_id: z.string().uuid().optional(),
-  exam_id: z.string().uuid().optional(),
-  title: z.string().min(1, 'Title is required'),
-  estimated_hours: z.number().min(0).optional(),
-  order_index: z.number().int().min(0).optional(),
-}).refine(
-  (d) => (d.task_id && !d.exam_id) || (!d.task_id && d.exam_id),
-  { message: 'Provide either task_id or exam_id, not both' }
-);
+const createSubtaskSchema = z
+  .object({
+    task_id: z.uuid().optional(),
+    exam_id: z.uuid().optional(),
+    title: z.string().trim().min(1, 'Title is required').max(200),
+    estimated_hours: z.number().min(0).max(1000).optional(),
+    order_index: z.number().int().min(0).optional(),
+  })
+  .refine((body) => Boolean(body.task_id) !== Boolean(body.exam_id), {
+    message: 'Provide either task_id or exam_id, not both',
+  });
 
-const updateSubtaskSchema = z.object({
-  title: z.string().min(1).optional(),
-  status: z.enum(['not_started', 'done']).optional(),
-  estimated_hours: z.number().min(0).optional(),
-  order_index: z.number().int().min(0).optional(),
+const updateSubtaskSchema = z
+  .object({
+    title: z.string().trim().min(1).max(200).optional(),
+    status: z.enum(['not_started', 'done']).optional(),
+    estimated_hours: z.number().min(0).max(1000).optional(),
+    order_index: z.number().int().min(0).optional(),
+  })
+  .refine((body) => Object.keys(body).length > 0, 'At least one field is required');
+
+const listQuerySchema = z.object({
+  task_id: z.uuid().optional(),
+  exam_id: z.uuid().optional(),
 });
 
-// GET /api/subtasks?task_id=xxx or ?exam_id=xxx
+const NOT_FOUND = 'Subtask not found';
+
+/**
+ * Confirm the parent task or exam belongs to the user. The service-role client
+ * bypasses RLS, so without this a user could attach subtasks to another
+ * user's record by guessing its id.
+ */
+async function assertParentOwned(userId, { task_id: taskId, exam_id: examId }) {
+  const table = taskId ? 'tasks' : 'exams';
+  const { data, error } = await supabase
+    .from(table)
+    .select('id')
+    .eq('id', taskId || examId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new HttpError(404, taskId ? 'Task not found' : 'Exam not found');
+}
+
+/** GET /api/subtasks?task_id=… or ?exam_id=… */
 exports.getSubtasks = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { task_id, exam_id } = req.query;
+  const { task_id: taskId, exam_id: examId } = validate(listQuerySchema, req.query);
 
-    let query = supabase
-      .from('subtasks')
-      .select('*')
-      .eq('user_id', userId)
-      .order('order_index', { ascending: true });
+  let query = supabase
+    .from('subtasks')
+    .select('*')
+    .eq('user_id', req.user.id)
+    .order('order_index', { ascending: true });
 
-    if (task_id) query = query.eq('task_id', task_id);
-    if (exam_id) query = query.eq('exam_id', exam_id);
+  if (taskId) query = query.eq('task_id', taskId);
+  if (examId) query = query.eq('exam_id', examId);
 
-    const { data, error } = await query;
-    if (error) throw error;
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch subtasks.' });
-  }
+  const { data, error } = await query;
+  if (error) throw error;
+  res.json(data);
 };
 
-// POST /api/subtasks
+/** POST /api/subtasks */
 exports.createSubtask = async (req, res) => {
-  try {
-    const parsed = createSubtaskSchema.parse(req.body);
-    const userId = req.user.id;
+  const body = validate(createSubtaskSchema, req.body);
+  await assertParentOwned(req.user.id, body);
 
-    const { data, error } = await supabase
-      .from('subtasks')
-      .insert({ ...parsed, user_id: userId })
-      .select()
-      .single();
+  const { data, error } = await supabase
+    .from('subtasks')
+    .insert({ ...body, user_id: req.user.id })
+    .select()
+    .single();
 
-    if (error) throw error;
-    res.status(201).json(data);
-  } catch (err) {
-    if (err.issues) return res.status(400).json({ error: err.issues[0].message });
-    res.status(500).json({ error: 'Failed to create subtask.' });
-  }
+  if (error) throw error;
+  res.status(201).json(data);
 };
 
-// PATCH /api/subtasks/:id
+/** PATCH /api/subtasks/:id */
 exports.updateSubtask = async (req, res) => {
-  try {
-    const parsed = updateSubtaskSchema.parse(req.body);
-    const userId = req.user.id;
+  const body = validate(updateSubtaskSchema, req.body);
+  const { data, error } = await supabase
+    .from('subtasks')
+    .update(body)
+    .eq('id', req.params.id)
+    .eq('user_id', req.user.id)
+    .select()
+    .single();
 
-    const { data, error } = await supabase
-      .from('subtasks')
-      .update(parsed)
-      .eq('id', req.params.id)
-      .eq('user_id', userId)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') return res.status(404).json({ error: 'Subtask not found.' });
-      throw error;
-    }
-    res.json(data);
-  } catch (err) {
-    if (err.issues) return res.status(400).json({ error: err.issues[0].message });
-    res.status(500).json({ error: 'Failed to update subtask.' });
-  }
+  throwIfDbError(error, NOT_FOUND);
+  res.json(data);
 };
 
-// DELETE /api/subtasks/:id
+/** DELETE /api/subtasks/:id */
 exports.deleteSubtask = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { error } = await supabase
-      .from('subtasks')
-      .delete()
-      .eq('id', req.params.id)
-      .eq('user_id', userId);
+  const { data, error } = await supabase
+    .from('subtasks')
+    .delete()
+    .eq('id', req.params.id)
+    .eq('user_id', req.user.id)
+    .select('id');
 
-    if (error) throw error;
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to delete subtask.' });
-  }
+  if (error) throw error;
+  if (data.length === 0) throw new HttpError(404, NOT_FOUND);
+  res.json({ success: true });
 };
+
+exports.schemas = { createSubtaskSchema, updateSubtaskSchema };

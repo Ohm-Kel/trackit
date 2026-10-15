@@ -1,21 +1,21 @@
 const { createClient } = require('@supabase/supabase-js');
-const path = require('path');
-require('dotenv').config();
-// Also try loading from the backend directory specifically for monorepo structures
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+const config = require('./config');
+const logger = require('./lib/logger');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-
-if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
-  console.warn('[AUTH CONFIG] WARNING: Supabase URL or Service Key is missing or using placeholder!');
-} else {
-  console.log(`[AUTH CONFIG] Initializing Supabase with URL: ${supabaseUrl.substring(0, 15)}...`);
+if (!config.supabaseUrl || !config.supabaseServiceKey) {
+  logger.warn('SUPABASE_URL or SUPABASE_SERVICE_KEY is not set; database calls will fail');
 }
 
+/**
+ * Server-side Supabase client using the service role key.
+ *
+ * The service role bypasses Row Level Security, so every query made with this
+ * client MUST filter by the authenticated user's id (`req.user.id`).
+ */
 const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co', 
-  supabaseKey || 'placeholder_key'
+  config.supabaseUrl || 'http://localhost:54321',
+  config.supabaseServiceKey || 'missing-service-key',
+  { auth: { persistSession: false, autoRefreshToken: false } },
 );
 
 module.exports = supabase;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, Check } from 'lucide-react';
 import { useCreateTask, useUpdateTask, useTasks } from '../hooks/useTasks';
@@ -18,7 +18,6 @@ export default function Add() {
   const [topics, setTopics] = useState([]);
   const [topicInput, setTopicInput] = useState('');
   const [savedOk, setSavedOk] = useState(false);
-  const [loadingEdit, setLoadingEdit] = useState(isEditMode);
 
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
@@ -26,8 +25,8 @@ export default function Add() {
   const updateExam = useUpdateExam();
 
   // Fetch existing data for edit mode
-  const { data: allTasks = [] } = useTasks();
-  const { data: allExams = [] } = useExams();
+  const { data: allTasks = [], isLoading: tasksLoading } = useTasks();
+  const { data: allExams = [], isLoading: examsLoading } = useExams();
 
   // Task form state
   const [taskForm, setTaskForm] = useState({
@@ -40,43 +39,43 @@ export default function Add() {
     subject: '', course_code: '', exam_date: '', daily_study_hours: '',
   });
 
-  // Populate form when editing
-  useEffect(() => {
-    if (editTaskId && allTasks.length > 0) {
-      const task = allTasks.find(t => t.id === editTaskId);
-      if (task) {
-        setTaskForm({
-          title: task.title || '',
-          due_date: task.due_date ? task.due_date.split('T')[0] : '',
-          course_code: task.course_code || '',
-          grade_weight: task.grade_weight ?? '',
-          estimated_hours: task.estimated_hours ?? '',
-          status: task.status || 'not_started',
-          description: task.description || '',
-        });
-        setLoadingEdit(false);
-      }
-    }
-    if (editExamId && allExams.length > 0) {
-      const exam = allExams.find(e => e.id === editExamId);
-      if (exam) {
-        setExamForm({
-          subject: exam.subject || '',
-          course_code: exam.course_code || '',
-          exam_date: exam.exam_date ? exam.exam_date.split('T')[0] : '',
-          daily_study_hours: exam.daily_study_hours ?? '',
-        });
-        setConfidence(exam.confidence_level || 'medium');
-        setTopics(Array.isArray(exam.topics) ? exam.topics : []);
-        setLoadingEdit(false);
-      }
-    }
-    if (!editTaskId && !editExamId) setLoadingEdit(false);
+  // Populate the form once the record being edited has loaded. Done during
+  // render (React's "adjust state when props change" pattern) rather than in an
+  // effect, so the form never renders a frame with stale values.
+  const editKey = editTaskId ? `task:${editTaskId}` : editExamId ? `exam:${editExamId}` : null;
+  const [hydratedKey, setHydratedKey] = useState(null);
+  const editTask = editTaskId ? allTasks.find(t => t.id === editTaskId) : undefined;
+  const editExam = editExamId ? allExams.find(e => e.id === editExamId) : undefined;
 
-    // If data loaded but item not found, stop loading (invalid ID in URL)
-    if (editTaskId && allTasks.length > 0 && !allTasks.find(t => t.id === editTaskId)) setLoadingEdit(false);
-    if (editExamId && allExams.length > 0 && !allExams.find(e => e.id === editExamId)) setLoadingEdit(false);
-  }, [editTaskId, editExamId, allTasks, allExams]);
+  if (editKey && hydratedKey !== editKey && (editTask || editExam)) {
+    setHydratedKey(editKey);
+    if (editTask) {
+      setTaskForm({
+        title: editTask.title || '',
+        due_date: editTask.due_date ? editTask.due_date.split('T')[0] : '',
+        course_code: editTask.course_code || '',
+        grade_weight: editTask.grade_weight ?? '',
+        estimated_hours: editTask.estimated_hours ?? '',
+        status: editTask.status || 'not_started',
+        description: editTask.description || '',
+      });
+    }
+    if (editExam) {
+      setExamForm({
+        subject: editExam.subject || '',
+        course_code: editExam.course_code || '',
+        exam_date: editExam.exam_date ? editExam.exam_date.split('T')[0] : '',
+        daily_study_hours: editExam.daily_study_hours ?? '',
+      });
+      setConfidence(editExam.confidence_level || 'medium');
+      setTopics(Array.isArray(editExam.topics) ? editExam.topics : []);
+    }
+  }
+
+  // Keep the spinner only while the record is still loading; an unknown id
+  // falls through to an empty form instead of spinning forever.
+  const editSourceLoading = editTaskId ? tasksLoading : editExamId ? examsLoading : false;
+  const loadingEdit = Boolean(editKey) && hydratedKey !== editKey && editSourceLoading;
 
   // Plain-text quick-fill
   const [nlpText, setNlpText] = useState('');

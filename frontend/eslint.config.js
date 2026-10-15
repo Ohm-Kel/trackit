@@ -23,7 +23,14 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Core no-unused-vars cannot see JSX usage, so PascalCase names (React
+      // components, including destructured `icon: Icon` props) are exempt.
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^[A-Z_]' }],
+      // Context modules export their hook next to the provider by design.
+      'react-refresh/only-export-components': [
+        'error',
+        { allowExportNames: ['useAuth', 'useTheme', 'useToast', 'requestNotificationPermission'] },
+      ],
     },
   },
 ])

@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../hooks/useTasks';
-import { useExams } from '../hooks/useExams';
 
 export default function Analytics() {
   const { session } = useAuth();

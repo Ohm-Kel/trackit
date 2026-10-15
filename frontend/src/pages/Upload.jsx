@@ -4,8 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { parseUpload, importExams, saveSchedule } from '../api/upload';
 
-const ACCEPTED = '.pdf,.png,.jpg,.jpeg';
-const MAX_SIZE = 8 * 1024 * 1024; // 8 MB
+const ACCEPTED = '.pdf,.png,.jpg,.jpeg,.webp';
+// Base64 encoding adds ~33%, so 6 MB stays under the API's 10 MB body limit.
+const MAX_SIZE = 6 * 1024 * 1024;
+// Claude rejects images larger than 5 MB.
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -57,7 +60,8 @@ export default function Upload() {
     if (!file) return 'No file selected';
     if (file.size > MAX_SIZE) return `File too large (max ${formatSize(MAX_SIZE)})`;
     const ext = file.name.toLowerCase().split('.').pop();
-    if (!['pdf', 'png', 'jpg', 'jpeg'].includes(ext)) return 'Unsupported file type';
+    if (!['pdf', 'png', 'jpg', 'jpeg', 'webp'].includes(ext)) return 'Unsupported file type';
+    if (ext !== 'pdf' && file.size > MAX_IMAGE_SIZE) return `Image too large (max ${formatSize(MAX_IMAGE_SIZE)})`;
     return null;
   }
 

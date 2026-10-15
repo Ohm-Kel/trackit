@@ -1,15 +1,13 @@
 const express = require('express');
-const router = express.Router();
 const uploadController = require('../controllers/uploadController');
 const authMiddleware = require('../middleware/authMiddleware');
+const { uploadLimiter } = require('../middleware/rateLimit');
 
-// POST /api/upload/parse — parse a timetable file with AI
-router.post('/parse', authMiddleware, uploadController.parseUpload);
+const router = express.Router();
+router.use(authMiddleware);
 
-// POST /api/upload/import-exams — bulk-create exams from parsed data
-router.post('/import-exams', authMiddleware, uploadController.importExams);
-
-// POST /api/upload/save-schedule — store weekly schedule on user profile
-router.post('/save-schedule', authMiddleware, uploadController.saveSchedule);
+router.post('/parse', uploadLimiter, uploadController.parseUpload);
+router.post('/import-exams', uploadController.importExams);
+router.post('/save-schedule', uploadController.saveSchedule);
 
 module.exports = router;
