@@ -1,4 +1,4 @@
-# ADR 0006: Installable app that reads offline
+# ADR 0007: Installable app that reads offline
 
 - Status: Accepted
 - Date: 2026-10-15

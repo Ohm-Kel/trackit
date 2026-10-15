@@ -18,7 +18,7 @@ function savedSessionUser() {
 export const AuthProvider = ({ children }) => {
   // Offline, an expired access token cannot be refreshed: supabase-js keeps
   // the session to refresh later, but retries for up to 30 seconds and then
-  // reports no session. Its user can still read their saved data (ADR 0006),
+  // reports no session. Its user can still read their saved data (ADR 0007),
   // so start with them rather than wait or sign them out.
   const [user, setUser] = useState(() => (onlineManager.isOnline() ? null : savedSessionUser()));
   const [session, setSession] = useState(null);

@@ -3,7 +3,7 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 
 /**
  * React Query's cache, saved to IndexedDB so signed-in pages can show the
- * last data they loaded when the device is offline (ADR 0006).
+ * last data they loaded when the device is offline (ADR 0007).
  *
  * Each user's cache is stored under their own key, so one user can never
  * restore another's, and every entry is deleted on sign-out.

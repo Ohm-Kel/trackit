@@ -4,7 +4,7 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 /**
  * Registers the service worker and, when a new version has been downloaded,
  * asks the user to reload. The new version only takes over when they accept,
- * so code never changes under a page that is in use (ADR 0006).
+ * so code never changes under a page that is in use (ADR 0007).
  */
 export default function UpdatePrompt() {
   const {

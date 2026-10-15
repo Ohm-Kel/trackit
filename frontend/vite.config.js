@@ -44,7 +44,7 @@ export function contentSecurityPolicy(supabaseUrl) {
 }
 
 /**
- * Installable app and offline shell (ADR 0006). The service worker precaches
+ * Installable app and offline shell (ADR 0007). The service worker precaches
  * only the built app shell. It has no runtime caching, so API responses
  * (including /api/chat/stream) and Supabase auth calls always go to the
  * network; signed-in data is kept offline by React Query's per-user

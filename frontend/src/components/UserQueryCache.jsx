@@ -11,7 +11,7 @@ const RESTORE_TIMEOUT_MS = 2000;
 
 /**
  * Keeps the signed-in user's React Query cache in IndexedDB so pages can
- * show their last data offline (ADR 0006).
+ * show their last data offline (ADR 0007).
  *
  * The cache is restored only for the user it was saved for. When the user
  * signs out, or another user signs in, the in-memory cache is emptied and
