@@ -93,4 +93,92 @@ BEGIN
   ASSERT (SELECT count(*) FROM public.subtasks) = 1, 'Only Alice''s valid subtask exists';
 END $$;
 
+-- Calendar feed (migration 003). Seed as the owner: Bob has a feed, and both
+-- users have dated tasks and exams.
+INSERT INTO public.calendar_feeds (user_id, token_hash)
+  VALUES (:bob, encode(sha256('bob-token'::bytea), 'hex'));
+INSERT INTO public.tasks (user_id, title, status, due_date) VALUES
+  (:alice, 'Alice open; task, with \ text', 'in_progress', '2026-11-02'),
+  (:alice, 'Alice done task', 'done', '2026-11-03'),
+  (:bob, 'Bob dated task', 'not_started', '2026-11-04');
+INSERT INTO public.exams (user_id, subject, exam_date) VALUES
+  (:alice, 'Alice exam', '2026-12-01 09:00:00+00');
+
+-- Alice manages only her own feed row.
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub', :alice, true);
+DO $$
+BEGIN
+  ASSERT (SELECT count(*) FROM public.calendar_feeds) = 0, 'Alice cannot see Bob''s feed';
+  INSERT INTO public.calendar_feeds (user_id, token_hash)
+    VALUES (auth.uid(), encode(sha256('alice-old'::bytea), 'hex'));
+  -- Rotating is an upsert, the way the API does it.
+  INSERT INTO public.calendar_feeds (user_id, token_hash)
+    VALUES (auth.uid(), encode(sha256('alice-token'::bytea), 'hex'))
+    ON CONFLICT (user_id) DO UPDATE SET token_hash = EXCLUDED.token_hash, created_at = now();
+  ASSERT (SELECT count(*) FROM public.calendar_feeds) = 1, 'Alice has one feed';
+  -- Bob's row matches nothing.
+  UPDATE public.calendar_feeds SET token_hash = repeat('0', 64)
+    WHERE user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
+  DELETE FROM public.calendar_feeds WHERE user_id = 'bbbbbbbb-0000-4000-8000-000000000002';
+END $$;
+
+DO $$
+DECLARE
+  attempt TEXT;
+  attempts TEXT[] := ARRAY[
+    $q$INSERT INTO public.calendar_feeds (user_id, token_hash) VALUES ('bbbbbbbb-0000-4000-8000-000000000002', repeat('1', 64))$q$,
+    $q$UPDATE public.calendar_feeds SET user_id = 'bbbbbbbb-0000-4000-8000-000000000002'$q$,
+    -- Signed-in users have no reason to call the feed lookup.
+    $q$SELECT public.calendar_feed('bob-token')$q$
+  ];
+BEGIN
+  FOREACH attempt IN ARRAY attempts LOOP
+    BEGIN
+      EXECUTE attempt;
+      RAISE EXCEPTION 'Expected RLS to reject: %', attempt;
+    EXCEPTION WHEN insufficient_privilege THEN
+      NULL;
+    END;
+  END LOOP;
+END $$;
+COMMIT;
+
+-- Without a session (the feed request), only the lookup function works.
+BEGIN;
+SET LOCAL ROLE anon;
+DO $$
+DECLARE
+  feed JSONB := public.calendar_feed('alice-token');
+BEGIN
+  ASSERT jsonb_array_length(feed->'tasks') = 1, 'The feed has Alice''s one open, dated task';
+  ASSERT feed->'tasks'->0->>'title' = 'Alice open; task, with \ text', 'The task title is returned as stored';
+  ASSERT jsonb_array_length(feed->'exams') = 1, 'The feed has Alice''s dated exam';
+  ASSERT feed->'exams'->0->>'subject' = 'Alice exam', 'The exam is Alice''s';
+  ASSERT public.calendar_feed('alice-old') IS NULL, 'A rotated token no longer works';
+  ASSERT public.calendar_feed('nope') IS NULL, 'An unknown token returns nothing';
+  ASSERT public.calendar_feed(encode(sha256('alice-token'::bytea), 'hex')) IS NULL,
+    'The stored hash is not itself a valid token';
+  BEGIN
+    PERFORM * FROM public.calendar_feeds;
+    RAISE EXCEPTION 'Expected anon to be refused calendar_feeds';
+  EXCEPTION WHEN insufficient_privilege THEN
+    NULL;
+  END;
+END $$;
+COMMIT;
+
+-- Revoking deletes the row; the old link stops working.
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub', :alice, true);
+DELETE FROM public.calendar_feeds WHERE user_id = auth.uid();
+COMMIT;
+DO $$
+BEGIN
+  ASSERT public.calendar_feed('alice-token') IS NULL, 'A revoked token no longer works';
+  ASSERT public.calendar_feed('bob-token') IS NOT NULL, 'Bob''s feed is untouched';
+END $$;
+
 \echo 'RLS checks passed'
