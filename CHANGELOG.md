@@ -12,7 +12,7 @@ All notable changes to this project are documented here. The format follows
 - Frontend test suite with Vitest and React Testing Library (30 tests), run in CI with a coverage summary
 - Database CI job: applies the schema and migrations to Postgres 16 and runs Row Level Security checks
 - `supabase_migrations_002.sql`
-- Content-Security-Policy and security headers on the frontend (Vercel and Docker)
+- Content-Security-Policy built from the configured Supabase URL, plus security headers on the frontend (Vercel and Docker)
 - Dependency audit in CI for production dependencies, and weekly Dependabot updates
 
 ### Changed
@@ -33,6 +33,7 @@ All notable changes to this project are documented here. The format follows
 - Rate-limit counters are readable and writable by the service role only
 - Stored XSS in the PDF export: task and exam text (including text read from uploaded timetables) is now HTML-escaped
 - CSV export neutralises spreadsheet formulas (`=`, `+`, `-`, `@`)
+- Every API route is rate-limited per user, and failed authentication per IP
 - Patched vulnerable dependencies, including proxy-addr (IP spoofing, critical), path-to-regexp, ws, body-parser, qs, react-router and vite
 - The browser console no longer logs the user's email and profile metadata
 
