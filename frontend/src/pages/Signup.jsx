@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, UserPlus, Chrome, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
@@ -11,7 +11,6 @@ const Signup = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp, signInWithGoogle } = useAuth();
-  const navigate = useNavigate();
 
   const validatePassword = (pass) => {
     if (pass.length < 8) return 'Password must be at least 8 characters long';

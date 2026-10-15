@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2, Sun, Moon, Monitor, Download, Trash2, Shield, LogOut, Globe, ExternalLink, Mail, BellOff } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabaseClient';
 import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
 import { useProfile, useUpdateProfile } from '../hooks/useProfile';
@@ -12,6 +11,7 @@ import { exportTasksCSV, exportExamsCSV } from '../utils/export';
 
 const PROFILE_KEY = 'trackit_profile';
 const NOTIF_KEY = 'trackit_notif';
+const DEFAULT_NOTIF = { browser: false, deadlineReminder: true, weeklyDigest: false, focusPlanAlert: true };
 
 function Section({ icon: Icon, title, description, children }) {
   return (
@@ -67,39 +67,33 @@ export default function Settings() {
   const { addToast } = useToast();
 
   const [localProfile, setLocalProfile] = useState({
-    name: '', university: '', course: '', year: '', email: '', avatar_url: ''
+    name: '', university: '', course: '', year: '', email: user?.email || '', avatar_url: ''
   });
-  const [notif, setNotif] = useState({
-    browser: false, deadlineReminder: true, weeklyDigest: false, focusPlanAlert: true
+  const [notif, setNotif] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(NOTIF_KEY)) || DEFAULT_NOTIF;
+    } catch {
+      return DEFAULT_NOTIF;
+    }
   });
   const [saved, setSaved] = useState(false);
   const [activeSection, setActiveSection] = useState('profile');
 
-  useEffect(() => {
-    // Load notifications from localStorage
-    const n = localStorage.getItem(NOTIF_KEY);
-    if (n) setNotif(JSON.parse(n));
-  }, []);
-
-  useEffect(() => {
-    // Initialize email from auth user if available
-    if (user?.email && !localProfile.email) {
-      setLocalProfile(p => ({ ...p, email: user.email }));
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (profileData) {
-      setLocalProfile({
-        name: profileData.display_name || '',
-        email: profileData.email || user?.email || '',
-        avatar_url: profileData.avatar_url || '',
-        university: profileData.university || '',
-        course: profileData.course || '',
-        year: profileData.year || ''
-      });
-    }
-  }, [profileData, user]);
+  // Copy the server profile into the editable form whenever a new version
+  // arrives (initial load or after saving). Done during render, as React
+  // recommends, instead of in an effect.
+  const [syncedProfile, setSyncedProfile] = useState(null);
+  if (profileData && profileData !== syncedProfile) {
+    setSyncedProfile(profileData);
+    setLocalProfile({
+      name: profileData.display_name || '',
+      email: profileData.email || user?.email || '',
+      avatar_url: profileData.avatar_url || '',
+      university: profileData.university || '',
+      course: profileData.course || '',
+      year: profileData.year || ''
+    });
+  }
 
   async function handleSaveProfile() {
     updateProfileMutation.mutate({
@@ -409,7 +403,7 @@ export default function Settings() {
                         <div className="px-3 py-1.5 text-[10px] font-bold text-text-3 uppercase tracking-wider border-b border-border mb-1">Backup</div>
                         <button
                           onClick={() => {
-                            const data = { profile, tasks: allTasks, exams: allExams, notifications: JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}'), exported_at: new Date().toISOString() };
+                            const data = { profile: profileData, tasks: allTasks, exams: allExams, notifications: JSON.parse(localStorage.getItem(NOTIF_KEY) || '{}'), exported_at: new Date().toISOString() };
                             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                             const url = URL.createObjectURL(blob);
                             const a = document.createElement('a'); a.href = url; a.download = 'trackit-full-data.json'; a.click();
@@ -439,7 +433,7 @@ export default function Settings() {
                           localStorage.removeItem(PROFILE_KEY);
                           localStorage.removeItem(NOTIF_KEY);
                           setLocalProfile({ name: '', university: '', course: '', year: '', email: '' });
-                          setNotif({ browser: false, deadlineReminder: true, weeklyDigest: false, focusPlanAlert: true });
+                          setNotif(DEFAULT_NOTIF);
                         }
                       }}
                       className="px-3 py-1.5 bg-white border border-[#FCA5A5] text-[#EF4444] rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all shrink-0 ml-3"

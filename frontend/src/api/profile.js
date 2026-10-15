@@ -22,7 +22,7 @@ export async function fetchProfile() {
       const errorData = await res.json();
       errorMessage = errorData.error || errorMessage;
       details = errorData.details;
-    } catch (e) {
+    } catch {
       // If not JSON, it might be a Vercel 404 HTML page
       errorMessage = `HTTP ${res.status}: ${res.statusText || 'Unknown Error'}`;
       details = 'The server returned a non-JSON response. This often means a routing mismatch (404) or a crash.';
@@ -56,7 +56,7 @@ export async function updateProfile(updates) {
       const errorData = await res.json();
       errorMessage = errorData.error || errorMessage;
       details = errorData.details;
-    } catch (e) {
+    } catch {
       errorMessage = `HTTP ${res.status}: ${res.statusText || 'Unknown Error'}`;
       details = 'The server returned a non-JSON response during update.';
     }

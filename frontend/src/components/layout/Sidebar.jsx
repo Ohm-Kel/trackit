@@ -13,14 +13,10 @@ import {
 } from 'lucide-react';
 import { daysUntil } from '../../utils/dates';
 
-function safeJsonParse(value, fallback = {}) {
-  try { return JSON.parse(value) || fallback; } catch { return fallback; }
-}
-
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { data: profile, isLoading: loadingProfile } = useProfile();
+  const { data: profile } = useProfile();
   const { data: tasks = [] } = useTasks();
   const { data: exams = [] } = useExams();
 
