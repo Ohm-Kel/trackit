@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, CheckCircle2, Circle, Trash2, Loader2 } from 'lucide-react';
 import { useSubtasks, useCreateSubtask, useUpdateSubtask, useDeleteSubtask } from '../hooks/useSubtasks';
+import { useToast } from './Toast';
 
 export default function SubtaskList({ parentId, parentType = 'task' }) {
   const { data: subtasks = [], isLoading } = useSubtasks(parentId, parentType);
@@ -8,19 +9,21 @@ export default function SubtaskList({ parentId, parentType = 'task' }) {
   const updateSubtask = useUpdateSubtask(parentId);
   const deleteSubtask = useDeleteSubtask(parentId);
   const [newTitle, setNewTitle] = useState('');
+  const { addToast } = useToast();
+  const showError = (action) => (err) => addToast(err.message, { type: 'error', title: `Couldn't ${action}` });
 
   function handleAdd() {
     if (!newTitle.trim()) return;
     const parentKey = parentType === 'task' ? 'task_id' : 'exam_id';
     createSubtask.mutate(
       { [parentKey]: parentId, title: newTitle.trim(), order_index: subtasks.length },
-      { onSuccess: () => setNewTitle('') }
+      { onSuccess: () => setNewTitle(''), onError: showError("add the subtask") }
     );
   }
 
   function toggleDone(sub) {
     const newStatus = sub.status === 'done' ? 'not_started' : 'done';
-    updateSubtask.mutate({ id: sub.id, updates: { status: newStatus } });
+    updateSubtask.mutate({ id: sub.id, updates: { status: newStatus } }, { onError: showError('update the subtask') });
   }
 
   const doneCount = subtasks.filter(s => s.status === 'done').length;
@@ -69,7 +72,7 @@ export default function SubtaskList({ parentId, parentType = 'task' }) {
               {sub.title}
             </span>
             <button
-              onClick={() => deleteSubtask.mutate(sub.id)}
+              onClick={() => deleteSubtask.mutate(sub.id, { onError: showError('delete the subtask') })}
               className="bg-transparent border-none cursor-pointer p-0 opacity-0 group-hover:opacity-100 transition-opacity text-text-3 hover:text-[#EF4444]"
             >
               <Trash2 className="w-3 h-3" />

@@ -53,11 +53,15 @@ export default defineConfig(({ mode }) => {
       env: {
         VITE_SUPABASE_URL: 'https://test.supabase.co',
         VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+        // Same relative base as production, so URL handling matches the
+        // deployed app (a relative base once broke `new URL(...)` calls).
+        VITE_API_URL: '/api',
       },
       coverage: {
         provider: 'v8',
         include: ['src/**/*.{js,jsx}'],
         exclude: ['src/test/**', 'src/main.jsx', 'src/**/*.test.{js,jsx}'],
+        thresholds: { lines: 65 },
       },
     },
   };
