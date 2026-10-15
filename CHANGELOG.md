@@ -4,6 +4,31 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org).
 
+## [Unreleased]
+
+### Added
+
+- `VITE_SITE_URL` sets the public origin used for the canonical URL, social cards, structured data, `robots.txt` and `sitemap.xml` (default `https://trackit-app-smoky.vercel.app`)
+- `robots.txt`, `sitemap.xml`, `<link rel="canonical">` and WebApplication JSON-LD for the landing page
+- `X-Robots-Tag: noindex` on app routes (Vercel and Docker); only `/landing` is listed for search engines
+- A 1200×630 social card, `favicon.ico` and `apple-touch-icon.png`
+- Playwright checks for the landing page's SEO tags, social image size, structured data, image dimensions and layout shift
+- Lighthouse CI job for the landing page (mobile), with score, Core Web Vitals and byte-budget assertions
+- `docs/performance.md` with before and after Lighthouse scores
+
+### Changed
+
+- The landing page's chunk is preloaded with the entry: mobile LCP 3.9 s to 2.3 s, Lighthouse performance 86 to 96
+- Landing page transfer is 168 KB instead of 528 KB: the favicon was the 369 KB logo
+- `logo.png` is 360 px and 69 KB instead of 640 px and 369 KB; a WebP copy is added
+- Hashed `/assets/` files are cached as immutable on Vercel
+
+### Fixed
+
+- `og:url` pointed at `https://trackit.app`, and social images used relative URLs, so shared links had no image
+- Page, Open Graph and Twitter titles and descriptions disagreed; the meta description is now under 160 characters
+- A hero preview label on the landing page failed WCAG AA contrast (4.49:1)
+
 ## [1.2.0] - 2026-10-15
 
 ### Added

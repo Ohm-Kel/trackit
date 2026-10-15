@@ -68,6 +68,8 @@ Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 [streaming chat with server-sent events](docs/adr/0004-stream-chat-with-server-sent-events.md),
 [a Content-Security-Policy built from the Supabase URL](docs/adr/0005-frontend-content-security-policy.md).
 Release and rollback steps are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+Landing page Lighthouse scores, before and after tuning, and the CI checks
+that keep them are in [`docs/performance.md`](docs/performance.md).
 
 ## Tech stack
 
@@ -121,6 +123,7 @@ cp frontend/.env.example frontend/.env   # Supabase URL and anon key
 | `RATE_LIMIT_STORE` | backend | `supabase` (default, shared across instances) or `memory` |
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | frontend | Public Supabase client config |
 | `VITE_API_URL` | frontend | API base URL in development |
+| `VITE_SITE_URL` | frontend | Public origin for the canonical URL, social cards, structured data, `robots.txt` and `sitemap.xml` (default `https://trackit-app-smoky.vercel.app`) |
 
 See [`backend/.env.example`](backend/.env.example) for every option.
 
@@ -149,6 +152,7 @@ npm run eval -- --oracle # evaluation harness self-check (no API calls)
 cd ../frontend
 npm test                 # Vitest and React Testing Library, including axe
 npm run test:e2e         # Playwright, production build in Chromium (npx playwright install chromium once)
+npm run test:lighthouse  # Lighthouse CI on the landing page (after npm run build; needs Chrome)
 npm run lint
 
 cd ..
@@ -206,8 +210,9 @@ trackit/
 │   └── eval/                 # Evaluation dataset, scorer and runner
 ├── frontend/
 │   └── src/                  # Pages, components, hooks, API client
-├── docs/                     # ADRs and the deployment guide
+├── docs/                     # ADRs, the deployment guide and performance notes
 ├── frontend/e2e/             # Playwright end-to-end tests
+├── frontend/vite-plugins/    # Build-time site metadata (SEO) and preloading
 ├── scripts/                  # Repository checks; db/ holds the RLS test suite
 ├── supabase_schema.sql       # Tables, RLS policies, triggers
 ├── supabase_migrations.sql   # Later additions (subtasks, chat history, schedule)
