@@ -108,8 +108,7 @@ export default function Settings() {
         setTimeout(() => setSaved(false), 2000);
       },
       onError: (err) => {
-        console.error('Error saving profile:', err);
-        addToast('Failed to save profile. Please try again.', { type: 'error' });
+        addToast(err.message, { type: 'error', title: 'Failed to save profile' });
       }
     });
   }

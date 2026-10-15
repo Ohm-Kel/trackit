@@ -18,6 +18,7 @@ export default function Add() {
   const [topics, setTopics] = useState([]);
   const [topicInput, setTopicInput] = useState('');
   const [savedOk, setSavedOk] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
@@ -106,10 +107,16 @@ export default function Add() {
       estimated_hours: taskForm.estimated_hours ? Number(taskForm.estimated_hours) : undefined,
     };
 
-    if (editTaskId) {
-      await updateTask.mutateAsync({ id: editTaskId, updates: payload });
-    } else {
-      await createTask.mutateAsync(payload);
+    setSaveError('');
+    try {
+      if (editTaskId) {
+        await updateTask.mutateAsync({ id: editTaskId, updates: payload });
+      } else {
+        await createTask.mutateAsync(payload);
+      }
+    } catch (err) {
+      setSaveError(err.message);
+      return;
     }
     setSavedOk(true);
     setTimeout(() => navigate('/tasks'), 800);
@@ -124,10 +131,16 @@ export default function Add() {
       daily_study_hours:  examForm.daily_study_hours ? Number(examForm.daily_study_hours) : undefined,
     };
 
-    if (editExamId) {
-      await updateExam.mutateAsync({ id: editExamId, updates: payload });
-    } else {
-      await createExam.mutateAsync(payload);
+    setSaveError('');
+    try {
+      if (editExamId) {
+        await updateExam.mutateAsync({ id: editExamId, updates: payload });
+      } else {
+        await createExam.mutateAsync(payload);
+      }
+    } catch (err) {
+      setSaveError(err.message);
+      return;
     }
     setSavedOk(true);
     setTimeout(() => navigate('/exams'), 800);
@@ -403,6 +416,12 @@ export default function Add() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {saveError && (
+          <div role="alert" className="mt-5 bg-[#FEF2F2] border border-[#FCA5A5] text-[#B91C1C] rounded-rs p-3 text-[13px]">
+            Couldn&apos;t save: {saveError}
           </div>
         )}
 

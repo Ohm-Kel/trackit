@@ -16,6 +16,16 @@ function formatSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/** Rows the parser could not read and skipped, so the student can check them. */
+function ParseWarnings({ warnings }) {
+  if (!warnings.length) return null;
+  return (
+    <div role="status" className="bg-[#FFFBEB] border border-[#FDE68A] rounded-rs p-3 mb-4 text-[12.5px] text-[#92400E]">
+      {warnings.map(w => <div key={w}>{w} Check the original and add anything missing by hand.</div>)}
+    </div>
+  );
+}
+
 function DayRow({ day, classes }) {
   if (!classes || classes.length === 0) {
     return (
@@ -45,6 +55,7 @@ export default function Upload() {
   const [examError, setExamError] = useState(null);
   const [examImporting, setExamImporting] = useState(false);
   const [examImported, setExamImported] = useState(false);
+  const [examWarnings, setExamWarnings] = useState([]);
   const examInputRef = useRef(null);
 
   // Schedule upload state
@@ -54,6 +65,7 @@ export default function Upload() {
   const [schedError, setSchedError] = useState(null);
   const [schedSaving, setSchedSaving] = useState(false);
   const [schedSaved, setSchedSaved] = useState(false);
+  const [schedWarnings, setSchedWarnings] = useState([]);
   const schedInputRef = useRef(null);
 
   function validateFile(file) {
@@ -74,10 +86,12 @@ export default function Upload() {
     setExamError(null);
     setExamResults(null);
     setExamImported(false);
+    setExamWarnings([]);
     setExamParsing(true);
     try {
       const result = await parseUpload(file, 'exam');
       setExamResults(Array.isArray(result.data) ? result.data : []);
+      setExamWarnings(Array.isArray(result.warnings) ? result.warnings : []);
     } catch (e) {
       setExamError(e.message);
     } finally {
@@ -104,6 +118,7 @@ export default function Upload() {
     setExamResults(null);
     setExamError(null);
     setExamImported(false);
+    setExamWarnings([]);
     if (examInputRef.current) examInputRef.current.value = '';
   }
 
@@ -116,10 +131,12 @@ export default function Upload() {
     setSchedError(null);
     setSchedResults(null);
     setSchedSaved(false);
+    setSchedWarnings([]);
     setSchedParsing(true);
     try {
       const result = await parseUpload(file, 'schedule');
       setSchedResults(result.data && typeof result.data === 'object' ? result.data : null);
+      setSchedWarnings(Array.isArray(result.warnings) ? result.warnings : []);
     } catch (e) {
       setSchedError(e.message);
     } finally {
@@ -145,6 +162,7 @@ export default function Upload() {
     setSchedResults(null);
     setSchedError(null);
     setSchedSaved(false);
+    setSchedWarnings([]);
     if (schedInputRef.current) schedInputRef.current.value = '';
   }
 
@@ -244,6 +262,8 @@ export default function Upload() {
                   </div>
                 )}
 
+                <ParseWarnings warnings={examWarnings} />
+
                 <div className="flex gap-2.5">
                   {examResults.length > 0 && (
                     <button
@@ -337,6 +357,8 @@ export default function Upload() {
                     <DayRow key={day} day={day} classes={schedResults[day]} />
                   ))}
                 </div>
+
+                <ParseWarnings warnings={schedWarnings} />
 
                 <div className="flex gap-2.5">
                   <button

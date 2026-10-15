@@ -6,6 +6,7 @@ import { daysUntil } from '../utils/dates';
 import { exportExamsCSV, exportExamsPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
 import { ExamsSkeleton } from '../components/Skeleton';
+import { useToast } from '../components/Toast';
 
 function confidenceStyle(level) {
   const l = (level || '').toLowerCase();
@@ -15,6 +16,7 @@ function confidenceStyle(level) {
 }
 
 export default function Exams() {
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const { data: exams = [], isLoading } = useExams();
   const updateExam = useUpdateExam();
@@ -36,7 +38,7 @@ export default function Exams() {
 
   function handleDelete(e, id) {
     e.stopPropagation();
-    if (window.confirm('Remove this exam?')) deleteExam.mutate(id);
+    if (window.confirm('Remove this exam?')) deleteExam.mutate(id, { onError: err => addToast(err.message, { type: 'error', title: "Couldn't remove the exam" }) });
   }
 
   if (isLoading) return <ExamsSkeleton />;
@@ -143,7 +145,7 @@ export default function Exams() {
                         <button
                           onClick={() => {
                             const newPrep = Math.min(100, prep + 10);
-                            updateExam.mutate({ id: exam.id, updates: { preparation_percent: newPrep } });
+                            updateExam.mutate({ id: exam.id, updates: { preparation_percent: newPrep } }, { onError: err => addToast(err.message, { type: 'error', title: "Couldn't update the exam" }) });
                           }}
                           className="flex-1 bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors"
                         >

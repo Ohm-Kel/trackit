@@ -6,6 +6,7 @@ import { formatRelativeDate, getDueBadgeClass, formatStatus, daysUntil } from '.
 import { exportTasksCSV, exportTasksPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
 import { TasksSkeleton } from '../components/Skeleton';
+import { useToast } from '../components/Toast';
 
 function getStatusClass(status) {
   if (status === 'in_progress') return 'bg-primary-light text-primary';
@@ -15,6 +16,7 @@ function getStatusClass(status) {
 }
 
 export default function Tasks() {
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const { data: tasks = [], isLoading } = useTasks();
   const updateTask = useUpdateTask();
@@ -62,12 +64,15 @@ export default function Tasks() {
 
   function toggleComplete(task) {
     const isDone = task.status === 'done';
-    updateTask.mutate({ id: task.id, updates: { status: isDone ? 'not_started' : 'done' } });
+    updateTask.mutate(
+      { id: task.id, updates: { status: isDone ? 'not_started' : 'done' } },
+      { onError: err => addToast(err.message, { type: 'error', title: "Couldn't update the task" }) },
+    );
   }
 
   function handleDelete(e, taskId) {
     e.stopPropagation();
-    if (window.confirm('Delete this task?')) deleteTask.mutate(taskId);
+    if (window.confirm('Delete this task?')) deleteTask.mutate(taskId, { onError: err => addToast(err.message, { type: 'error', title: "Couldn't delete the task" }) });
   }
 
   const totalCount = tasks.length;
@@ -194,12 +199,14 @@ export default function Tasks() {
                     onClick={() => setExpandedRow(expandedRow === task.id ? null : task.id)}
                     className={`grid grid-cols-[32px_1fr_36px] md:grid-cols-[32px_1fr_100px_80px_90px_90px_60px] py-3 px-3 md:px-4 border-b border-border items-center gap-2 cursor-pointer transition-colors ${expandedRow === task.id ? 'bg-primary-faint' : 'hover:bg-bg'}`}
                   >
-                    <div
+                    <button
+                      type="button"
+                      aria-label={isDone ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
                       onClick={e => { e.stopPropagation(); toggleComplete(task); }}
-                      className={`w-[17px] h-[17px] rounded-full border-[1.5px] shrink-0 mt-[2px] flex items-center justify-center transition-colors cursor-pointer ${isDone ? 'border-primary bg-primary' : 'border-border2 bg-white hover:border-primary hover:bg-primary-light'}`}
+                      className={`w-[17px] h-[17px] p-0 rounded-full border-[1.5px] shrink-0 mt-[2px] flex items-center justify-center transition-colors cursor-pointer ${isDone ? 'border-primary bg-primary' : 'border-border2 bg-white hover:border-primary hover:bg-primary-light'}`}
                     >
                       {isDone && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
-                    </div>
+                    </button>
                     <div className="min-w-0 pr-2">
                       <div className={`text-[13.5px] font-semibold whitespace-nowrap overflow-hidden text-ellipsis ${isDone ? 'line-through text-text-3' : 'text-text-1'}`}>{task.title}</div>
                       <div className="text-[11.5px] text-text-3 mt-0.5">
@@ -293,9 +300,14 @@ export default function Tasks() {
                     className="grid grid-cols-[32px_1fr_36px] md:grid-cols-[32px_1fr_100px_80px_90px_90px_60px] py-3 px-3 md:px-4 border-b border-border items-center gap-2 cursor-pointer transition-colors hover:bg-bg opacity-[0.55]"
                     onClick={() => toggleComplete(task)}
                   >
-                    <div className="w-[17px] h-[17px] rounded-full border-[1.5px] border-primary bg-primary shrink-0 mt-[2px] flex items-center justify-center">
+                    <button
+                      type="button"
+                      aria-label={`Mark "${task.title}" as not done`}
+                      onClick={e => { e.stopPropagation(); toggleComplete(task); }}
+                      className="w-[17px] h-[17px] p-0 rounded-full border-[1.5px] border-primary bg-primary shrink-0 mt-[2px] flex items-center justify-center cursor-pointer"
+                    >
                       <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                    </div>
+                    </button>
                     <div className="min-w-0 pr-2">
                       <div className="text-[13.5px] font-semibold text-text-3 line-through whitespace-nowrap overflow-hidden text-ellipsis">{task.title}</div>
                       <div className="text-[11.5px] text-text-3 mt-0.5">

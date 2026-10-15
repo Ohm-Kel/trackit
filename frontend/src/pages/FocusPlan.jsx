@@ -4,6 +4,7 @@ import { useTasks, useUpdateTask } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
 import { useProfile } from '../hooks/useProfile';
 import { daysUntil } from '../utils/dates';
+import { useToast } from '../components/Toast';
 
 function blockColor(task) {
   const d = daysUntil(task.due_date);
@@ -90,6 +91,7 @@ function formatHour(h) {
 }
 
 export default function FocusPlan() {
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const { data: tasks = [], isLoading } = useTasks();
   const { data: exams = [] } = useExams();
@@ -131,7 +133,10 @@ export default function FocusPlan() {
 
   function toggleDone(task) {
     const isDone = task.status === 'done';
-    updateTask.mutate({ id: task.id, updates: { status: isDone ? 'not_started' : 'done' } });
+    updateTask.mutate(
+      { id: task.id, updates: { status: isDone ? 'not_started' : 'done' } },
+      { onError: err => addToast(err.message, { type: 'error', title: "Couldn't update the task" }) },
+    );
   }
 
   return (
