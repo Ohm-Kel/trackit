@@ -12,6 +12,7 @@ function createSupabaseMock() {
   const log = [];
 
   const getUser = jest.fn();
+  const rpc = jest.fn(async () => ({ data: null, error: null }));
 
   function queue(table, result) {
     if (!pending.has(table)) pending.set(table, []);
@@ -48,9 +49,18 @@ function createSupabaseMock() {
     pending.clear();
     log.length = 0;
     getUser.mockReset();
+    rpc.mockReset();
+    rpc.mockImplementation(async () => ({ data: null, error: null }));
   }
 
-  return { client: { from: jest.fn(from), auth: { getUser } }, queue, queries, reset, getUser };
+  return {
+    client: { from: jest.fn(from), rpc, auth: { getUser } },
+    queue,
+    queries,
+    reset,
+    getUser,
+    rpc,
+  };
 }
 
 /** Helper: does a recorded call list contain `.method(...args)`? */

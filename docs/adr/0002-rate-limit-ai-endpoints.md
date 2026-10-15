@@ -1,4 +1,4 @@
-# ADR 0002: Per-user, in-memory rate limits on AI endpoints
+# ADR 0002: Per-user rate limits on AI endpoints
 
 - Status: Accepted
 - Date: 2026-10-15
@@ -18,16 +18,30 @@ sent the full conversation history, so cost grew with every message.
   environment variables.
 - Cap the history sent to the model at the most recent 20 turns and the
   message length at 4,000 characters.
-- Use the library's default in-memory store.
+- Keep the counters in Postgres (amended in v1.2.0, see below).
 
 ## Consequences
 
-- On Vercel, each serverless instance keeps its own counter, so the effective
-  limit is "per user per warm instance". This bounds runaway loops and casual
-  abuse, which is the main risk at the current scale, without adding
-  infrastructure.
-- A shared store (for example Upstash Redis) would make the limit exact
-  across instances. It is a drop-in change to `middleware/rateLimit.js` and
-  is listed on the roadmap.
 - Token usage per request is logged, so actual spend per user can be
   monitored before tightening limits.
+
+## Amendment (v1.2.0): shared counters in Postgres
+
+The first version used the library's in-memory store. On Vercel each
+serverless instance kept its own counter, so the effective limit was "per user
+per warm instance".
+
+Counters now live in a `rate_limits` table, updated by a `rate_limit_hit`
+function that increments with a single upsert, so concurrent requests from
+different instances cannot lose a hit. A Redis service such as Upstash was the
+alternative; Postgres was chosen because the project already depends on it,
+and at two AI calls per request the extra database round trip is negligible.
+
+- The table has RLS enabled with no policies, and execute rights on the
+  functions are revoked from `anon` and `authenticated`, so only the service
+  role can touch counters.
+- If the database call fails (for example, before `supabase_migrations_002.sql`
+  has been run), the store counts in memory and logs once. Limits degrade to the
+  old per-instance behaviour instead of switching off.
+- `RATE_LIMIT_STORE=memory` keeps the in-memory store, which tests and
+  single-process setups use.

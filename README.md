@@ -58,11 +58,11 @@ flowchart LR
 
 - The **frontend** signs in with Supabase Auth and calls the API with the user's access token. It reads notifications directly through Supabase Realtime, protected by Row Level Security.
 - The **API** verifies every token, validates every request with Zod, scopes every query to the signed-in user, and is the only component holding the Anthropic and Supabase service keys.
-- **AI calls** are rate-limited per user. Chat history sent to the model is capped, and token usage is logged.
+- **AI calls** are rate-limited per user, with counters shared across serverless instances in Postgres. Chat history sent to the model is capped, and token usage is logged.
 
 Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 [structured output through tool use](docs/adr/0001-structured-output-via-tool-use.md),
-[rate limiting AI endpoints](docs/adr/0002-rate-limit-ai-endpoints.md),
+[rate limiting AI endpoints with shared counters](docs/adr/0002-rate-limit-ai-endpoints.md),
 [the API as the authorisation boundary](docs/adr/0003-api-as-authorization-boundary.md).
 
 ## Tech stack
@@ -96,7 +96,7 @@ cd trackit
 
 ### 2. Set up the database
 
-In the Supabase SQL editor, run `supabase_schema.sql`, then `supabase_migrations.sql`. They create the tables, Row Level Security policies and the trigger that creates a profile on sign-up.
+In the Supabase SQL editor, run `supabase_schema.sql`, then `supabase_migrations.sql`, then `supabase_migrations_002.sql`. They create the tables, Row Level Security policies, the trigger that creates a profile on sign-up, and the shared rate-limit counters.
 
 ### 3. Configure environment variables
 
@@ -112,6 +112,7 @@ cp frontend/.env.example frontend/.env   # Supabase URL and anon key
 | `ANTHROPIC_MODEL` | backend | Optional model override |
 | `ALLOWED_ORIGINS` | backend | Comma-separated CORS allowlist |
 | `AI_CHAT_RATE_LIMIT`, `AI_UPLOAD_RATE_LIMIT` | backend | Requests per user per hour (defaults 30 and 10) |
+| `RATE_LIMIT_STORE` | backend | `supabase` (default, shared across instances) or `memory` |
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | frontend | Public Supabase client config |
 | `VITE_API_URL` | frontend | API base URL in development |
 
@@ -189,13 +190,13 @@ trackit/
 ├── scripts/                  # Repository checks
 ├── supabase_schema.sql       # Tables, RLS policies, triggers
 ├── supabase_migrations.sql   # Later additions (subtasks, chat history, schedule)
+├── supabase_migrations_002.sql # Rate-limit counters (v1.2.0)
 └── docker-compose.yml
 ```
 
 ## Roadmap
 
 - Add anonymised real-world timetables (scans, photos, multi-page PDFs) as evaluation set v2
-- Move rate-limit counters to a shared store so limits hold across serverless instances
 - Forward the user's JWT to Supabase so Row Level Security also applies to API queries
 - Stream chat replies for faster perceived response time
 - Frontend component tests with Vitest and React Testing Library

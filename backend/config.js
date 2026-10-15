@@ -45,6 +45,9 @@ const config = Object.freeze({
   allowedOrigins: parseList(process.env.ALLOWED_ORIGINS || 'http://localhost:5173'),
 
   rateLimit: Object.freeze({
+    // 'supabase' shares counters across instances (needs supabase_migrations_002.sql);
+    // 'memory' counts per process. Tests default to memory.
+    store: process.env.RATE_LIMIT_STORE || (nodeEnv === 'test' ? 'memory' : 'supabase'),
     windowMs: parsePositiveInt(process.env.AI_RATE_LIMIT_WINDOW_MS, 60 * 60 * 1000),
     chatMax: parsePositiveInt(process.env.AI_CHAT_RATE_LIMIT, 30),
     uploadMax: parsePositiveInt(process.env.AI_UPLOAD_RATE_LIMIT, 10),
