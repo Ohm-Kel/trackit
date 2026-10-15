@@ -57,8 +57,8 @@ const config = Object.freeze({
   }),
 
   upload: Object.freeze({
-    // Base64 inflates size by ~4/3, so 8 MB of base64 is ~6 MB of file.
-    maxBase64Chars: parsePositiveInt(process.env.UPLOAD_MAX_BASE64_CHARS, 8 * 1024 * 1024),
+    // Base64 inflates size by ~4/3, so 8.5 MB of base64 is ~6.4 MB of file.
+    maxBase64Chars: parsePositiveInt(process.env.UPLOAD_MAX_BASE64_CHARS, 8.5 * 1024 * 1024),
   }),
 });
 
