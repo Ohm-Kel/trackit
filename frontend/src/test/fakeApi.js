@@ -15,6 +15,8 @@ export function createFakeApi() {
     notifications: [],
     chat: [],
     profile: { display_name: 'Ama Owusu', email: 'ama@example.edu', weekly_schedule: null },
+    // The calendar subscription link; like the API, only the latest token is valid.
+    calendarFeed: null,
   };
   const calls = [];
   const overrides = new Map();
@@ -43,6 +45,18 @@ export function createFakeApi() {
       return json({ success: true });
     }
     return json({ error: 'Method not allowed' }, 405);
+  }
+
+  /** A minimal .ics with one SUMMARY per open dated task or dated exam (see backend/lib/calendar.js). */
+  function calendarFile(include) {
+    const summaries = [
+      ...(include === 'exams' ? [] : db.tasks.filter((t) => t.status !== 'done' && t.due_date).map((t) => `Due: ${t.title}`)),
+      ...(include === 'tasks' ? [] : db.exams.filter((e) => e.exam_date).map((e) => `Exam: ${e.subject}`)),
+    ];
+    const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', ...summaries.flatMap((s) => ['BEGIN:VEVENT', `SUMMARY:${s}`, 'END:VEVENT']), 'END:VCALENDAR'];
+    return new Response(lines.join('\r\n') + '\r\n', {
+      headers: { 'Content-Type': 'text/calendar; charset=utf-8' },
+    });
   }
 
   async function handle(input, init = {}) {
@@ -112,6 +126,18 @@ export function createFakeApi() {
           return json({ success: true });
         }
         return json({ error: 'Parse not stubbed in this test' }, 500);
+      case 'calendar':
+        if (itemId === 'export.ics') return calendarFile(url.searchParams.get('include') || 'all');
+        if (method === 'POST') {
+          const token = `tok${String(nextId++).padStart(40, '0')}`;
+          db.calendarFeed = { token, created_at: new Date().toISOString() };
+          return json({ token, path: `/calendar/${token}.ics`, created_at: db.calendarFeed.created_at }, 201);
+        }
+        if (method === 'DELETE') {
+          db.calendarFeed = null;
+          return json({ message: 'Calendar link revoked' });
+        }
+        return json({ active: Boolean(db.calendarFeed), created_at: db.calendarFeed?.created_at ?? null });
       default:
         return json({ error: 'Not found' }, 404);
     }

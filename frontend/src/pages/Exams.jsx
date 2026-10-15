@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useExams, useUpdateExam, useDeleteExam } from '../hooks/useExams';
 import { daysUntil } from '../utils/dates';
 import { exportExamsCSV, exportExamsPDF } from '../utils/export';
+import { downloadCalendar } from '../api/calendar';
 import SubtaskList from '../components/SubtaskList';
 import { ExamsSkeleton } from '../components/Skeleton';
 import { useToast } from '../components/Toast';
@@ -66,6 +67,15 @@ export default function Exams() {
                 <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-rs shadow-md z-10 py-1 min-w-[140px]">
                   <button onClick={() => { exportExamsCSV(exams); setShowExport(false); }} className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium">Export as CSV</button>
                   <button onClick={() => { exportExamsPDF(exams); setShowExport(false); }} className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium">Export as PDF</button>
+                  <button
+                    onClick={() => {
+                      setShowExport(false);
+                      downloadCalendar('exams').catch(err => addToast(err.message, { type: 'error', title: "Couldn't download the calendar file" }));
+                    }}
+                    className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium"
+                  >
+                    Download .ics
+                  </button>
                 </div>
               )}
             </div>

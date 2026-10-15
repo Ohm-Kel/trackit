@@ -103,3 +103,38 @@ for (const path of ['/', '/tasks', '/exams', '/chat', '/upload', '/focus', '/ana
     expect(violations.flatMap((v) => v.nodes.map((n) => `${n.target.join(' ')}: ${n.any[0]?.message}`))).toEqual([]);
   });
 }
+
+for (const theme of ['light', 'dark']) {
+  test(`creates a calendar subscription link in Settings (${theme} mode)`, async ({ page, api, signIn }) => {
+    await signIn();
+    await page.addInitScript((value) => localStorage.setItem('trackit_theme', value), theme);
+    await page.goto('/settings');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    await page.getByRole('button', { name: 'Calendar' }).click();
+    await page.getByRole('button', { name: 'Create subscription link' }).click();
+
+    const link = page.getByLabel('Your subscription link');
+    await expect(link).toHaveValue(/\/api\/calendar\/[\w-]{43}\.ics$/);
+    expect(await link.inputValue()).toContain(api.db.calendarFeed.token);
+    await expect(page.getByRole('link', { name: 'Open in calendar app' })).toHaveAttribute('href', /^webcal:\/\//);
+
+    const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+    expect(
+      violations.map((v) => ({ rule: v.id, nodes: v.nodes.map((n) => `${n.target.join(' ')}: ${n.any[0]?.message}`) })),
+    ).toEqual([]);
+  });
+}
+
+test('downloads tasks as an .ics file', async ({ page, api, signIn }) => {
+  seed(api);
+  await signIn();
+  await page.goto('/tasks');
+  await page.getByRole('button', { name: 'Export' }).click();
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Download .ics' }).click(),
+  ]);
+  expect(download.suggestedFilename()).toBe('trackit-tasks.ics');
+  const body = await (await download.createReadStream()).toArray();
+  expect(Buffer.concat(body).toString('utf8')).toContain('SUMMARY:Due: Statistics assignment');
+});
