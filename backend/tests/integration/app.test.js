@@ -47,7 +47,21 @@ describe('platform behaviour', () => {
     });
     const res = await ctx.api().get('/api/tasks').set(ctx.auth);
     expect(res.status).toBe(500);
-    expect(res.body).toEqual({ error: 'Internal server error' });
+    expect(res.body).toEqual({
+      error: 'Internal server error',
+      requestId: res.headers['x-request-id'],
+    });
+  });
+
+  it('tags every response with a request ID, keeping a well-formed incoming one', async () => {
+    const generated = await ctx.api().get('/api/health');
+    expect(generated.headers['x-request-id']).toMatch(/^[0-9a-f-]{36}$/);
+
+    const kept = await ctx.api().get('/api/health').set('X-Request-Id', 'edge-1234abcd');
+    expect(kept.headers['x-request-id']).toBe('edge-1234abcd');
+
+    const replaced = await ctx.api().get('/api/health').set('X-Request-Id', '<script>');
+    expect(replaced.headers['x-request-id']).not.toBe('<script>');
   });
 });
 

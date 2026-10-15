@@ -125,16 +125,24 @@ function sendEvent(res, event, data) {
  * are ordinary JSON error responses, so clients handle them like /api/chat.
  */
 exports.chatStream = async (req, res) => {
-  const { message, userId, params } = await prepareChat(req);
-
-  const stream = anthropic.messages.stream(params);
   let clientGone = false;
+  let stream;
   res.on('close', () => {
     if (!res.writableEnded) {
       clientGone = true;
-      stream.abort();
+      stream?.abort();
     }
   });
+
+  const { message, userId, params } = await prepareChat(req);
+  // Loading the workload takes a moment; skip the model call (and its cost)
+  // if the user has already left.
+  if (clientGone) {
+    logger.info({ userId }, 'Client closed chat stream before the reply started');
+    return;
+  }
+
+  stream = anthropic.messages.stream(params);
 
   let reply = '';
   try {

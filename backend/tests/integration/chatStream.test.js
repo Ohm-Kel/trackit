@@ -137,3 +137,43 @@ it('aborts the model stream when the client disconnects', async () => {
     server.close();
   }
 });
+
+it('skips the model call when the client leaves while the workload is loading', async () => {
+  // A database client whose queries resolve only after the client has gone.
+  let release;
+  const slow = new Promise((resolve) => (release = resolve));
+  const query = new Proxy(
+    {},
+    {
+      get: (_t, prop) =>
+        prop === 'then'
+          ? (resolve) => slow.then(() => resolve({ data: [], error: null }))
+          : () => query,
+    },
+  );
+  ctx.createUserClient.mockImplementationOnce(() => ({ from: () => query }));
+
+  const server = createApp().listen(0);
+  try {
+    await new Promise((resolve) => {
+      const req = http.request({
+        port: server.address().port,
+        path: '/api/chat/stream',
+        method: 'POST',
+        headers: { ...ctx.auth, 'Content-Type': 'application/json' },
+      });
+      req.on('error', () => {});
+      req.end(JSON.stringify({ message: 'q' }));
+      setTimeout(() => {
+        req.destroy();
+        resolve();
+      }, 50);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    release();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(ctx.anthropic.messages.stream).not.toHaveBeenCalled();
+  } finally {
+    server.close();
+  }
+});

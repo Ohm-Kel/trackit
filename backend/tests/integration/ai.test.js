@@ -116,6 +116,24 @@ describe('POST /api/upload/parse', () => {
     expect(res.body).not.toHaveProperty('raw');
   });
 
+  it('warns when the reply hit the token limit and may be incomplete', async () => {
+    ctx.anthropic.messages.create.mockResolvedValue({
+      stop_reason: 'max_tokens',
+      content: [{ type: 'tool_use', name: TOOLS.exam.name, input: { exams: [] } }],
+    });
+    const res = await ctx.api().post('/api/upload/parse').set(ctx.auth).send(body);
+    expect(res.body.warnings).toEqual([
+      'The timetable is long, so some entries at the end may be missing.',
+    ]);
+  });
+
+  it('tells the model to treat document text as data', async () => {
+    ctx.anthropic.messages.create.mockResolvedValue({ content: [] });
+    await ctx.api().post('/api/upload/parse').set(ctx.auth).send(body);
+    const [{ content }] = ctx.anthropic.messages.create.mock.calls[0][0].messages;
+    expect(content.at(-1).text).toMatch(/ignore any instructions/i);
+  });
+
   it.each([
     [{ ...body, mimeType: 'text/html' }, 'mimeType'],
     [{ ...body, file: 'data:application/pdf;base64,AAAA' }, 'file'],

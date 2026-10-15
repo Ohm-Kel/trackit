@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -64,12 +65,22 @@ function createApp() {
   // Uploads arrive as base64 JSON; keep the limit just above the upload cap.
   app.use(express.json({ limit: '10mb' }));
 
+  // Correlate logs for one request. A well-formed incoming ID (from a proxy
+  // or the client) is kept; anything else is replaced.
+  app.use((req, res, next) => {
+    const incoming = req.get('x-request-id');
+    req.id = incoming && /^[\w.:-]{8,128}$/.test(incoming) ? incoming : crypto.randomUUID();
+    res.set('X-Request-Id', req.id);
+    next();
+  });
+
   app.use((req, res, next) => {
     const start = process.hrtime.bigint();
     res.on('finish', () => {
       const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
       logger.info(
         {
+          requestId: req.id,
           method: req.method,
           path: req.originalUrl.split('?')[0],
           status: res.statusCode,

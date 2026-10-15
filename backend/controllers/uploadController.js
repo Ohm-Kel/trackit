@@ -67,18 +67,22 @@ exports.parseUpload = async (req, res) => {
       userId: req.user.id,
       type,
       dropped: result.dropped,
+      truncated: result.truncated,
       inputTokens: result.usage?.input_tokens,
       outputTokens: result.usage?.output_tokens,
     },
     'timetable parsed',
   );
 
-  const warnings =
-    result.dropped > 0
-      ? [
-          `${result.dropped} entr${result.dropped === 1 ? 'y was' : 'ies were'} unreadable and skipped.`,
-        ]
-      : [];
+  const warnings = [];
+  if (result.dropped > 0) {
+    warnings.push(
+      `${result.dropped} entr${result.dropped === 1 ? 'y was' : 'ies were'} unreadable and skipped.`,
+    );
+  }
+  if (result.truncated) {
+    warnings.push('The timetable is long, so some entries at the end may be missing.');
+  }
 
   res.json({ type, data: result.data, warnings });
 };
