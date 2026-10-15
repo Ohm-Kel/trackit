@@ -47,6 +47,21 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   return {
     plugins: [react(), contentSecurityPolicy(env.VITE_SUPABASE_URL)],
+    build: {
+      rollupOptions: {
+        output: {
+          // Libraries change far less often than app code. Separate chunks
+          // let browsers keep them cached across deploys.
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+            if (/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom)\//.test(id)) return 'react';
+            if (id.includes('node_modules/@supabase/')) return 'supabase';
+            if (id.includes('node_modules/@tanstack/')) return 'query';
+            return undefined;
+          },
+        },
+      },
+    },
     test: {
       environment: 'jsdom',
       exclude: ['e2e/**', 'node_modules/**'],
