@@ -7,6 +7,7 @@ const config = require('./config');
 const logger = require('./lib/logger');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { rejectBlockedIps } = require('./lib/authFailures');
+const { logPath } = require('./lib/logPath');
 
 const taskRoutes = require('./routes/tasks');
 const examRoutes = require('./routes/exams');
@@ -16,6 +17,7 @@ const uploadRoutes = require('./routes/upload');
 const userRoutes = require('./routes/users');
 const notificationRoutes = require('./routes/notifications');
 const analyticsRoutes = require('./routes/analytics');
+const calendarRoutes = require('./routes/calendar');
 const docsRoutes = require('./routes/docs');
 
 /**
@@ -43,6 +45,7 @@ function buildApiRouter() {
   api.use('/users', userRoutes);
   api.use('/notifications', notificationRoutes);
   api.use('/analytics', analyticsRoutes);
+  api.use('/calendar', calendarRoutes);
   api.use('/', docsRoutes);
 
   return api;
@@ -84,7 +87,7 @@ function createApp() {
         {
           requestId: req.id,
           method: req.method,
-          path: req.originalUrl.split('?')[0],
+          path: logPath(req.originalUrl),
           status: res.statusCode,
           durationMs,
         },

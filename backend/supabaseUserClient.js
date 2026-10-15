@@ -28,4 +28,21 @@ function createUserClient(accessToken) {
   });
 }
 
-module.exports = { createUserClient };
+let anonClient;
+
+/**
+ * Supabase client with no user session, for requests that are not signed in
+ * (the calendar feed). Postgres sees the `anon` role, which can only call the
+ * functions granted to it. Falls back to the service role like
+ * `createUserClient`.
+ * @returns {import('@supabase/supabase-js').SupabaseClient}
+ */
+function createAnonClient() {
+  if (!config.supabaseAnonKey) return serviceClient;
+  anonClient ??= createClient(config.supabaseUrl, config.supabaseAnonKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+  return anonClient;
+}
+
+module.exports = { createUserClient, createAnonClient };
