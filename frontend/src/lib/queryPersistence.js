@@ -1,4 +1,4 @@
-import { createStore, del, get, set, clear } from 'idb-keyval';
+import { createStore, del, delMany, get, keys, set, clear } from 'idb-keyval';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 
 /**
@@ -47,3 +47,13 @@ export const readUserCache = (userId) => get(cacheKey(userId), store);
 
 /** Delete every user's saved cache. */
 export const clearPersistedQueries = () => clear(store);
+
+/**
+ * Delete every saved cache except this user's. A user who closed the app
+ * without signing out leaves their cache behind; it must not stay on the
+ * device once someone else signs in.
+ */
+export async function clearOtherUsersCaches(userId) {
+  const others = (await keys(store)).filter((key) => key !== cacheKey(userId));
+  if (others.length) await delMany(others, store);
+}

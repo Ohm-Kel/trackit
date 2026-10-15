@@ -55,6 +55,10 @@ shown to the next person who opens the app.
   whenever the signed-in user changes or disappears (another tab, an expired
   refresh token). A persister write still pending from the previous user is
   dropped rather than saved after the clear.
+- A user who closes the app without signing out leaves their cache behind.
+  It is deleted the next time the app opens with nobody signed in, and
+  before any other user's cache is restored, so it never stays on the
+  device once someone else uses the app.
 - The app waits (a few milliseconds, at most two seconds) for the saved
   cache to be restored before rendering signed-in pages, so they start from
   it rather than an empty list.
@@ -108,8 +112,9 @@ any violation.
   load, once the service worker is installed.
 - Offline pages show data as of the user's last online visit to them, up to
   seven days old. Pages never opened online have nothing to show offline.
-- Saved data sits unencrypted in the browser's IndexedDB until sign-out, like
-  any browser cache. Users of shared devices must sign out. iOS Safari may
+- Saved data sits unencrypted in the browser's IndexedDB until sign-out (or
+  until the app next opens for someone else or for nobody), like any browser
+  cache. Users of shared devices must sign out. iOS Safari may
   evict it after a few weeks without use.
 - If the sign-out request fails offline, the cached data is deleted but the
   Supabase session stays on the device until the user signs out again

@@ -6,7 +6,8 @@ import { AuthRetryableFetchError } from '@supabase/supabase-js';
 import { renderApp } from '../test/renderApp';
 import { inDays, task } from '../test/fakeApi';
 import { signInAs, supabase, USER } from '../test/fakeSupabase';
-import { readUserCache } from '../lib/queryPersistence';
+import { createStore, keys, set } from 'idb-keyval';
+import { cacheKey, readUserCache } from '../lib/queryPersistence';
 
 vi.mock('../lib/supabaseClient', () => import('../test/fakeSupabase'));
 
@@ -18,6 +19,27 @@ const seed = (api) =>
     task({ title: 'Statistics assignment', status: 'in_progress', due_date: inDays(3) }),
     task({ title: 'Lab report', status: 'not_started', due_date: inDays(5) }),
   );
+
+const OTHER_ID = '22222222-2222-4222-8222-222222222222';
+
+/** Save a cache for another user, as if they had closed the app without signing out. */
+async function saveOtherUsersCache() {
+  const store = createStore('trackit-offline', 'query-cache');
+  const otherTasks = [task({ title: 'Kofi private essay', due_date: inDays(1) })];
+  await set(
+    cacheKey(OTHER_ID),
+    {
+      timestamp: Date.now(),
+      buster: '1',
+      clientState: {
+        mutations: [],
+        queries: [{ queryKey: ['tasks'], queryHash: '["tasks"]', state: { data: otherTasks, status: 'success', dataUpdatedAt: Date.now() } }],
+      },
+    },
+    store,
+  );
+  return store;
+}
 
 /** Wait until the persister has saved the task list to IndexedDB. */
 async function waitForSavedTasks(userId = USER.id) {
@@ -119,5 +141,22 @@ describe('saved data', () => {
     renderApp('/tasks', { signedIn: false, setup: () => signInAs(other) });
     expect(await screen.findByText('No tasks yet')).toBeInTheDocument();
     expect(screen.queryByText('Statistics assignment')).not.toBeInTheDocument();
+  });
+
+  it("deletes a user's cache left behind without signing out once someone else signs in", async () => {
+    const store = await saveOtherUsersCache();
+    renderApp('/tasks', { setup: seed });
+
+    expect(await screen.findByText('Statistics assignment')).toBeInTheDocument();
+    expect(screen.queryByText('Kofi private essay')).not.toBeInTheDocument();
+    await waitFor(async () => expect(await readUserCache(OTHER_ID)).toBeUndefined());
+    await waitForSavedTasks();
+    expect(await keys(store)).toEqual([cacheKey(USER.id)]);
+  });
+
+  it('deletes every saved cache when the app opens with nobody signed in', async () => {
+    const store = await saveOtherUsersCache();
+    renderApp('/landing', { signedIn: false });
+    await waitFor(async () => expect(await keys(store)).toEqual([]));
   });
 });
