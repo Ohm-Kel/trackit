@@ -1,141 +1,103 @@
 const { z } = require('zod');
 const supabase = require('../supabaseClient');
-
-// ── Zod schemas ──────────────────────────────────────────────────────────────
+const { HttpError } = require('../lib/errors');
+const { validate, throwIfDbError } = require('../lib/validate');
+const { optionalDate } = require('../lib/schemas');
 
 const STATUS_VALUES = ['not_started', 'in_progress', 'stuck', 'done'];
 
-const createTaskSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().optional(),
-  due_date: z.string().optional(),
-  course_code: z.string().optional(),
+const taskFields = {
+  title: z.string().trim().min(1, 'Title is required').max(200),
+  description: z.string().max(5000).optional(),
+  due_date: optionalDate,
+  course_code: z.string().max(50).optional(),
   grade_weight: z.number().min(0).max(100).optional(),
-  estimated_hours: z.number().min(0).optional(),
+  estimated_hours: z.number().min(0).max(1000).optional(),
   priority_score: z.number().optional(),
+};
+
+const createTaskSchema = z.object({
+  ...taskFields,
   status: z.enum(STATUS_VALUES).default('not_started'),
 });
 
-// Only the fields a client is allowed to change
-const updateTaskSchema = z.object({
-  title: z.string().min(1).optional(),
-  description: z.string().optional(),
-  due_date: z.string().optional(),
-  course_code: z.string().optional(),
-  grade_weight: z.number().min(0).max(100).optional(),
-  estimated_hours: z.number().min(0).optional(),
-  priority_score: z.number().optional(),
-  status: z.enum(STATUS_VALUES).optional(),
-  ai_reasoning: z.string().optional(),
-});
+// Only the fields a client is allowed to change.
+const updateTaskSchema = z
+  .object({
+    ...taskFields,
+    title: taskFields.title.optional(),
+    status: z.enum(STATUS_VALUES).optional(),
+    ai_reasoning: z.string().max(5000).optional(),
+  })
+  .refine((body) => Object.keys(body).length > 0, 'At least one field is required');
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+const NOT_FOUND = 'Task not found';
 
-function validationError(res, issues) {
-  return res.status(400).json({ error: issues[0]?.message || 'Validation error' });
-}
-
-// ── Controllers ──────────────────────────────────────────────────────────────
-
-// GET /api/tasks
+/** GET /api/tasks */
 exports.getTasks = async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('user_id', req.user.id)
-      .order('due_date', { ascending: true });
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('user_id', req.user.id)
+    .order('due_date', { ascending: true });
 
-    if (error) throw error;
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  if (error) throw error;
+  res.json(data);
 };
 
-// GET /api/tasks/:id
+/** GET /api/tasks/:id */
 exports.getTaskById = async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('id', req.params.id)
-      .eq('user_id', req.user.id)
-      .single();
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('id', req.params.id)
+    .eq('user_id', req.user.id)
+    .single();
 
-    if (error) {
-      // PGRST116 = "The result contains 0 rows" (Supabase PostgREST code)
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({ error: 'Task not found or unauthorized' });
-      }
-      throw error;
-    }
-
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  throwIfDbError(error, NOT_FOUND);
+  res.json(data);
 };
 
-// POST /api/tasks
+/** POST /api/tasks */
 exports.createTask = async (req, res) => {
-  try {
-    const parsed = createTaskSchema.safeParse(req.body);
-    if (!parsed.success) return validationError(res, parsed.error.issues);
+  const body = validate(createTaskSchema, req.body);
+  const { data, error } = await supabase
+    .from('tasks')
+    .insert([{ ...body, user_id: req.user.id }])
+    .select()
+    .single();
 
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert([{ user_id: req.user.id, ...parsed.data }])
-      .select();
-
-    if (error) throw error;
-    res.status(201).json(data[0]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  if (error) throw error;
+  res.status(201).json(data);
 };
 
-// PATCH /api/tasks/:id
+/** PATCH /api/tasks/:id */
 exports.updateTask = async (req, res) => {
-  try {
-    const parsed = updateTaskSchema.safeParse(req.body);
-    if (!parsed.success) return validationError(res, parsed.error.issues);
+  const body = validate(updateTaskSchema, req.body);
+  const { data, error } = await supabase
+    .from('tasks')
+    .update(body)
+    .eq('id', req.params.id)
+    .eq('user_id', req.user.id)
+    .select();
 
-    const { data, error } = await supabase
-      .from('tasks')
-      .update(parsed.data)
-      .eq('id', req.params.id)
-      .eq('user_id', req.user.id)
-      .select();
-
-    if (error) throw error;
-    if (data.length === 0) {
-      return res.status(404).json({ error: 'Task not found or unauthorized' });
-    }
-
-    res.json(data[0]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  if (error) throw error;
+  if (data.length === 0) throw new HttpError(404, NOT_FOUND);
+  res.json(data[0]);
 };
 
-// DELETE /api/tasks/:id
+/** DELETE /api/tasks/:id */
 exports.deleteTask = async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('tasks')
-      .delete()
-      .eq('id', req.params.id)
-      .eq('user_id', req.user.id)
-      .select();
+  const { data, error } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', req.params.id)
+    .eq('user_id', req.user.id)
+    .select();
 
-    if (error) throw error;
-    if (data.length === 0) {
-      return res.status(404).json({ error: 'Task not found or unauthorized' });
-    }
-
-    res.json({ message: 'Task deleted successfully', task: data[0] });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  if (error) throw error;
+  if (data.length === 0) throw new HttpError(404, NOT_FOUND);
+  res.json({ message: 'Task deleted successfully', task: data[0] });
 };
+
+exports.schemas = { createTaskSchema, updateTaskSchema };

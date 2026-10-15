@@ -1,138 +1,102 @@
 const { z } = require('zod');
 const supabase = require('../supabaseClient');
-
-// ── Zod schemas ──────────────────────────────────────────────────────────────
+const { HttpError } = require('../lib/errors');
+const { validate, throwIfDbError } = require('../lib/validate');
+const { optionalDate } = require('../lib/schemas');
 
 const CONFIDENCE_VALUES = ['low', 'medium', 'high'];
 
+const examFields = {
+  subject: z.string().trim().min(1, 'Subject is required').max(200),
+  course_code: z.string().max(50).optional(),
+  exam_date: optionalDate,
+  daily_study_hours: z.number().min(0).max(24).optional(),
+  preparation_percent: z.number().min(0).max(100).optional(),
+};
+
 const createExamSchema = z.object({
-  subject: z.string().min(1, 'Subject is required'),
-  course_code: z.string().optional(),
-  exam_date: z.string().optional(),
+  ...examFields,
   confidence_level: z.enum(CONFIDENCE_VALUES).default('medium'),
-  daily_study_hours: z.number().min(0).optional(),
-  preparation_percent: z.number().min(0).max(100).optional(),
-  topics: z.array(z.string()).default([]),
+  topics: z.array(z.string().max(200)).max(100).default([]),
 });
 
-// Only the fields a client is allowed to change
-const updateExamSchema = z.object({
-  subject: z.string().min(1).optional(),
-  course_code: z.string().optional(),
-  exam_date: z.string().optional(),
-  confidence_level: z.enum(CONFIDENCE_VALUES).optional(),
-  daily_study_hours: z.number().min(0).optional(),
-  preparation_percent: z.number().min(0).max(100).optional(),
-  topics: z.array(z.string()).optional(),
-});
+// Only the fields a client is allowed to change.
+const updateExamSchema = z
+  .object({
+    ...examFields,
+    subject: examFields.subject.optional(),
+    confidence_level: z.enum(CONFIDENCE_VALUES).optional(),
+    topics: z.array(z.string().max(200)).max(100).optional(),
+  })
+  .refine((body) => Object.keys(body).length > 0, 'At least one field is required');
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+const NOT_FOUND = 'Exam not found';
 
-function validationError(res, issues) {
-  return res.status(400).json({ error: issues[0]?.message || 'Validation error' });
-}
-
-// ── Controllers ──────────────────────────────────────────────────────────────
-
-// GET /api/exams
+/** GET /api/exams */
 exports.getExams = async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('exams')
-      .select('*')
-      .eq('user_id', req.user.id)
-      .order('exam_date', { ascending: true });
+  const { data, error } = await supabase
+    .from('exams')
+    .select('*')
+    .eq('user_id', req.user.id)
+    .order('exam_date', { ascending: true });
 
-    if (error) throw error;
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  if (error) throw error;
+  res.json(data);
 };
 
-// GET /api/exams/:id
+/** GET /api/exams/:id */
 exports.getExamById = async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('exams')
-      .select('*')
-      .eq('id', req.params.id)
-      .eq('user_id', req.user.id)
-      .single();
+  const { data, error } = await supabase
+    .from('exams')
+    .select('*')
+    .eq('id', req.params.id)
+    .eq('user_id', req.user.id)
+    .single();
 
-    if (error) {
-      // PGRST116 = "The result contains 0 rows"
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({ error: 'Exam not found or unauthorized' });
-      }
-      throw error;
-    }
-
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  throwIfDbError(error, NOT_FOUND);
+  res.json(data);
 };
 
-// POST /api/exams
+/** POST /api/exams */
 exports.createExam = async (req, res) => {
-  try {
-    const parsed = createExamSchema.safeParse(req.body);
-    if (!parsed.success) return validationError(res, parsed.error.issues);
+  const body = validate(createExamSchema, req.body);
+  const { data, error } = await supabase
+    .from('exams')
+    .insert([{ ...body, user_id: req.user.id }])
+    .select()
+    .single();
 
-    const { data, error } = await supabase
-      .from('exams')
-      .insert([{ user_id: req.user.id, ...parsed.data }])
-      .select();
-
-    if (error) throw error;
-    res.status(201).json(data[0]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  if (error) throw error;
+  res.status(201).json(data);
 };
 
-// PATCH /api/exams/:id
+/** PATCH /api/exams/:id */
 exports.updateExam = async (req, res) => {
-  try {
-    const parsed = updateExamSchema.safeParse(req.body);
-    if (!parsed.success) return validationError(res, parsed.error.issues);
+  const body = validate(updateExamSchema, req.body);
+  const { data, error } = await supabase
+    .from('exams')
+    .update(body)
+    .eq('id', req.params.id)
+    .eq('user_id', req.user.id)
+    .select();
 
-    const { data, error } = await supabase
-      .from('exams')
-      .update(parsed.data)
-      .eq('id', req.params.id)
-      .eq('user_id', req.user.id)
-      .select();
-
-    if (error) throw error;
-    if (data.length === 0) {
-      return res.status(404).json({ error: 'Exam not found or unauthorized' });
-    }
-
-    res.json(data[0]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  if (error) throw error;
+  if (data.length === 0) throw new HttpError(404, NOT_FOUND);
+  res.json(data[0]);
 };
 
-// DELETE /api/exams/:id
+/** DELETE /api/exams/:id */
 exports.deleteExam = async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('exams')
-      .delete()
-      .eq('id', req.params.id)
-      .eq('user_id', req.user.id)
-      .select();
+  const { data, error } = await supabase
+    .from('exams')
+    .delete()
+    .eq('id', req.params.id)
+    .eq('user_id', req.user.id)
+    .select();
 
-    if (error) throw error;
-    if (data.length === 0) {
-      return res.status(404).json({ error: 'Exam not found or unauthorized' });
-    }
-
-    res.json({ message: 'Exam deleted successfully', exam: data[0] });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  if (error) throw error;
+  if (data.length === 0) throw new HttpError(404, NOT_FOUND);
+  res.json({ message: 'Exam deleted successfully', exam: data[0] });
 };
+
+exports.schemas = { createExamSchema, updateExamSchema };
