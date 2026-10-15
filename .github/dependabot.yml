@@ -1,0 +1,27 @@
+# Weekly dependency updates, with minor and patch bumps grouped per directory.
+#
+# The backend and root package.json must declare identical runtime ranges
+# (scripts/check-deps-sync.js), so those two only get lockfile updates within
+# their ranges. Widening a range is done by hand in both files together.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /backend
+    schedule: { interval: weekly }
+    versioning-strategy: lockfile-only
+    groups:
+      all: { patterns: ['*'] }
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly }
+    versioning-strategy: lockfile-only
+    groups:
+      all: { patterns: ['*'] }
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: { interval: weekly }
+    groups:
+      minor-and-patch: { update-types: [minor, patch] }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }

@@ -29,6 +29,8 @@ jobs:
       - run: npm ci
       - name: Check root and backend dependencies match
         run: node ../scripts/check-deps-sync.js
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high && (cd .. && npm audit --omit=dev --audit-level=high)
       - run: npm run lint
       - run: npm run format:check
       - name: Test with coverage
@@ -61,7 +63,9 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - run: npm run lint
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - run: npx eslint --max-warnings=0 .
       - name: Test with coverage
         run: npm run test:coverage -- --coverage.reporter=text --coverage.reporter=json-summary
       - name: Publish coverage summary
