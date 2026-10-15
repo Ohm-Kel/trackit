@@ -1,10 +1,10 @@
 const express = require('express');
 const chatController = require('../controllers/chatController');
-const authMiddleware = require('../middleware/authMiddleware');
+const requireUser = require('../middleware/requireUser');
 const { chatLimiter } = require('../middleware/rateLimit');
 
 const router = express.Router();
-router.use(authMiddleware);
+router.use(requireUser);
 
 router.post('/', chatLimiter, chatController.chat);
 router.post('/stream', chatLimiter, chatController.chatStream);

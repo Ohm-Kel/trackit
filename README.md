@@ -59,7 +59,7 @@ flowchart LR
 - The **frontend** signs in with Supabase Auth and calls the API with the user's access token. It reads notifications directly through Supabase Realtime, protected by Row Level Security.
 - The **API** verifies every token, validates every request with Zod, and queries Supabase as the signed-in user, so Row Level Security applies on top of explicit `user_id` filters. It is the only component holding the Anthropic and Supabase service keys.
 - The **frontend** is served with a strict Content-Security-Policy, and CI audits production dependencies, with Dependabot proposing updates weekly.
-- **AI calls** are rate-limited per user, with counters shared across serverless instances in Postgres. Chat history sent to the model is capped, and token usage is logged.
+- **AI calls** are rate-limited per user, with counters shared across serverless instances in Postgres. Every other route has a generous per-user limit, and failed authentication is limited per IP. Chat history sent to the model is capped, and token usage is logged.
 
 Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 [structured output through tool use](docs/adr/0001-structured-output-via-tool-use.md),
@@ -114,6 +114,7 @@ cp frontend/.env.example frontend/.env   # Supabase URL and anon key
 | `ANTHROPIC_MODEL` | backend | Optional model override |
 | `ALLOWED_ORIGINS` | backend | Comma-separated CORS allowlist |
 | `AI_CHAT_RATE_LIMIT`, `AI_UPLOAD_RATE_LIMIT` | backend | Requests per user per hour (defaults 30 and 10) |
+| `API_RATE_LIMIT_PER_MINUTE`, `AUTH_FAILURE_LIMIT` | backend | General per-user limit (300/min) and failed-auth limit per IP (50 per 15 min) |
 | `RATE_LIMIT_STORE` | backend | `supabase` (default, shared across instances) or `memory` |
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | frontend | Public Supabase client config |
 | `VITE_API_URL` | frontend | API base URL in development |

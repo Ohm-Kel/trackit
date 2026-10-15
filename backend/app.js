@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const config = require('./config');
 const logger = require('./lib/logger');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
+const { authFailureLimiter } = require('./middleware/rateLimit');
 
 const taskRoutes = require('./routes/tasks');
 const examRoutes = require('./routes/exams');
@@ -79,6 +80,8 @@ function createApp() {
     });
     next();
   });
+
+  app.use(authFailureLimiter);
 
   const api = buildApiRouter();
   app.use('/api', api);

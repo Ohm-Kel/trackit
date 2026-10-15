@@ -52,6 +52,8 @@ const config = Object.freeze({
     windowMs: parsePositiveInt(process.env.AI_RATE_LIMIT_WINDOW_MS, 60 * 60 * 1000),
     chatMax: parsePositiveInt(process.env.AI_CHAT_RATE_LIMIT, 30),
     uploadMax: parsePositiveInt(process.env.AI_UPLOAD_RATE_LIMIT, 10),
+    apiPerMinute: parsePositiveInt(process.env.API_RATE_LIMIT_PER_MINUTE, 300),
+    authFailuresPerIp: parsePositiveInt(process.env.AUTH_FAILURE_LIMIT, 50),
   }),
 
   chat: Object.freeze({

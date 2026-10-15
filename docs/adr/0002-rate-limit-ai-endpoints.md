@@ -45,3 +45,13 @@ and at two AI calls per request the extra database round trip is negligible.
   old per-instance behaviour instead of switching off.
 - `RATE_LIMIT_STORE=memory` keeps the in-memory store, which tests and
   single-process setups use.
+
+## Amendment (v1.2.0): limits beyond the AI endpoints
+
+- Every authenticated route also has a per-user limit (default 300 requests
+  a minute) as a backstop against runaway clients. It uses the in-memory store:
+  it protects the database rather than a paid API, and a shared counter would
+  add a database round trip to every request.
+- Failed authentication is limited per IP (default 50 per 15 minutes), because
+  each bad token costs a Supabase Auth call. Only 401 responses count, so
+  students sharing a campus IP are not affected by each other's normal use.
