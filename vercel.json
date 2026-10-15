@@ -41,6 +41,15 @@
           "value": "DENY"
         }
       ]
+    },
+    {
+      "source": "/((?!landing$|api/|assets/)[^.]+)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
     }
   ]
 }

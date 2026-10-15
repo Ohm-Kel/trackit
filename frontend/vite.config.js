@@ -1,6 +1,7 @@
 import process from 'node:process'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import { siteMetadata } from './vite-plugins/site.js'
 
 /**
  * Add a Content-Security-Policy <meta> tag to production builds, allowing
@@ -46,7 +47,11 @@ export function contentSecurityPolicy(supabaseUrl) {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   return {
-    plugins: [react(), contentSecurityPolicy(env.VITE_SUPABASE_URL)],
+    plugins: [
+      react(),
+      contentSecurityPolicy(env.VITE_SUPABASE_URL),
+      siteMetadata(env.VITE_SITE_URL),
+    ],
     build: {
       rollupOptions: {
         output: {
