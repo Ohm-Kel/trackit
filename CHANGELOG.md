@@ -9,7 +9,10 @@ All notable changes to this project are documented here. The format follows
 ### Added
 
 - Streamed chat replies: `POST /api/chat/stream` sends the reply as server-sent events, and the chat page shows it as it is generated
-- Frontend test suite with Vitest and React Testing Library (80 tests, 69% line coverage with a 65% CI threshold): every route renders with and without data, and the main flows run against an in-memory fake of the API
+- Frontend test suite with Vitest and React Testing Library (124 tests, 77% line coverage with a 75% CI threshold): every route renders with and without data, the main flows run against an in-memory fake of the API, and axe checks every page
+- End-to-end tests with Playwright: the production build in Chromium at desktop and mobile sizes, including sign-in through supabase-js, a streamed chat reply, CSP enforcement and WCAG 2 AA checks with colour contrast
+- Request IDs: every response has `X-Request-Id`, logs include it, and 500 responses return it
+- `docs/DEPLOYMENT.md` (release, verification and rollback steps), `supabase_migrations_002_rollback.sql` (tested in CI), and ADRs 0004 (streaming) and 0005 (CSP)
 - Database CI job: applies the schema and migrations to Postgres 16 and runs Row Level Security checks
 - `supabase_migrations_002.sql`
 - Content-Security-Policy built from the configured Supabase URL, plus security headers on the frontend (Vercel and Docker)
@@ -20,6 +23,9 @@ All notable changes to this project are documented here. The format follows
 - AI rate-limit counters are shared across serverless instances in Postgres, falling back to memory if the database is unavailable (`RATE_LIMIT_STORE`)
 - API queries run as the signed-in user, so Row Level Security applies on top of the `user_id` filters (`SUPABASE_ANON_KEY`)
 - The onboarding tour starts the first time the user reaches the dashboard, not only when the app opens there
+- Library code is split into separately cached chunks; the app entry is 40 KB instead of 480 KB
+- The Inter font is self-hosted instead of loaded from Google Fonts
+- The timetable parser warns when a long document may have been cut off
 
 ### Fixed
 
@@ -31,6 +37,10 @@ All notable changes to this project are documented here. The format follows
 - Failed saves, task toggles, deletes and subtask actions gave no feedback; errors now show the API's message
 - The upload page ignored the parser's warnings about skipped rows
 - The task completion toggle was not reachable by keyboard or screen reader
+- Accessibility: buttons without accessible names, form labels not tied to their fields, text below WCAG AA contrast (as low as 2.5:1), and an onboarding tour without dialog semantics or Escape to close
+- The focus plan placed study sessions on top of classes when a day had no free window
+- The password reset form accepted 6-character passwords, weaker than sign-up's rule
+- The chat stream called the model even if the user had already left
 
 ### Security
 
@@ -41,8 +51,13 @@ All notable changes to this project are documented here. The format follows
 - Every API route is rate-limited per user, and failed authentication per IP
 - Patched vulnerable dependencies, including proxy-addr (IP spoofing, critical), path-to-regexp, ws, body-parser, qs, react-router and vite
 - The browser console no longer logs the user's email and profile metadata
+- The timetable prompt tells the model to ignore instructions inside uploaded documents
+- No Google Fonts request, so visitor IPs are not sent to a third party
 
 ### Upgrade notes
+
+See `docs/DEPLOYMENT.md` for the full checklist.
+
 
 - Run `supabase_migrations_002.sql` in the Supabase SQL editor
 - Add `SUPABASE_ANON_KEY` to the API's environment (on Vercel, Project settings → Environment Variables). Until it is set, the API keeps using the service role and logs a warning

@@ -64,17 +64,20 @@ flowchart LR
 Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 [structured output through tool use](docs/adr/0001-structured-output-via-tool-use.md),
 [rate limiting AI endpoints with shared counters](docs/adr/0002-rate-limit-ai-endpoints.md),
-[the API as the authorisation boundary, with RLS on API queries](docs/adr/0003-api-as-authorization-boundary.md).
+[the API as the authorisation boundary, with RLS on API queries](docs/adr/0003-api-as-authorization-boundary.md),
+[streaming chat with server-sent events](docs/adr/0004-stream-chat-with-server-sent-events.md),
+[a Content-Security-Policy built from the Supabase URL](docs/adr/0005-frontend-content-security-policy.md).
+Release and rollback steps are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Tech stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, Vite 7, Tailwind CSS 4, TanStack React Query 5, React Router 7, Recharts |
+| Frontend | React 19, Vite 7, Tailwind CSS 4, TanStack React Query 5, React Router 7 |
 | Backend | Node.js 22, Express 5, Zod 4, pino, helmet, express-rate-limit |
 | AI | Anthropic SDK (Claude Haiku 4.5 by default), vision and PDF input, forced tool use |
 | Data and auth | Supabase Postgres with Row Level Security, Supabase Auth and Realtime |
-| Quality | Jest and Supertest (117 backend tests, 95% line coverage), Vitest and React Testing Library (80 frontend tests, 69% line coverage), SQL RLS checks, ESLint, Prettier, pre-commit, GitHub Actions |
+| Quality | Jest and Supertest (121 backend tests, 95% line coverage), Vitest and React Testing Library (124 frontend tests, 77% line coverage), Playwright end-to-end and axe accessibility checks, SQL RLS checks, ESLint, Prettier, pre-commit, GitHub Actions |
 | Delivery | Vercel (frontend and serverless API), Docker and Docker Compose |
 
 ## Getting started
@@ -97,7 +100,7 @@ cd trackit
 
 ### 2. Set up the database
 
-In the Supabase SQL editor, run `supabase_schema.sql`, then `supabase_migrations.sql`, then `supabase_migrations_002.sql`. They create the tables, Row Level Security policies, the trigger that creates a profile on sign-up, and the shared rate-limit counters.
+In the Supabase SQL editor, run `supabase_schema.sql`, then `supabase_migrations.sql`, then `supabase_migrations_002.sql` (see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for Auth settings and rollback). They create the tables, Row Level Security policies, the trigger that creates a profile on sign-up, and the shared rate-limit counters.
 
 ### 3. Configure environment variables
 
@@ -144,7 +147,8 @@ npm run lint && npm run format:check
 npm run eval -- --oracle # evaluation harness self-check (no API calls)
 
 cd ../frontend
-npm test                 # Vitest and React Testing Library
+npm test                 # Vitest and React Testing Library, including axe
+npm run test:e2e         # Playwright, production build in Chromium (npx playwright install chromium once)
 npm run lint
 
 cd ..
@@ -202,7 +206,8 @@ trackit/
 │   └── eval/                 # Evaluation dataset, scorer and runner
 ├── frontend/
 │   └── src/                  # Pages, components, hooks, API client
-├── docs/adr/                 # Architecture decision records
+├── docs/                     # ADRs and the deployment guide
+├── frontend/e2e/             # Playwright end-to-end tests
 ├── scripts/                  # Repository checks; db/ holds the RLS test suite
 ├── supabase_schema.sql       # Tables, RLS policies, triggers
 ├── supabase_migrations.sql   # Later additions (subtasks, chat history, schedule)
