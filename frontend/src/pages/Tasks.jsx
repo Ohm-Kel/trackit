@@ -2,7 +2,9 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { Plus, Search, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2, AlertTriangle, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
-import { formatRelativeDate, getDueBadgeClass, formatStatus, daysUntil } from '../utils/dates';
+import { formatRelativeDate, getDueBadgeClass, getDueUrgency, formatStatus, daysUntil } from '../utils/dates';
+
+const URGENCY_TEXT = { urgent: 'text-error', soon: 'text-warning', later: 'text-text-3', none: 'text-text-3' };
 import { exportTasksCSV, exportTasksPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
 import { TasksSkeleton } from '../components/Skeleton';
@@ -212,7 +214,7 @@ export default function Tasks() {
                       <div className="text-[11.5px] text-text-3 mt-0.5">
                         {task.course_code && <span>{task.course_code}</span>}
                         <span className="hidden lg:inline">{task.subtasks_count > 0 ? ` · ${task.subtasks_count} subtasks` : ''}</span>
-                        <span className="lg:hidden"> · <span className={`font-semibold ${dueBadge.includes('EF') ? 'text-[#B91C1C]' : dueBadge.includes('D97') ? 'text-[#B45309]' : 'text-text-3'}`}>{rel}</span></span>
+                        <span className="lg:hidden">{task.course_code ? ' · ' : ''}<span className={`font-semibold ${URGENCY_TEXT[getDueUrgency(task.due_date)]}`}>{rel}</span></span>
                       </div>
                     </div>
                     <div className="hidden lg:flex">

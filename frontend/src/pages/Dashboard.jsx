@@ -4,7 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
 import { useProfile } from '../hooks/useProfile';
-import { daysUntil, formatRelativeDate, getDueBadgeClass, formatStatus } from '../utils/dates';
+import { daysUntil, formatRelativeDate, getDueBadgeClass, getDueUrgency, formatStatus } from '../utils/dates';
+
+// The dot beside each queued task matches its due badge.
+const URGENCY_DOT = { urgent: 'bg-[#EF4444]', soon: 'bg-[#F59E0B]', later: 'bg-border2', none: 'bg-border2' };
 import { DashboardSkeleton } from '../components/Skeleton';
 
 export default function Dashboard() {
@@ -152,7 +155,7 @@ export default function Dashboard() {
                 return (
                   <div key={task.id} className={`flex items-start gap-3 p-3.5 px-4 ${idx < priorityQueue.length - 1 ? 'border-b border-border' : ''} hover:bg-bg transition-colors cursor-pointer group`} onClick={() => navigate('/tasks')}>
                     <div className="w-[17px] h-[17px] rounded-full border-[1.5px] border-border2 bg-white shrink-0 mt-0.5 group-hover:border-primary group-hover:bg-primary-light transition-colors"></div>
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#EF4444] shrink-0 mt-[5px]"></div>
+                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-[5px] ${URGENCY_DOT[getDueUrgency(task.due_date)]}`}></div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[13.5px] font-semibold text-text-1 mb-[3px] whitespace-nowrap overflow-hidden text-ellipsis">{task.title}</div>
                       <div className="text-[11.5px] text-text-3 flex gap-2.5 flex-wrap">

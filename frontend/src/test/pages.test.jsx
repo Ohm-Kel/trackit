@@ -136,3 +136,34 @@ describe('onboarding tour', () => {
     expect(localStorage.getItem('trackit_onboarding_done')).toBe('true');
   });
 });
+
+describe('due-date urgency', () => {
+  it('colours the phone task row by urgency, without a stray separator', async () => {
+    renderApp('/tasks', {
+      setup: (fake) =>
+        fake.db.tasks.push(
+          task({ title: 'Lab report', due_date: inDays(-1) }),
+          task({ title: 'Essay', course_code: 'ENG101', due_date: inDays(10) }),
+        ),
+    });
+    const lab = (await screen.findByText('Lab report')).nextElementSibling;
+    const phoneDue = lab.querySelector('.lg\\:hidden');
+    expect(phoneDue.textContent).toBe('Overdue');
+    expect(phoneDue.firstElementChild).toHaveClass('text-error');
+
+    const essay = screen.getByText('Essay').nextElementSibling.querySelector('.lg\\:hidden');
+    expect(essay.textContent).toMatch(/^ · \S/);
+    expect(essay.firstElementChild).toHaveClass('text-text-3');
+  });
+
+  it('marks only urgent tasks with a red dot in the Dashboard queue', async () => {
+    renderApp('/', {
+      setup: (fake) =>
+        fake.db.tasks.push(task({ title: 'Lab report', due_date: inDays(0) }), task({ title: 'Essay', due_date: inDays(10) })),
+    });
+    const dot = (title) => screen.getByText(title).parentElement.previousElementSibling;
+    await screen.findByText('Essay');
+    expect(dot('Lab report')).toHaveClass('bg-[#EF4444]');
+    expect(dot('Essay')).toHaveClass('bg-border2');
+  });
+});
