@@ -12,6 +12,7 @@ All notable changes to this project are documented here. The format follows
 - Frontend test suite with Vitest and React Testing Library (124 tests, 77% line coverage with a 75% CI threshold): every route renders with and without data, the main flows run against an in-memory fake of the API, and axe checks every page
 - End-to-end tests with Playwright: the production build in Chromium at desktop and mobile sizes, including sign-in through supabase-js, a streamed chat reply, CSP enforcement and WCAG 2 AA checks with colour contrast
 - Request IDs: every response has `X-Request-Id`, logs include it, and 500 responses return it
+- CodeQL security analysis on pull requests, pushes to master and weekly
 - `docs/DEPLOYMENT.md` (release, verification and rollback steps), `supabase_migrations_002_rollback.sql` (tested in CI), and ADRs 0004 (streaming) and 0005 (CSP)
 - Database CI job: applies the schema and migrations to Postgres 16 and runs Row Level Security checks
 - `supabase_migrations_002.sql`
@@ -41,6 +42,9 @@ All notable changes to this project are documented here. The format follows
 - The focus plan placed study sessions on top of classes when a day had no free window
 - The password reset form accepted 6-character passwords, weaker than sign-up's rule
 - The chat stream called the model even if the user had already left
+- Dark mode kept light-mode tints and dark text, leaving text as low as 1.1:1 contrast; every signed-in page now passes WCAG AA in dark mode, checked in CI
+- The completed_at backfill would have overwritten `updated_at` on every done task
+- A class starting after 9 PM stretched the focus plan's last window past 9 PM
 
 ### Security
 
