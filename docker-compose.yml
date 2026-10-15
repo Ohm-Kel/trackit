@@ -1,0 +1,27 @@
+# Run the full stack locally: `docker compose up --build`, then open
+# http://localhost:8080. Needs backend/.env and a root .env (see the
+# .env.example files). The database and auth stay on Supabase.
+services:
+  api:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      ALLOWED_ORIGINS: http://localhost:8080
+    ports:
+      - '3001:3001'
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:?set VITE_SUPABASE_URL in .env}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:?set VITE_SUPABASE_ANON_KEY in .env}
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - '8080:80'
+    restart: unless-stopped
