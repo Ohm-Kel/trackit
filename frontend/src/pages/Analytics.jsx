@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../hooks/useTasks';
-import { API_URL } from '../api/baseUrl';
+import { apiJson } from '../api/http';
 
 export default function Analytics() {
   const { session } = useAuth();
@@ -26,17 +26,12 @@ export default function Analytics() {
       try {
         if (!session?.access_token) return;
         
-        const [velRes, burnRes] = await Promise.all([
-          fetch(`${API_URL}/analytics/velocity`, {
-            headers: { 'Authorization': `Bearer ${session.access_token}` }
-          }),
-          fetch(`${API_URL}/analytics/burnout`, {
-            headers: { 'Authorization': `Bearer ${session.access_token}` }
-          })
+        const [vel, burn] = await Promise.all([
+          apiJson('/analytics/velocity'),
+          apiJson('/analytics/burnout'),
         ]);
-
-        if (velRes.ok) setVelocity(await velRes.json());
-        if (burnRes.ok) setBurnout(await burnRes.json());
+        setVelocity(vel);
+        setBurnout(burn);
       } catch (err) {
         console.error('Error fetching analytics:', err);
       } finally {
@@ -78,7 +73,7 @@ export default function Analytics() {
         <StatCard 
           icon={Activity} 
           title="Study Velocity" 
-          value={velocity[0]?.tasks || 0} 
+          value={velocity.at(-1)?.tasks || 0} 
           description="Tasks cleared this week"
           color="blue"
         />

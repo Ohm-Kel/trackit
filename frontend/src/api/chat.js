@@ -1,13 +1,5 @@
-import { supabase } from '../lib/supabaseClient';
+import { apiJson, apiRequest } from './http';
 import { readEvents } from './sse';
-import { API_URL } from './baseUrl';
-
-
-async function getAuthHeader() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return {};
-  return { Authorization: `Bearer ${session.access_token}` };
-}
 
 /**
  * Send a chat message and stream the reply as it is generated.
@@ -19,22 +11,14 @@ async function getAuthHeader() {
  * @returns {Promise<{reply: string}>} The complete reply, once it has been saved.
  */
 export async function streamChatMessage(message, history = [], { onDelta, signal } = {}) {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/chat/stream`, {
+  const res = await apiRequest('/chat/stream', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'text/event-stream',
-      ...headers,
-    },
-    body: JSON.stringify({ message, history }),
+    body: { message, history },
+    headers: { Accept: 'text/event-stream' },
     signal,
+    fallbackError: 'Failed to get AI response',
   });
-
-  if (!res.ok || !res.body) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || 'Failed to get AI response');
-  }
+  if (!res.body) throw new Error('Failed to get AI response');
 
   for await (const { event, data } of readEvents(res.body)) {
     if (event === 'delta') onDelta?.(data.text);
@@ -45,22 +29,17 @@ export async function streamChatMessage(message, history = [], { onDelta, signal
 }
 
 /**
- * Load persisted chat history from the database.
+ * Load persisted chat history from the database. Returns [] if it cannot be
+ * loaded, so the chat still opens.
  * @returns {Promise<Array<{role: string, content: string, created_at: string}>>}
  */
-export async function fetchChatHistory() {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/chat/history`, { headers });
-  if (!res.ok) return [];
-  return res.json();
+export function fetchChatHistory() {
+  return apiJson('/chat/history').catch(() => []);
 }
 
 /**
  * Clear all persisted chat history.
  */
-export async function clearChatHistory() {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/chat/history`, { method: 'DELETE', headers });
-  if (!res.ok) throw new Error('Failed to clear history');
-  return res.json();
+export function clearChatHistory() {
+  return apiJson('/chat/history', { method: 'DELETE', fallbackError: 'Failed to clear history' });
 }
