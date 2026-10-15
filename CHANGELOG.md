@@ -9,7 +9,7 @@ All notable changes to this project are documented here. The format follows
 ### Added
 
 - Streamed chat replies: `POST /api/chat/stream` sends the reply as server-sent events, and the chat page shows it as it is generated
-- Frontend test suite with Vitest and React Testing Library (30 tests), run in CI with a coverage summary
+- Frontend test suite with Vitest and React Testing Library (80 tests, 69% line coverage with a 65% CI threshold): every route renders with and without data, and the main flows run against an in-memory fake of the API
 - Database CI job: applies the schema and migrations to Postgres 16 and runs Row Level Security checks
 - `supabase_migrations_002.sql`
 - Content-Security-Policy built from the configured Supabase URL, plus security headers on the frontend (Vercel and Docker)
@@ -26,6 +26,11 @@ All notable changes to this project are documented here. The format follows
 - `supabase_schema.sql` failed on a fresh database (`ON table ALL` instead of `FOR ALL`)
 - Velocity analytics failed on every request because `tasks.completed_at` did not exist; it is now added and maintained by a trigger
 - Notifications and analytics called relative API URLs, which failed in local development
+- Task and exam lists failed to load in production: `new URL('/api/tasks')` throws for the relative production API base
+- The Analytics "this week" card showed the oldest week's count
+- Failed saves, task toggles, deletes and subtask actions gave no feedback; errors now show the API's message
+- The upload page ignored the parser's warnings about skipped rows
+- The task completion toggle was not reachable by keyboard or screen reader
 
 ### Security
 
