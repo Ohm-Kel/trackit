@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { PASSWORD_HINT, validatePassword } from '../utils/password';
 import { Mail, Lock, UserPlus, Chrome, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 const Signup = () => {
@@ -11,13 +12,6 @@ const Signup = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp, signInWithGoogle } = useAuth();
-
-  const validatePassword = (pass) => {
-    if (pass.length < 8) return 'Password must be at least 8 characters long';
-    if (!/[0-9]/.test(pass)) return 'Password must contain at least one number';
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return 'Password must contain at least one special character';
-    return null;
-  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -124,7 +118,7 @@ const Signup = () => {
                     <input id="signup-password"
                       type="password"
                       required
-                      placeholder="8+ chars, number, special char"
+                      placeholder={PASSWORD_HINT}
                       className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#5E6E84] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}

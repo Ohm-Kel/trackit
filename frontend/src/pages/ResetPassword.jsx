@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { Lock, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { PASSWORD_HINT, validatePassword } from '../utils/password';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -27,9 +28,8 @@ export default function ResetPassword() {
     e.preventDefault();
     setError('');
 
-    if (password.length < 6) {
-      return setError('Password must be at least 6 characters');
-    }
+    const passwordError = validatePassword(password);
+    if (passwordError) return setError(passwordError);
     if (password !== confirm) {
       return setError('Passwords do not match');
     }
@@ -87,7 +87,7 @@ export default function ResetPassword() {
                   <input id="resetpassword-new-password"
                     type={showPassword ? 'text' : 'password'}
                     required
-                    placeholder="At least 6 characters"
+                    placeholder={PASSWORD_HINT}
                     className="block w-full pl-12 pr-12 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#5E6E84] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
