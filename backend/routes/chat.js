@@ -1,15 +1,13 @@
 const express = require('express');
-const router = express.Router();
 const chatController = require('../controllers/chatController');
 const authMiddleware = require('../middleware/authMiddleware');
+const { chatLimiter } = require('../middleware/rateLimit');
 
-// POST /api/chat
-router.post('/', authMiddleware, chatController.chat);
+const router = express.Router();
+router.use(authMiddleware);
 
-// GET /api/chat/history — load persisted chat history
-router.get('/history', authMiddleware, chatController.getHistory);
-
-// DELETE /api/chat/history — clear chat history
-router.delete('/history', authMiddleware, chatController.clearHistory);
+router.post('/', chatLimiter, chatController.chat);
+router.get('/history', chatController.getHistory);
+router.delete('/history', chatController.clearHistory);
 
 module.exports = router;
