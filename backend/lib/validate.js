@@ -1,3 +1,4 @@
+const { z } = require('zod');
 const { HttpError } = require('./errors');
 
 /**
@@ -30,4 +31,20 @@ function throwIfDbError(error, notFoundMessage = 'Not found') {
   throw error;
 }
 
-module.exports = { validate, throwIfDbError };
+// Any 8-4-4-4-12 hex string, which is what a Postgres uuid column accepts.
+const idSchema = z.guid();
+
+/**
+ * Return the `:id` route parameter, or throw a 404 if it is not a UUID. No row
+ * can have such an id, and querying with it makes Postgres fail the cast,
+ * which would surface as a 500.
+ * @param {string} id
+ * @param {string} notFoundMessage
+ * @returns {string}
+ */
+function parseId(id, notFoundMessage = 'Not found') {
+  if (!idSchema.safeParse(id).success) throw new HttpError(404, notFoundMessage);
+  return id;
+}
+
+module.exports = { validate, throwIfDbError, parseId };

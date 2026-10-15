@@ -1,4 +1,5 @@
 const { HttpError } = require('../lib/errors');
+const { parseId } = require('../lib/validate');
 
 const URGENT_WINDOW_MS = 4 * 24 * 60 * 60 * 1000;
 const HIGH_WORKLOAD_THRESHOLD = 3;
@@ -53,10 +54,11 @@ exports.getNotifications = async (req, res) => {
 
 /** PATCH /api/notifications/:id/read */
 exports.markAsRead = async (req, res) => {
+  const id = parseId(req.params.id, 'Notification not found');
   const { data, error } = await req.db
     .from('notifications')
     .update({ read_status: true })
-    .eq('id', req.params.id)
+    .eq('id', id)
     .eq('user_id', req.user.id)
     .select('id');
 
