@@ -6,9 +6,11 @@ describe('validatePassword', () => {
     ['short1!', /at least 8/],
     ['longenough!', /number/],
     ['longenough1', /special/],
-    ['a1!' + 'x'.repeat(70), /at most 72/],
+    ['a1!' + 'x'.repeat(70), /too long/],
     // Multi-byte characters count as bytes, as bcrypt sees them.
-    ['a1!' + 'é'.repeat(35), /at most 72/],
+    ['a1!' + 'é'.repeat(35), /too long/],
+    // An accented letter is not a symbol.
+    ['café12345', /special/],
   ])('rejects %j', (password, reason) => {
     expect(validatePassword(password)).toMatch(reason);
   });

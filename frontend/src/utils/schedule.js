@@ -56,7 +56,8 @@ export function computeFreeSlots(schedule, date = new Date()) {
   const free = [];
   let cursor = DAY_START;
   for (const block of busy) {
-    if (block.start - cursor >= MIN_SLOT_HOURS) free.push({ start: cursor, end: block.start });
+    const end = Math.min(block.start, DAY_END);
+    if (end - cursor >= MIN_SLOT_HOURS) free.push({ start: cursor, end });
     cursor = Math.max(cursor, block.end);
   }
   if (DAY_END - cursor >= MIN_SLOT_HOURS) free.push({ start: cursor, end: DAY_END });

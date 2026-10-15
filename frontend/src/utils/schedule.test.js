@@ -51,6 +51,11 @@ describe('computeFreeSlots', () => {
     ).toEqual([]);
   });
 
+  it('never extends a window past 9 PM, even before a late class', () => {
+    const slots = computeFreeSlots({ monday: [{ start: '22:00', end: '23:00' }] }, MONDAY);
+    expect(slots.map(({ start, end }) => [start, end])).toEqual([[8, 21]]);
+  });
+
   it('ignores unreadable class times', () => {
     expect(computeFreeSlots({ monday: [{ start: 'TBA', end: '' }] }, MONDAY)).toBe(DEFAULT_SLOTS);
   });

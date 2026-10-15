@@ -6,6 +6,10 @@
  */
 export const PASSWORD_HINT = '8+ chars, number, special char';
 
+// The ASCII symbols Supabase Auth accepts for its "symbols" requirement, so a
+// password that passes here also passes there. Accented letters do not count.
+const SYMBOLS = /[!@#$%^&*()_+\-=[\]{};':"|<>?,./`~\\]/;
+
 // Supabase hashes passwords with bcrypt, which only uses the first 72 bytes.
 const MAX_BYTES = 72;
 
@@ -13,9 +17,10 @@ const MAX_BYTES = 72;
 export function validatePassword(password) {
   if (password.length < 8) return 'Password must be at least 8 characters long';
   if (new TextEncoder().encode(password).length > MAX_BYTES) {
-    return 'Password must be at most 72 characters long';
+    // Accented letters and emoji take more than one byte each.
+    return 'Password is too long (72 bytes at most; some characters count as more than one)';
   }
   if (!/[0-9]/.test(password)) return 'Password must contain at least one number';
-  if (!/[^A-Za-z0-9\s]/.test(password)) return 'Password must contain at least one special character';
+  if (!SYMBOLS.test(password)) return 'Password must contain at least one special character';
   return null;
 }

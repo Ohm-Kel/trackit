@@ -30,9 +30,14 @@ export async function apiRequest(path, { method = 'GET', body, headers = {}, sig
     signal,
   });
   if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    const error = new Error(data.error || `${fallbackError || 'Request failed'} (${res.status})`);
+    const data = await res.json().catch(() => null);
+    const error = new Error(data?.error || `${fallbackError || 'Request failed'} (${res.status})`);
     error.status = res.status;
+    error.requestId = data?.requestId;
+    if (!data) {
+      error.details =
+        'The server returned a non-JSON response. This often means a routing mismatch (404) or a crash.';
+    }
     throw error;
   }
   return res;
