@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell, Check, Trash2, Info, AlertTriangle, Sparkles, Loader2, X } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
@@ -10,7 +10,7 @@ export default function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       if (!session?.access_token) return;
       
@@ -33,7 +33,7 @@ export default function NotificationCenter() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session]);
 
   useEffect(() => {
     fetchNotifications();
@@ -56,7 +56,7 @@ export default function NotificationCenter() {
         supabase.removeChannel(channel);
       };
     }
-  }, [session]);
+  }, [session, fetchNotifications]);
 
   const markAsRead = async (id) => {
     try {

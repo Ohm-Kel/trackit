@@ -62,13 +62,14 @@ export default function OnboardingTour() {
   const location = useLocation();
 
   useEffect(() => {
+    // Start the tour the first time the user reaches the dashboard.
     const done = localStorage.getItem(TOUR_KEY);
     if (!done && location.pathname === '/') {
       // Small delay so dashboard loads first
       const t = setTimeout(() => setShow(true), 800);
       return () => clearTimeout(t);
     }
-  }, []);
+  }, [location.pathname]);
 
   if (!show) return null;
 

@@ -141,8 +141,13 @@ npm run test:coverage    # with coverage (85% line gate)
 npm run lint && npm run format:check
 npm run eval -- --oracle # evaluation harness self-check (no API calls)
 
+cd ../frontend
+npm test                 # Vitest and React Testing Library
+npm run lint
+
+cd ..
 # Schema, migrations and RLS policies, against an empty Postgres database
-DATABASE_URL=postgres://postgres@localhost:5432/postgres ../scripts/db/test.sh
+DATABASE_URL=postgres://postgres@localhost:5432/postgres scripts/db/test.sh
 ```
 
 ## Usage examples
@@ -206,7 +211,6 @@ trackit/
 ## Roadmap
 
 - Add anonymised real-world timetables (scans, photos, multi-page PDFs) as evaluation set v2
-- Frontend component tests with Vitest and React Testing Library
 
 ## Contributors
 
