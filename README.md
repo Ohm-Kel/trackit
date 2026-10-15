@@ -67,7 +67,7 @@ Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 [the API as the authorisation boundary, with RLS on API queries](docs/adr/0003-api-as-authorization-boundary.md),
 [streaming chat with server-sent events](docs/adr/0004-stream-chat-with-server-sent-events.md),
 [a Content-Security-Policy built from the Supabase URL](docs/adr/0005-frontend-content-security-policy.md),
-[running the API's tests against a real Supabase stack](docs/adr/0006-real-database-integration-tests.md).
+[running the API's tests against a real Supabase stack](docs/adr/0008-real-database-integration-tests.md).
 Release and rollback steps are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Tech stack

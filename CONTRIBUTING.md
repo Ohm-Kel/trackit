@@ -49,7 +49,7 @@ migrations, and runs `backend/tests/db` with real users and tokens. The stack
 stays up between runs: pass Jest arguments to run one file
 (`scripts/db/integration.sh isolation`), use `RESET_DB=1` after editing the
 SQL files, and `npx supabase stop` when done. See
-[ADR 0006](docs/adr/0006-real-database-integration-tests.md).
+[ADR 0008](docs/adr/0008-real-database-integration-tests.md).
 
 ## Code conventions
 

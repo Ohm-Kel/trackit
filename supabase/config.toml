@@ -1,7 +1,7 @@
 # Local Supabase stack for the real-database integration tests
 # (backend/tests/db, `npm run test:db`). Only the database, PostgREST and
 # GoTrue (behind the API gateway) are started; see
-# docs/adr/0006-real-database-integration-tests.md.
+# docs/adr/0008-real-database-integration-tests.md.
 # Reference: https://supabase.com/docs/guides/local-development/cli/config
 project_id = "trackit"
 

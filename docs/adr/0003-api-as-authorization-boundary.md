@@ -26,7 +26,7 @@ Treat the API as the authorisation boundary for everything it does:
 - Integration tests use a Supabase fake that records each query and assert
   the `user_id` filter is present. `backend/tests/db` also runs
   every endpoint against a real Supabase stack and checks that one user cannot
-  reach another's rows ([ADR 0006](0006-real-database-integration-tests.md)).
+  reach another's rows ([ADR 0008](0008-real-database-integration-tests.md)).
 
 ## Consequences
 

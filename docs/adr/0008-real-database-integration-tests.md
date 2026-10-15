@@ -1,4 +1,4 @@
-# ADR 0006: Run the API's tests against a real Supabase stack
+# ADR 0008: Run the API's tests against a real Supabase stack
 
 - Status: Accepted
 - Date: 2026-10-15
