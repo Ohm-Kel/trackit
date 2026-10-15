@@ -85,7 +85,8 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_PASSWORD: postgres
+          # Throwaway container: no password needed.
+          POSTGRES_HOST_AUTH_METHOD: trust
         ports: ['5432:5432']
         options: >-
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
@@ -94,7 +95,7 @@ jobs:
       - name: Apply schema and migrations, then run RLS checks
         run: scripts/db/test.sh
         env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+          DATABASE_URL: postgres://postgres@localhost:5432/postgres
 
   docker:
     name: Docker images build
