@@ -49,4 +49,18 @@ const apiLimiter = rateLimit({
   message: { error: 'Too many requests. Please slow down.' },
 });
 
-module.exports = { aiRateLimit, chatLimiter, uploadLimiter, apiLimiter };
+/**
+ * Per-IP limit on the calendar feed, which has no user to key on. Calendar
+ * services fetch every subscriber's feed from a few shared IPs, so the limit
+ * is high: it only stops a client hammering the database. Kept apart from the
+ * failed-auth counter, so reaching it never blocks other routes.
+ */
+const calendarFeedLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: config.rateLimit.calendarFeedPerMinute,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Too many calendar requests. Please try again later.' },
+});
+
+module.exports = { aiRateLimit, chatLimiter, uploadLimiter, apiLimiter, calendarFeedLimiter };

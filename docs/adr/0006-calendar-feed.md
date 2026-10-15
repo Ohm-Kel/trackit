@@ -90,9 +90,23 @@ usual bearer-token check (ADR 0003) cannot protect the feed.
   suggests hourly refreshes (`REFRESH-INTERVAL`, `X-PUBLISHED-TTL`); Google
   Calendar ignores this and polls on its own schedule, typically every few
   hours.
-- A malformed or unknown token returns 404 and counts as a failed
-  authentication for the IP (`backend/lib/authFailures.js`), so guessing
-  is blocked like guessing JWTs. A database error is not counted.
+- Google, Microsoft and Apple fetch every subscriber's feed from a small
+  pool of shared IPs, and keep polling links that were rotated or revoked.
+  So an unknown token returns 404 **without** counting as a failed
+  authentication: counting it would let stale subscriptions block a
+  fetcher IP through the app-wide failed-auth limit, and break calendar
+  sync for every user on it. Nothing is lost, because guessing a 256-bit
+  token is infeasible.
+- A **malformed** token (anything but 43 base64url characters) still
+  counts as a failed authentication for the IP
+  (`backend/lib/authFailures.js`). Real calendar clients only hold
+  well-formed tokens, so this only catches scanners. A database error is
+  not counted.
+- The feed route has its own per-IP limit (600 requests a minute per
+  instance, `CALENDAR_FEED_RATE_LIMIT`), separate from the failed-auth
+  counter, so reaching it never blocks other routes. It only stops a
+  client hammering the database; it is high because one fetcher IP serves
+  many users.
 - Feed tokens are replaced with `[token]` in request and error logs.
 - `POST /api/calendar/feed` falls under the general per-user API limit.
 
@@ -105,12 +119,11 @@ usual bearer-token check (ADR 0003) cannot protect the feed.
 - The URL appears in the hosting platform's access logs (Vercel), which the
   API cannot redact. Putting the token in a query string would not avoid
   this.
-- Google and Microsoft fetch subscriptions from shared IP addresses. If many
-  users keep subscriptions to revoked links, those fetches count as failed
-  authentications for the shared IP, and at 50 per 15 minutes per instance
-  could briefly block refreshes for other users (calendar apps retry later).
-  If this shows up in the logs, keep revoked hashes as tombstones and answer
-  them with `410 Gone` without counting a failure.
+- A regression test sends many unknown-token requests from one IP and
+  checks that the same IP still gets a valid feed and signed-in API
+  responses. If the feed limit is ever reached by a busy fetcher IP,
+  raise `CALENDAR_FEED_RATE_LIMIT`; old subscriptions could also be
+  answered with `410 Gone` from kept tombstones, so clients stop polling.
 - Date-only due dates rely on Postgres storing them at midnight UTC, which
   holds for Supabase's default UTC time zone.
 - Alternatives considered: pushing events to each provider's API (needs

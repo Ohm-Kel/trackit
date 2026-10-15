@@ -120,6 +120,7 @@ cp frontend/.env.example frontend/.env   # Supabase URL and anon key
 | `ALLOWED_ORIGINS` | backend | Comma-separated CORS allowlist |
 | `AI_CHAT_RATE_LIMIT`, `AI_UPLOAD_RATE_LIMIT` | backend | Requests per user per hour (defaults 30 and 10) |
 | `API_RATE_LIMIT_PER_MINUTE`, `AUTH_FAILURE_LIMIT` | backend | General per-user limit (300/min) and failed-auth limit per IP (50 per 15 min) |
+| `CALENDAR_FEED_RATE_LIMIT` | backend | Calendar feed requests per IP per minute (600) |
 | `RATE_LIMIT_STORE` | backend | `supabase` (default, shared across instances) or `memory` |
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | frontend | Public Supabase client config |
 | `VITE_API_URL` | frontend | API base URL in development |

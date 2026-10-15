@@ -157,18 +157,22 @@ describe('GET /api/calendar/:token.ics', () => {
     expect(again.status).toBe(304);
   });
 
-  it('returns 404 for an unknown token and counts it as a failed authentication', async () => {
+  it('does not block an IP that polls revoked or rotated links', async () => {
+    // Calendar services poll every subscriber's feed from shared IPs and keep
+    // polling links that were rotated or revoked. Many more 404s than the
+    // failed-auth limit (3 in this file) must not block that IP.
     ctx.supabase.rpc.mockResolvedValue({ data: null, error: null });
-    for (let i = 0; i < 3; i += 1) {
-      const res = await ctx.api().get(`/api/calendar/${TOKEN}.ics`);
+    for (let i = 0; i < 10; i += 1) {
+      const res = await ctx.api().get(`/api/calendar/${'B'.repeat(42)}${i % 10}.ics`);
       expect(res.status).toBe(404);
       expect(res.body).toEqual({ error: 'Calendar not found' });
     }
 
-    const blocked = await ctx.api().get(`/api/calendar/${TOKEN}.ics`);
-    expect(blocked.status).toBe(429);
-    expect(blocked.headers['retry-after']).toBeDefined();
-    expect(ctx.supabase.rpc).toHaveBeenCalledTimes(3);
+    // The same IP still gets other users' feeds and signed-in API calls.
+    ctx.supabase.rpc.mockResolvedValue({ data: FEED, error: null });
+    expect((await ctx.api().get(`/api/calendar/${TOKEN}.ics`)).status).toBe(200);
+    ctx.supabase.queue('calendar_feeds', { data: null });
+    expect((await ctx.api().get('/api/calendar/feed').set(ctx.auth)).status).toBe(200);
   });
 
   it('rejects a malformed token without querying the database', async () => {

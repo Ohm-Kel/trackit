@@ -76,23 +76,26 @@ exports.revokeFeed = async (req, res) => {
 
 /**
  * GET /api/calendar/:token.ics: the subscription feed. Not signed in:
- * calendar apps cannot send a token, so the URL is the credential. A bad
- * token counts as a failed authentication for the IP, like a bad JWT.
+ * calendar apps cannot send a token, so the URL is the credential.
+ *
+ * Only a malformed token counts as a failed authentication for the IP. A
+ * well-formed unknown token is usually an old subscription to a rotated or
+ * revoked link, polled from Google's or Microsoft's shared fetcher IPs;
+ * counting those would block every user's feed on that IP. Guessing a
+ * 256-bit token is infeasible, so nothing is lost. See ADR 0006.
  */
 exports.getFeedCalendar = async (req, res) => {
   const params = feedParamsSchema.safeParse(req.params);
-  let feed = null;
-  if (params.success) {
-    const { data, error } = await createAnonClient().rpc('calendar_feed', {
-      p_token: params.data.token,
-    });
-    if (error) throw error;
-    feed = data;
-  }
-  if (!feed) {
+  if (!params.success) {
     recordFailure(req.ip);
     throw new HttpError(404, 'Calendar not found');
   }
+
+  const { data: feed, error } = await createAnonClient().rpc('calendar_feed', {
+    p_token: params.data.token,
+  });
+  if (error) throw error;
+  if (!feed) throw new HttpError(404, 'Calendar not found');
 
   sendCalendar(res, buildCalendar({ tasks: feed.tasks, exams: feed.exams }), {
     filename: 'trackit.ics',

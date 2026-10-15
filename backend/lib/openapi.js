@@ -341,7 +341,7 @@ function buildOpenApiDocument() {
           tags: ['Calendar'],
           summary: 'Calendar subscription feed (iCalendar)',
           description:
-            'For calendar apps, which cannot send a bearer token: the secret token in the URL is the credential. Open tasks with a due date appear as all-day events; exams as events. Unknown tokens count towards the per-IP failed-authentication limit.',
+            'For calendar apps, which cannot send a bearer token: the secret token in the URL is the credential. Open tasks with a due date appear as all-day events; exams as events. Malformed tokens count towards the per-IP failed-authentication limit; well-formed unknown tokens (old subscriptions to a rotated or revoked link) do not.',
           security: [],
           parameters: [
             {
@@ -354,7 +354,7 @@ function buildOpenApiDocument() {
           responses: {
             200: icsResponse('iCalendar feed'),
             404: errorResponse('Unknown, rotated or revoked token'),
-            429: errorResponse('Too many failed attempts from this IP'),
+            429: errorResponse('Too many requests or malformed tokens from this IP'),
             500: common[500],
           },
         },

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const calendarController = require('../controllers/calendarController');
 const requireUser = require('../middleware/requireUser');
+const { calendarFeedLimiter } = require('../middleware/rateLimit');
 
 // Manage the subscription link (signed in).
 router.get('/feed', requireUser, calendarController.getFeed);
@@ -13,6 +14,6 @@ router.delete('/feed', requireUser, calendarController.revokeFeed);
 router.get('/export.ics', requireUser, calendarController.exportCalendar);
 
 // GET /api/calendar/:token.ics: subscription feed (the token is the credential).
-router.get('/:token.ics', calendarController.getFeedCalendar);
+router.get('/:token.ics', calendarFeedLimiter, calendarController.getFeedCalendar);
 
 module.exports = router;
