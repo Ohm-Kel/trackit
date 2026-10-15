@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
+import { clearPersistedQueries } from '../lib/queryPersistence';
 
 const AuthContext = createContext({});
 
@@ -7,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const syncUserProfile = async (sessionUser) => {
     if (!sessionUser) return;
@@ -83,7 +86,11 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  const signOut = () => {
+  const signOut = async () => {
+    // Forget this user's data on the device first, so it is gone even if
+    // the sign-out request itself fails (for example while offline).
+    queryClient.clear();
+    await clearPersistedQueries().catch(() => {});
     return supabase.auth.signOut();
   };
 

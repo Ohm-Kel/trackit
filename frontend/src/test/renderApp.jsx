@@ -1,9 +1,7 @@
 import { render } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { vi } from 'vitest';
-import { AuthProvider } from '../context/AuthContext';
-import { ThemeProvider } from '../context/ThemeContext';
-import { ToastProvider } from '../components/Toast';
+import AppProviders from '../AppProviders';
 import App from '../App';
 import { createFakeApi } from './fakeApi';
 import { resetSupabase, signInAs } from './fakeSupabase';
@@ -33,15 +31,9 @@ export function renderApp(path, { signedIn = true, setup, tour = false } = {}) {
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   const utils = render(
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </QueryClientProvider>,
+    <AppProviders queryClient={queryClient}>
+      <App />
+    </AppProviders>,
   );
   return { ...utils, api, queryClient };
 }

@@ -1,10 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, onlineManager } from '@tanstack/react-query'
 import { inject } from '@vercel/analytics'
-import { AuthProvider } from './context/AuthContext'
-import { ThemeProvider } from './context/ThemeContext'
-import { ToastProvider } from './components/Toast'
+import AppProviders from './AppProviders'
+import { MAX_AGE } from './lib/queryPersistence'
 import '@fontsource-variable/inter'
 import './index.css'
 import App from './App.jsx'
@@ -12,18 +11,21 @@ import App from './App.jsx'
 // Initialize Vercel Analytics (only runs in production on Vercel)
 inject()
 
-const queryClient = new QueryClient()
+// React Query assumes it starts online; start from the browser's view so a
+// page opened offline shows saved data instead of failing requests.
+onlineManager.setOnline(navigator.onLine)
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    // Keep unused queries long enough to be saved for offline use (ADR 0006).
+    queries: { gcTime: MAX_AGE },
+  },
+})
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
-        </ThemeProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <AppProviders queryClient={queryClient}>
+      <App />
+    </AppProviders>
   </StrictMode>,
 )
