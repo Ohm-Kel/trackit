@@ -14,7 +14,7 @@ async function getAuthHeader() {
  * Send a chat message to the AI and receive a reply.
  *
  * @param {string} message - The user's current message.
- * @param {Array<{role: 'user'|'ai', text: string}>} history - Prior messages.
+ * @param {Array<{role: 'user'|'assistant', content: string}>} history - Prior turns, excluding `message`.
  * @returns {Promise<{reply: string}>}
  */
 export async function sendChatMessage(message, history = []) {
