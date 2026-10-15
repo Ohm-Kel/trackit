@@ -79,3 +79,23 @@ describe('chat against the real database', () => {
     expect((await app.get('/api/chat/history').set(user.auth)).body).toEqual([]);
   });
 });
+
+// Regression: both turns of an exchange are saved in one insert, so they get
+// the same created_at, and history sometimes returned a reply before its question.
+it('returns each question before its reply', async () => {
+  const asker = await db.createUser('asker');
+  const app = db.api();
+  db.anthropic.messages.create.mockImplementation(async ({ messages }) => ({
+    content: [{ type: 'text', text: `Answer to ${messages.at(-1).content}` }],
+  }));
+
+  const questions = Array.from({ length: 8 }, (_, i) => `Question ${i + 1}`);
+  for (const message of questions) {
+    await app.post('/api/chat').set(asker.auth).send({ message }).expect(200);
+  }
+
+  const history = await app.get('/api/chat/history').set(asker.auth);
+  expect(history.body.map((turn) => turn.content)).toEqual(
+    questions.flatMap((question) => [question, `Answer to ${question}`]),
+  );
+});
