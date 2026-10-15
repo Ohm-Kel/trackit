@@ -13,8 +13,6 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const userMetadata = sessionUser.user_metadata;
-      
-      console.log('Syncing user profile for:', sessionUser.email, 'Metadata:', userMetadata);
 
       const { error } = await supabase
         .from('users')
@@ -28,11 +26,7 @@ export const AuthProvider = ({ children }) => {
           ignoreDuplicates: false
         });
 
-      if (error) {
-        console.error('Error syncing user profile to Supabase:', error);
-      } else {
-        console.log('Successfully synced user profile to Supabase');
-      }
+      if (error) console.error('Error syncing user profile to Supabase:', error.message);
     } catch (err) {
       console.error('Unexpected error during profile sync:', err);
     }

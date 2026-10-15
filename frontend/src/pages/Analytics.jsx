@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../hooks/useTasks';
+import { API_URL } from '../api/baseUrl';
 
 export default function Analytics() {
   const { session } = useAuth();
@@ -26,10 +27,10 @@ export default function Analytics() {
         if (!session?.access_token) return;
         
         const [velRes, burnRes] = await Promise.all([
-          fetch('/api/analytics/velocity', {
+          fetch(`${API_URL}/analytics/velocity`, {
             headers: { 'Authorization': `Bearer ${session.access_token}` }
           }),
-          fetch('/api/analytics/burnout', {
+          fetch(`${API_URL}/analytics/burnout`, {
             headers: { 'Authorization': `Bearer ${session.access_token}` }
           })
         ]);

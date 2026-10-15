@@ -1,9 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
 import { readEvents } from './sse';
+import { API_URL } from './baseUrl';
 
-const API_URL = import.meta.env.PROD
-  ? '/api'
-  : import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 async function getAuthHeader() {
   const { data: { session } } = await supabase.auth.getSession();

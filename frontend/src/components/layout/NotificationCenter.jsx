@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell, Check, Trash2, Info, AlertTriangle, Sparkles, Loader2, X } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
+import { API_URL } from '../../api/baseUrl';
 
 export default function NotificationCenter() {
   const { session } = useAuth();
@@ -14,7 +15,7 @@ export default function NotificationCenter() {
     try {
       if (!session?.access_token) return;
       
-      const res = await fetch('/api/notifications', {
+      const res = await fetch(`${API_URL}/notifications`, {
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
       
@@ -24,7 +25,7 @@ export default function NotificationCenter() {
       }
 
       // Proactively trigger AI suggestion analysis
-      await fetch('/api/notifications/generate-suggestions', {
+      await fetch(`${API_URL}/notifications/generate-suggestions`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
@@ -60,7 +61,7 @@ export default function NotificationCenter() {
 
   const markAsRead = async (id) => {
     try {
-      const res = await fetch(`/api/notifications/${id}/read`, {
+      const res = await fetch(`${API_URL}/notifications/${id}/read`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
@@ -74,7 +75,7 @@ export default function NotificationCenter() {
 
   const markAllAsRead = async () => {
     try {
-      const res = await fetch('/api/notifications/read-all', {
+      const res = await fetch(`${API_URL}/notifications/read-all`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
