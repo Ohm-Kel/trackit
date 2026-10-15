@@ -1,0 +1,35 @@
+name: CodeQL
+
+# Static security analysis of the backend and frontend JavaScript. Findings
+# appear under the repository's Security → Code scanning tab and on PRs.
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    - cron: '17 3 * * 1' # weekly, to pick up new queries
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze JavaScript
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+          config: |
+            paths-ignore:
+              - '**/node_modules'
+              - backend/eval/dataset
+              - '**/dist'
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:javascript-typescript
