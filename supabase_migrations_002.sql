@@ -74,3 +74,34 @@ CREATE POLICY "Subtask parent must belong to the user" ON public.subtasks
     (subtasks.exam_id IS NOT NULL AND EXISTS (
       SELECT 1 FROM public.exams e WHERE e.id = subtasks.exam_id AND e.user_id = auth.uid()))
   );
+
+-- 3. Task completion time
+-- The analytics velocity endpoint counts tasks by when they were completed,
+-- but the column did not exist, so the endpoint always failed.
+ALTER TABLE public.tasks ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ;
+
+-- Best available estimate for tasks already done.
+UPDATE public.tasks SET completed_at = updated_at
+WHERE status = 'done' AND completed_at IS NULL;
+
+-- Stamp the time a task becomes done; clear it if the task is reopened.
+CREATE OR REPLACE FUNCTION public.set_task_completed_at()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF NEW.status = 'done' THEN
+    IF TG_OP = 'INSERT' OR OLD.status IS DISTINCT FROM 'done' THEN
+      NEW.completed_at = now();
+    END IF;
+  ELSE
+    NEW.completed_at = NULL;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS set_tasks_completed_at ON public.tasks;
+CREATE TRIGGER set_tasks_completed_at
+  BEFORE INSERT OR UPDATE OF status ON public.tasks
+  FOR EACH ROW EXECUTE FUNCTION public.set_task_completed_at();

@@ -1,5 +1,5 @@
 -- Row Level Security checks for the operations the API performs as a signed-in
--- user. Run by scripts/db/test.sh after the schema and migrations.
+-- user, plus the columns the API relies on. Run by scripts/db/test.sh after the schema and migrations.
 \set ON_ERROR_STOP 1
 \set alice '''aaaaaaaa-0000-4000-8000-000000000001'''
 \set bob   '''bbbbbbbb-0000-4000-8000-000000000002'''
@@ -34,6 +34,24 @@ BEGIN
   INSERT INTO public.users (id, email, display_name) VALUES (auth.uid(), 'alice@example.com', 'Alice')
     ON CONFLICT (id) DO UPDATE SET display_name = EXCLUDED.display_name;
   ASSERT (SELECT display_name FROM public.users) = 'Alice', 'Alice can update her profile';
+
+  -- Every column list the API selects exists (a missing column fails here).
+  PERFORM title, status, due_date, grade_weight, estimated_hours, course_code, description,
+          completed_at, priority_score, ai_reasoning
+    FROM public.tasks;
+  PERFORM subject, exam_date, confidence_level, topics, course_code, daily_study_hours,
+          preparation_percent
+    FROM public.exams;
+  PERFORM role, content, created_at FROM public.chat_history;
+  PERFORM weekly_schedule FROM public.users;
+
+  -- completed_at follows the status.
+  UPDATE public.tasks SET status = 'done' WHERE title = 'New task';
+  ASSERT (SELECT completed_at FROM public.tasks WHERE title = 'New task') IS NOT NULL,
+    'completed_at is set when a task is done';
+  UPDATE public.tasks SET status = 'in_progress' WHERE title = 'New task';
+  ASSERT (SELECT completed_at FROM public.tasks WHERE title = 'New task') IS NULL,
+    'completed_at is cleared when a task is reopened';
 
   -- Updates and deletes on Bob's rows match nothing.
   UPDATE public.tasks SET title = 'hijacked' WHERE id = 'bbbbbbbb-1111-4000-8000-000000000002';
