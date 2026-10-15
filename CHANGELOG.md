@@ -4,11 +4,11 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org).
 
-## [1.1.0] - Unreleased
+## [1.1.0] - 2026-10-15
 
 ### Added
 
-- Evaluation harness for the timetable parser: a versioned synthetic dataset (20 documents, 145 records), scorer, runner and CI self-check
+- Evaluation harness for the timetable parser: a versioned synthetic dataset (20 documents, 145 records), scorer, runner, CI self-check and a manual GitHub Actions workflow for real runs
 - Interactive API documentation at `/api/docs`, generated from the Zod request schemas
 - Per-user rate limits on the chat and timetable-parsing endpoints
 - Warnings in the parse response when unreadable rows are skipped
@@ -45,3 +45,6 @@ All notable changes to this project are documented here. The format follows
 ## [1.0.0] - 2026-10-10
 
 - Initial release: tasks, exams, subtasks, AI chat, timetable upload, focus plan, analytics, notifications, export, dark mode and onboarding
+
+[1.1.0]: https://github.com/Ohm-Kel/trackit/compare/5b4e017...v1.1.0
+[1.0.0]: https://github.com/Ohm-Kel/trackit/tree/5b4e017
