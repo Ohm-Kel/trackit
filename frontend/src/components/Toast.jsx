@@ -50,12 +50,13 @@ export function ToastProvider({ children }) {
       {children}
 
       {/* Toast container */}
-      <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2 max-w-[380px] w-full pointer-events-none">
+      <div aria-live="polite" className="fixed top-[68px] inset-x-4 md:top-4 md:left-auto md:right-4 z-[100] flex flex-col gap-2 md:max-w-[380px] md:w-full pointer-events-none">
         {toasts.map(toast => {
           const Icon = ICONS[toast.type] || Info;
           return (
             <div
               key={toast.id}
+              role="status"
               className={`pointer-events-auto flex items-start gap-2.5 p-3 px-3.5 border rounded-r shadow-md animate-[slideIn_0.25s_ease] ${STYLES[toast.type] || STYLES.info}`}
             >
               <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${ICON_COLORS[toast.type] || ICON_COLORS.info}`} />
@@ -65,7 +66,8 @@ export function ToastProvider({ children }) {
               </div>
               <button
                 onClick={() => removeToast(toast.id)}
-                className="p-0.5 bg-transparent border-none cursor-pointer opacity-60 hover:opacity-100 transition-opacity shrink-0"
+                aria-label="Dismiss notification"
+                className="p-2 -m-1.5 bg-transparent border-none cursor-pointer opacity-60 hover:opacity-100 transition-opacity shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
               </button>

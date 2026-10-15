@@ -137,6 +137,10 @@
   --tw-bg-opacity: 1;
 }
 
+/* Titles and course names are user text and can be one long unbroken word;
+   wrap them instead of pushing the page sideways. `truncate` still wins. */
+main { overflow-wrap: anywhere; }
+
 @layer base {
   html, body {
     height: 100%;

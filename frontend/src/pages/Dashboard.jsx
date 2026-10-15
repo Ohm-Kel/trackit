@@ -122,7 +122,7 @@ export default function Dashboard() {
         </div>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_290px] gap-5 md:gap-7">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_290px] gap-5 md:gap-7">
 
           {/* Priority Queue */}
           <div>
