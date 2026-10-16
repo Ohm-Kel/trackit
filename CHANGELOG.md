@@ -4,6 +4,20 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org).
 
+## [Unreleased]
+
+### Added
+
+- Installable Progressive Web App: a web app manifest with maskable icons, and a service worker that precaches the app shell, so Trackit can be added to the home screen and opens without a connection
+- Offline reading: each user's tasks, exams and other loaded data are saved in IndexedDB and shown offline, under an "offline, showing saved data" banner, even after the access token has expired; saved data is deleted on sign-out, and a cache left by a user who did not sign out is deleted before anyone else's is restored
+- "A new version of Trackit is available" prompt with Reload and Later; a new version never takes over an open page without the user's say-so
+- ADR 0007 (installable app that reads offline) and end-to-end tests that load the task list offline
+
+### Changed
+
+- Adding, editing, completing and deleting tasks and exams, chat and uploads are disabled while offline, with the reason shown, instead of failing or waiting silently
+- `sw.js` is served with `Cache-Control: no-cache` and the manifest as `application/manifest+json` (Vercel and Docker)
+
 ## [1.2.0] - 2026-10-15
 
 ### Added

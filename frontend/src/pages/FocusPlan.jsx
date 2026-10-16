@@ -6,6 +6,7 @@ import { useProfile } from '../hooks/useProfile';
 import { daysUntil } from '../utils/dates';
 import { DAY_NAMES, computeFreeSlots } from '../utils/schedule';
 import { useToast } from '../components/Toast';
+import { useOnline } from '../hooks/useOnline';
 
 function blockColor(task) {
   const d = daysUntil(task.due_date);
@@ -22,6 +23,7 @@ export default function FocusPlan() {
   const { data: exams = [] } = useExams();
   const { data: profile } = useProfile();
   const updateTask = useUpdateTask();
+  const online = useOnline();
 
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -185,10 +187,11 @@ export default function FocusPlan() {
                       >
                         <div className="flex items-start gap-3">
                           <button
+                            disabled={!online}
                             type="button"
                             aria-label={isDone ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
                             onClick={() => toggleDone(task)}
-                            className="p-0 bg-transparent border-none cursor-pointer mt-0.5 shrink-0"
+                            className="disabled:opacity-50 disabled:cursor-not-allowed p-0 bg-transparent border-none cursor-pointer mt-0.5 shrink-0"
                           >
                             {isDone
                               ? <CheckCircle2 className="w-[18px] h-[18px] text-primary" />

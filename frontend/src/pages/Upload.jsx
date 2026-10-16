@@ -3,6 +3,8 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { parseUpload, importExams, saveSchedule } from '../api/upload';
+import { useOnline } from '../hooks/useOnline';
+import OfflineNotice from '../pwa/OfflineNotice';
 
 const ACCEPTED = '.pdf,.png,.jpg,.jpeg,.webp';
 // Base64 encoding adds ~33%, so 6 MB stays under the API's 10 MB body limit.
@@ -47,6 +49,7 @@ function DayRow({ day, classes }) {
 export default function Upload() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const online = useOnline();
 
   // Exam upload state
   const [examFile, setExamFile] = useState(null);
@@ -174,6 +177,7 @@ export default function Upload() {
         <div>
           <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Upload Timetable</h1>
           <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">AI extracts exam dates and class schedules automatically</p>
+          <OfflineNotice className="mt-2" />
         </div>
       </div>
 
@@ -191,6 +195,7 @@ export default function Upload() {
               type="file"
               accept={ACCEPTED}
               className="hidden"
+              disabled={!online}
               onChange={e => { if (e.target.files[0]) handleExamFile(e.target.files[0]); }}
             />
 
@@ -269,7 +274,7 @@ export default function Upload() {
                   {examResults.length > 0 && (
                     <button
                       onClick={handleImportExams}
-                      disabled={examImporting}
+                      disabled={examImporting || !online}
                       className="flex-1 bg-primary text-white border-none py-2 rounded-rs text-[12.5px] font-bold shadow-xs hover:bg-primary-hover cursor-pointer transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-2"
                     >
                       {examImporting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
@@ -300,6 +305,7 @@ export default function Upload() {
               type="file"
               accept={ACCEPTED}
               className="hidden"
+              disabled={!online}
               onChange={e => { if (e.target.files[0]) handleSchedFile(e.target.files[0]); }}
             />
 
@@ -365,7 +371,7 @@ export default function Upload() {
                 <div className="flex gap-2.5">
                   <button
                     onClick={handleSaveSchedule}
-                    disabled={schedSaving}
+                    disabled={schedSaving || !online}
                     className="flex-1 bg-primary text-white border-none py-2 rounded-rs text-[12.5px] font-bold shadow-xs hover:bg-primary-hover cursor-pointer transition-colors disabled:opacity-60 inline-flex items-center justify-center gap-2"
                   >
                     {schedSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}

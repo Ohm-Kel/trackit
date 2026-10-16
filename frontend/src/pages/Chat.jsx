@@ -4,6 +4,8 @@ import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
 import { daysUntil } from '../utils/dates';
 import { streamChatMessage, fetchChatHistory, clearChatHistory } from '../api/chat';
+import { useOnline } from '../hooks/useOnline';
+import OfflineNotice from '../pwa/OfflineNotice';
 
 function daysLabel(dateStr) {
   const diff = daysUntil(dateStr);
@@ -28,6 +30,7 @@ const INITIAL_GREETING = { role: 'ai', text: 'Hey! I can see your full schedule 
 export default function Chat() {
   const { data: tasks = [], isLoading: tasksLoading } = useTasks();
   const { data: exams = [], isLoading: examsLoading } = useExams();
+  const online = useOnline();
   const [messages, setMessages] = useState([INITIAL_GREETING]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -73,7 +76,7 @@ export default function Chat() {
   });
 
   const sendMessage = useCallback(async () => {
-    if (!input.trim() || sending) return;
+    if (!input.trim() || sending || !online) return;
     const userMsg = input;
     const now = clockTime();
     setInput('');
@@ -116,7 +119,7 @@ export default function Chat() {
       if (abortRef.current === controller) abortRef.current = null;
       setSending(false);
     }
-  }, [input, sending, messages]);
+  }, [input, sending, online, messages]);
 
   async function handleClearHistory() {
     if (!window.confirm('Clear all chat history? This cannot be undone.')) return;
@@ -152,6 +155,7 @@ export default function Chat() {
         {messages.length > 1 && (
           <button
             onClick={handleClearHistory}
+            disabled={!online}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border2 text-text-3 hover:text-[#B91C1C] hover:border-[#FCA5A5] rounded-rs text-[11px] font-semibold cursor-pointer transition-all"
             title="Clear chat history"
           >
@@ -208,7 +212,7 @@ export default function Chat() {
               <button
                 key={p}
                 onClick={() => setInput(p)}
-                disabled={sending}
+                disabled={sending || !online}
                 className="bg-white border border-border rounded-[20px] px-3.5 py-1.5 text-[12px] font-medium text-text-2 cursor-pointer transition-colors hover:border-primary hover:text-primary hover:bg-primary-faint disabled:opacity-50"
               >
                 {p}
@@ -216,6 +220,7 @@ export default function Chat() {
             ))}
           </div>
 
+          <OfflineNotice id="chat-offline" className="mb-2" />
           {/* Input */}
           <div className="bg-white border-[1.5px] border-border rounded-r p-3 px-3.5 transition-colors focus-within:border-primary shadow-xs">
             <textarea
@@ -223,14 +228,15 @@ export default function Chat() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              disabled={sending}
+              disabled={sending || !online}
+              aria-describedby={online ? undefined : 'chat-offline'}
               className="w-full border-none outline-none resize-none font-sans text-[13.5px] text-text-1 bg-transparent min-h-[20px] max-h-[80px] leading-relaxed placeholder:text-text-3 disabled:opacity-50"
               placeholder="Ask anything about your workload…"
               rows="1"
             />
             <div className="flex justify-between items-center mt-2">
               <span className="text-[11px] text-text-3 hidden sm:block">Enter to send · Shift+Enter for new line</span>
-              <button onClick={sendMessage} aria-label="Send message" disabled={sending || !input.trim()} className="bg-primary hover:bg-primary-hover disabled:opacity-50 border-none w-[30px] h-[30px] rounded-[7px] cursor-pointer flex items-center justify-center transition-colors shrink-0 ml-auto">
+              <button onClick={sendMessage} aria-label="Send message" disabled={sending || !online || !input.trim()} className="bg-primary hover:bg-primary-hover disabled:opacity-50 border-none w-[30px] h-[30px] rounded-[7px] cursor-pointer flex items-center justify-center transition-colors shrink-0 ml-auto">
                 <Send className="w-3 h-3 text-white" />
               </button>
             </div>

@@ -29,6 +29,7 @@ Trackit closes that gap in three steps:
 - **Analytics**: completion velocity, deadline-cluster ("burnout") detection and workload by grade weight
 - **Notifications**: in-app and browser reminders for upcoming deadlines, delivered in real time
 - **Export**: tasks and exams as CSV or PDF, plus a full JSON backup
+- **Installable, and readable offline**: add Trackit to the home screen; tasks, exams and other pages show the last data loaded, with writes turned off until the connection returns
 - **Dark mode** and a guided onboarding tour
 
 ## Architecture
@@ -66,18 +67,19 @@ Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 [rate limiting AI endpoints with shared counters](docs/adr/0002-rate-limit-ai-endpoints.md),
 [the API as the authorisation boundary, with RLS on API queries](docs/adr/0003-api-as-authorization-boundary.md),
 [streaming chat with server-sent events](docs/adr/0004-stream-chat-with-server-sent-events.md),
-[a Content-Security-Policy built from the Supabase URL](docs/adr/0005-frontend-content-security-policy.md).
+[a Content-Security-Policy built from the Supabase URL](docs/adr/0005-frontend-content-security-policy.md),
+[an installable app that reads offline](docs/adr/0007-progressive-web-app.md).
 Release and rollback steps are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Tech stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, Vite 7, Tailwind CSS 4, TanStack React Query 5, React Router 7 |
+| Frontend | React 19, Vite 7, Tailwind CSS 4, TanStack React Query 5 (persisted to IndexedDB), React Router 7, vite-plugin-pwa (Workbox) |
 | Backend | Node.js 22, Express 5, Zod 4, pino, helmet, express-rate-limit |
 | AI | Anthropic SDK (Claude Haiku 4.5 by default), vision and PDF input, forced tool use |
 | Data and auth | Supabase Postgres with Row Level Security, Supabase Auth and Realtime |
-| Quality | Jest and Supertest (121 backend tests, 95% line coverage), Vitest and React Testing Library (124 frontend tests, 77% line coverage), Playwright end-to-end and axe accessibility checks, SQL RLS checks, ESLint, Prettier, pre-commit, GitHub Actions |
+| Quality | Jest and Supertest (121 backend tests, 95% line coverage), Vitest and React Testing Library (150 frontend tests, 78% line coverage), Playwright end-to-end and axe accessibility checks, SQL RLS checks, ESLint, Prettier, pre-commit, GitHub Actions |
 | Delivery | Vercel (frontend and serverless API), Docker and Docker Compose |
 
 ## Getting started

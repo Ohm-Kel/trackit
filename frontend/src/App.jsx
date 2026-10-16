@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import UpdatePrompt from './pwa/UpdatePrompt';
 
 // Lazy-loaded pages
 const Landing = lazy(() => import('./pages/Landing'));
@@ -67,6 +68,7 @@ function App() {
           </Routes>
         </Suspense>
       </ErrorBoundary>
+      <UpdatePrompt />
     </Router>
   );
 }

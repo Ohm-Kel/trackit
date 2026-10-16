@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, CheckCircle2, Circle, Trash2, Loader2 } from 'lucide-react';
 import { useSubtasks, useCreateSubtask, useUpdateSubtask, useDeleteSubtask } from '../hooks/useSubtasks';
 import { useToast } from './Toast';
+import { useOnline } from '../hooks/useOnline';
 
 export default function SubtaskList({ parentId, parentType = 'task' }) {
   const { data: subtasks = [], isLoading } = useSubtasks(parentId, parentType);
@@ -9,11 +10,12 @@ export default function SubtaskList({ parentId, parentType = 'task' }) {
   const updateSubtask = useUpdateSubtask(parentId);
   const deleteSubtask = useDeleteSubtask(parentId);
   const [newTitle, setNewTitle] = useState('');
+  const online = useOnline();
   const { addToast } = useToast();
   const showError = (action) => (err) => addToast(err.message, { type: 'error', title: `Couldn't ${action}` });
 
   function handleAdd() {
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim() || !online) return;
     const parentKey = parentType === 'task' ? 'task_id' : 'exam_id';
     createSubtask.mutate(
       { [parentKey]: parentId, title: newTitle.trim(), order_index: subtasks.length },
@@ -60,8 +62,9 @@ export default function SubtaskList({ parentId, parentType = 'task' }) {
         {subtasks.map(sub => (
           <div key={sub.id} className="flex items-center gap-2 group py-1">
             <button
+              disabled={!online}
               onClick={() => toggleDone(sub)}
-              className="bg-transparent border-none cursor-pointer p-0 shrink-0"
+              className="disabled:opacity-50 disabled:cursor-not-allowed bg-transparent border-none cursor-pointer p-0 shrink-0"
             >
               {sub.status === 'done'
                 ? <CheckCircle2 className="w-[15px] h-[15px] text-primary" />
@@ -72,8 +75,9 @@ export default function SubtaskList({ parentId, parentType = 'task' }) {
               {sub.title}
             </span>
             <button
+              disabled={!online}
               onClick={() => deleteSubtask.mutate(sub.id, { onError: showError('delete the subtask') })}
-              className="bg-transparent border-none cursor-pointer p-0 opacity-0 group-hover:opacity-100 transition-opacity text-text-3 hover:text-[#B91C1C]"
+              className="disabled:opacity-50 disabled:cursor-not-allowed bg-transparent border-none cursor-pointer p-0 opacity-0 group-hover:opacity-100 transition-opacity text-text-3 hover:text-[#B91C1C]"
             >
               <Trash2 className="w-3 h-3" />
             </button>
@@ -89,11 +93,14 @@ export default function SubtaskList({ parentId, parentType = 'task' }) {
           onChange={e => setNewTitle(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAdd(); } }}
           placeholder="Add a subtask…"
+          aria-label="New subtask"
+          disabled={!online}
           className="flex-1 bg-transparent border-none outline-none text-[12.5px] text-text-1 placeholder:text-text-3"
         />
         <button
           onClick={handleAdd}
-          disabled={!newTitle.trim() || createSubtask.isPending}
+          aria-label="Add subtask"
+          disabled={!newTitle.trim() || createSubtask.isPending || !online}
           className="bg-transparent border-none cursor-pointer p-0 text-text-3 hover:text-primary transition-colors disabled:opacity-40"
         >
           <Plus className="w-3.5 h-3.5" />

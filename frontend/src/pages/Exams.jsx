@@ -7,6 +7,7 @@ import { exportExamsCSV, exportExamsPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
 import { ExamsSkeleton } from '../components/Skeleton';
 import { useToast } from '../components/Toast';
+import { useOnline } from '../hooks/useOnline';
 
 function confidenceStyle(level) {
   const l = (level || '').toLowerCase();
@@ -21,6 +22,7 @@ export default function Exams() {
   const { data: exams = [], isLoading } = useExams();
   const updateExam = useUpdateExam();
   const deleteExam = useDeleteExam();
+  const online = useOnline();
 
   const [expandedExam, setExpandedExam] = useState(null);
   const [showExport, setShowExport] = useState(false);
@@ -143,11 +145,12 @@ export default function Exams() {
                       <div className="flex gap-2 mt-4 pt-4 border-t border-border">
                         <button onClick={() => navigate(`/add?editExam=${exam.id}`)} className="flex-1 bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Edit</button>
                         <button
+                          disabled={!online}
                           onClick={() => {
                             const newPrep = Math.min(100, prep + 10);
                             updateExam.mutate({ id: exam.id, updates: { preparation_percent: newPrep } }, { onError: err => addToast(err.message, { type: 'error', title: "Couldn't update the exam" }) });
                           }}
-                          className="flex-1 bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors"
+                          className="disabled:opacity-50 disabled:cursor-not-allowed flex-1 bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors"
                         >
                           Mark Today Done ✓
                         </button>
@@ -166,7 +169,7 @@ export default function Exams() {
                         <SubtaskList parentId={exam.id} parentType="exam" />
                       )}
 
-                      <button onClick={e => handleDelete(e, exam.id)} className="mt-1 w-full text-[11.5px] text-text-3 hover:text-[#B91C1C] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
+                      <button disabled={!online} onClick={e => handleDelete(e, exam.id)} className="disabled:opacity-50 disabled:cursor-not-allowed mt-1 w-full text-[11.5px] text-text-3 hover:text-[#B91C1C] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
                     </div>
                   );
                 })}
