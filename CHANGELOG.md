@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Calendar subscription: Settings → Calendar creates a private link that Google Calendar, Apple Calendar and Outlook can subscribe to, with open tasks as all-day events on their due date and exams as events. The link can be copied, rotated and revoked; only a SHA-256 hash of its token is stored (`supabase_migrations_003.sql`, ADR 0006)
+- `GET /api/calendar/:token.ics` (the feed), `POST`/`GET`/`DELETE /api/calendar/feed` (manage the link) and `GET /api/calendar/export.ics` (one-off download), documented in the OpenAPI document. The feed has its own per-IP limit (`CALENDAR_FEED_RATE_LIMIT`, default 600 a minute); malformed tokens count towards the failed-auth limit, but unknown ones do not, so stale subscriptions polled from Google's or Microsoft's shared IPs cannot block those IPs
+- "Download .ics" in the Export menu of the Tasks and Exams pages
+- `supabase_migrations_003_rollback.sql`; CI applies, re-runs and rolls back migration 003 and checks its Row Level Security
+- Playwright tests that fail if any route scrolls sideways at 375px in light or dark mode, plus checks for tap targets, focus rings and on-screen menus
+
+### Changed
+
+- Request and error logs replace calendar feed tokens with `[token]`
+
 ### Fixed
 
 - UI and UX problems found in a screenshot audit of every route at 375, 768 and 1280px, in light and dark mode, with empty, realistic and long data ([docs/ui-audit.md](docs/ui-audit.md)):
@@ -23,10 +35,6 @@ All notable changes to this project are documented here. The format follows
   - On phones, the Tasks, Exams and Dashboard header buttons and the exam card links are 44px tall
   - The logo has a transparent background, so no grey square shows around it, and the phone header uses the same clock mark as the sidebar
   - Analytics uses plain labels: "Analytics" and "Tasks Completed per Week"
-
-### Added
-
-- Playwright tests that fail if any route scrolls sideways at 375px in light or dark mode, plus checks for tap targets, focus rings and on-screen menus
 
 ## [1.2.0] - 2026-10-15
 

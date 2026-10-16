@@ -54,6 +54,7 @@ const config = Object.freeze({
     uploadMax: parsePositiveInt(process.env.AI_UPLOAD_RATE_LIMIT, 10),
     apiPerMinute: parsePositiveInt(process.env.API_RATE_LIMIT_PER_MINUTE, 300),
     authFailuresPerIp: parsePositiveInt(process.env.AUTH_FAILURE_LIMIT, 50),
+    calendarFeedPerMinute: parsePositiveInt(process.env.CALENDAR_FEED_RATE_LIMIT, 600),
     authFailureWindowMs: 15 * 60 * 1000,
   }),
 

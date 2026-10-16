@@ -33,6 +33,9 @@ describe('API documentation', () => {
       '/upload/parse',
       '/chat/stream',
       '/analytics/burnout',
+      '/calendar/feed',
+      '/calendar/export.ics',
+      '/calendar/{token}.ics',
     ]) {
       expect(body.paths).toHaveProperty([path]);
     }

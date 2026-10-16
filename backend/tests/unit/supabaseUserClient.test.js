@@ -40,8 +40,28 @@ it('sends queries with the anon key and the user’s token, so RLS applies', asy
 });
 
 it('falls back to the service-role client when no anon key is configured', () => {
-  const { createUserClient, serviceClient } = load({});
+  const { createUserClient, createAnonClient, serviceClient } = load({});
   expect(createUserClient('user-jwt')).toBe(serviceClient);
+  expect(createAnonClient()).toBe(serviceClient);
+});
+
+it('calls the calendar feed function as anon, with no user token', async () => {
+  global.fetch = jest.fn(
+    async () =>
+      new Response('null', { status: 200, headers: { 'Content-Type': 'application/json' } }),
+  );
+  const { createAnonClient, serviceClient } = load({ SUPABASE_ANON_KEY: 'anon-key' });
+
+  const db = createAnonClient();
+  expect(db).not.toBe(serviceClient);
+  expect(createAnonClient()).toBe(db);
+  await db.rpc('calendar_feed', { p_token: 'secret' });
+
+  const [url, init] = global.fetch.mock.calls[0];
+  const headers = new Headers(init.headers);
+  expect(String(url)).toBe(`${SUPABASE_URL}/rest/v1/rpc/calendar_feed`);
+  expect(headers.get('apikey')).toBe('anon-key');
+  expect(headers.get('authorization')).toBe('Bearer anon-key');
 });
 
 it('keeps the service-role client out of request handlers', () => {

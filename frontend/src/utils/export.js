@@ -15,7 +15,8 @@ function escapeCSV(value) {
   return str;
 }
 
-function downloadFile(content, filename, mimeType) {
+/** Save `content` (text or a Blob) as a file through a temporary download link. */
+export function downloadFile(content, filename, mimeType) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

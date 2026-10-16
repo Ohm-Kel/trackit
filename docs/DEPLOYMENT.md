@@ -19,10 +19,14 @@ and re-runnable.
 | 1 | `supabase_schema.sql` | New project only |
 | 2 | `supabase_migrations.sql` | New project only |
 | 3 | `supabase_migrations_002.sql` | **once**, upgrading to v1.2.0 |
+| 4 | `supabase_migrations_003.sql` | **once**, before deploying the calendar feed |
 
 Migration 002 adds the shared rate-limit counters, `tasks.completed_at`, and
-two Row Level Security policies. Every migration is tested in CI against
-Postgres 16 (`scripts/db/test.sh`), including its rollback.
+two Row Level Security policies. Migration 003 adds `calendar_feeds` (hashed
+feed tokens) and the `calendar_feed` lookup function. Without it, Settings →
+Calendar shows an error and feed URLs return 500; the rest of the app is
+unaffected. Every migration is tested in CI against Postgres 16
+(`scripts/db/test.sh`), including its rollback.
 
 ## 2. Supabase Auth settings
 
@@ -68,6 +72,8 @@ task list and chat before merging.
 - Sign in, open Tasks, Exams and Analytics, and send one chat message.
 - In the browser's developer tools, the page has a `Content-Security-Policy`
   `<meta>` tag and no CSP errors in the console.
+- In Settings → Calendar, create a link and open it in a browser: it
+  downloads a `.ics` file. Then revoke it.
 - In Vercel → Logs, look for `Shared rate-limit store unavailable` (means
   migration 002 is missing) or `SUPABASE_ANON_KEY is not set`.
 
@@ -80,6 +86,9 @@ task list and chat before merging.
   `supabase_migrations_002_rollback.sql`. It discards rate-limit counters
   and task completion times. v1.1.0 does not need the rollback to run; the
   added objects are unused by it.
+
+To roll back the calendar feed, roll back the code first, then run
+`supabase_migrations_003_rollback.sql`. Every subscription link stops working.
 
 Every 500 response includes a `requestId` that matches the `requestId`
 field in the API logs, which helps trace a user's report.

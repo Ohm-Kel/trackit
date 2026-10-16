@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Apply the schema and every migration to an empty Postgres database, check
-# that migration 002 re-runs and rolls back cleanly, then run the RLS checks.
+# that migrations 002 and 003 re-run and roll back cleanly, then run the RLS
+# checks.
 # Usage: DATABASE_URL=postgres://postgres@localhost:5432/postgres scripts/db/test.sh
 set -euo pipefail
 cd "$(dirname "$0")/../.."
@@ -16,4 +17,9 @@ psql_run -f supabase_migrations_002.sql
 psql_run -f supabase_migrations_002_rollback.sql
 psql_run -f supabase_migrations_002_rollback.sql
 psql_run -f supabase_migrations_002.sql
+psql_run -f supabase_migrations_003.sql
+psql_run -f supabase_migrations_003.sql
+psql_run -f supabase_migrations_003_rollback.sql
+psql_run -f supabase_migrations_003_rollback.sql
+psql_run -f supabase_migrations_003.sql
 psql_run -f scripts/db/rls-test.sql

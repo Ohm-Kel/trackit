@@ -6,6 +6,7 @@ import { formatRelativeDate, getDueBadgeClass, getDueUrgency, formatStatus, days
 
 const URGENCY_TEXT = { urgent: 'text-error', soon: 'text-warning', later: 'text-text-3', none: 'text-text-3' };
 import { exportTasksCSV, exportTasksPDF } from '../utils/export';
+import { downloadCalendar } from '../api/calendar';
 import SubtaskList from '../components/SubtaskList';
 import { TasksSkeleton } from '../components/Skeleton';
 import { useToast } from '../components/Toast';
@@ -106,6 +107,15 @@ export default function Tasks() {
                 <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-rs shadow-md z-10 py-1 min-w-[140px]">
                   <button onClick={() => { exportTasksCSV(tasks); setShowExport(false); }} className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium">Export as CSV</button>
                   <button onClick={() => { exportTasksPDF(tasks); setShowExport(false); }} className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium">Export as PDF</button>
+                  <button
+                    onClick={() => {
+                      setShowExport(false);
+                      downloadCalendar('tasks').catch(err => addToast(err.message, { type: 'error', title: "Couldn't download the calendar file" }));
+                    }}
+                    className="w-full text-left px-3 py-2 text-[12.5px] text-text-1 hover:bg-bg border-none bg-transparent cursor-pointer font-medium"
+                  >
+                    Download .ics
+                  </button>
                 </div>
               )}
             </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2, Sun, Moon, Monitor, Download, Trash2, Shield, LogOut, Globe, ExternalLink, Mail, BellOff } from 'lucide-react';
+import { User, Bell, Palette, Database, ChevronRight, Check, Save, Loader2, Sun, Moon, Monitor, Download, Trash2, Shield, LogOut, Globe, ExternalLink, Mail, BellOff, CalendarDays } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../hooks/useTasks';
@@ -8,6 +8,7 @@ import { useProfile, useUpdateProfile } from '../hooks/useProfile';
 import { requestNotificationPermission } from '../components/NotificationManager';
 import { useToast } from '../components/Toast';
 import { exportTasksCSV, exportExamsCSV } from '../utils/export';
+import CalendarSubscription from '../components/CalendarSubscription';
 
 const PROFILE_KEY = 'trackit_profile';
 const NOTIF_KEY = 'trackit_notif';
@@ -135,6 +136,7 @@ export default function Settings() {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'appearance', label: 'Appearance', icon: Palette },
+    { id: 'calendar', label: 'Calendar', icon: CalendarDays },
     { id: 'data', label: 'Data & Privacy', icon: Database },
   ];
 
@@ -377,6 +379,13 @@ export default function Settings() {
                   </div>
                   <div className="mt-4 text-[11.5px] text-text-3">Accent colors change the primary buttons, highlights, and icons throughout Trackit.</div>
                 </div>
+              </Section>
+            )}
+
+            {/* Calendar */}
+            {activeSection === 'calendar' && (
+              <Section icon={CalendarDays} title="Calendar subscription" description="See your deadlines and exams in your calendar app">
+                <CalendarSubscription />
               </Section>
             )}
 

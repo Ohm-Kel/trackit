@@ -1,5 +1,6 @@
 const { HttpError } = require('../lib/errors');
 const logger = require('../lib/logger');
+const { logPath } = require('../lib/logPath');
 
 /** 404 handler for unmatched routes. */
 function notFound(req, res) {
@@ -23,7 +24,10 @@ function errorHandler(err, req, res, _next) {
     return res.status(400).json({ error: 'Request body must be valid JSON' });
   }
 
-  logger.error({ err, requestId: req.id, method: req.method, path: req.path }, 'Unhandled error');
+  logger.error(
+    { err, requestId: req.id, method: req.method, path: logPath(req.originalUrl) },
+    'Unhandled error',
+  );
   // The request ID lets a user's bug report be matched to the server log.
   return res.status(500).json({ error: 'Internal server error', requestId: req.id });
 }

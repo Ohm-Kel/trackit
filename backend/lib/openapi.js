@@ -5,6 +5,7 @@ const subtasks = require('../controllers/subtaskController').schemas;
 const users = require('../controllers/userController').schemas;
 const chat = require('../controllers/chatController').schemas;
 const upload = require('../controllers/uploadController').schemas;
+const calendar = require('../controllers/calendarController').schemas;
 const { parsedExamSchema, weeklyScheduleSchema } = require('./timetableParser');
 
 /**
@@ -52,6 +53,20 @@ const idParam = [
   { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
 ];
 
+const icsResponse = (description) => ({
+  description,
+  content: { 'text/calendar': { schema: { type: 'string', description: 'RFC 5545 iCalendar' } } },
+});
+
+const feedStatus = {
+  type: 'object',
+  properties: {
+    active: { type: 'boolean' },
+    created_at: { type: ['string', 'null'], format: 'date-time' },
+  },
+  required: ['active', 'created_at'],
+};
+
 function crud(tag, resource, createSchema, updateSchema) {
   const base = `/${resource}`;
   return {
@@ -97,7 +112,7 @@ function buildOpenApiDocument() {
       title: 'Trackit API',
       version: '1.1.0',
       description:
-        'REST API for Trackit, the AI-powered student deadline tracker. All endpoints except /health require a Supabase access token. Request schemas are generated from the Zod validators used by the server.',
+        'REST API for Trackit, the AI-powered student deadline tracker. All endpoints except /health and the calendar feed require a Supabase access token. Request schemas are generated from the Zod validators used by the server.',
       license: { name: 'MIT', identifier: 'MIT' },
     },
     servers: [{ url: '/api' }],
@@ -275,6 +290,73 @@ function buildOpenApiDocument() {
           tags: ['Notifications'],
           summary: 'Create a workload reminder if deadlines are close',
           responses: { 200: ok('Result'), ...common },
+        },
+      },
+      '/calendar/feed': {
+        get: {
+          tags: ['Calendar'],
+          summary: 'Whether the user has a calendar subscription link',
+          responses: { 200: ok('Status', feedStatus), ...common },
+        },
+        post: {
+          tags: ['Calendar'],
+          summary: 'Create or rotate the calendar subscription link',
+          description:
+            'Returns a new secret token once; only its SHA-256 hash is stored. Any previous link stops working.',
+          responses: {
+            201: ok('Created', {
+              type: 'object',
+              properties: {
+                token: toSchema(calendar.feedParamsSchema.shape.token),
+                path: { type: 'string', description: 'Feed path relative to the API base' },
+                created_at: { type: 'string', format: 'date-time' },
+              },
+              required: ['token', 'path', 'created_at'],
+            }),
+            ...common,
+          },
+        },
+        delete: {
+          tags: ['Calendar'],
+          summary: 'Revoke the calendar subscription link',
+          responses: { 200: ok('Revoked'), ...common },
+        },
+      },
+      '/calendar/export.ics': {
+        get: {
+          tags: ['Calendar'],
+          summary: 'Download open tasks and exams as an iCalendar file',
+          parameters: [
+            {
+              name: 'include',
+              in: 'query',
+              schema: toSchema(calendar.exportQuerySchema.shape.include),
+            },
+          ],
+          responses: { 200: icsResponse('iCalendar file'), ...common },
+        },
+      },
+      '/calendar/{token}.ics': {
+        get: {
+          tags: ['Calendar'],
+          summary: 'Calendar subscription feed (iCalendar)',
+          description:
+            'For calendar apps, which cannot send a bearer token: the secret token in the URL is the credential. Open tasks with a due date appear as all-day events; exams as events. Malformed tokens count towards the per-IP failed-authentication limit; well-formed unknown tokens (old subscriptions to a rotated or revoked link) do not.',
+          security: [],
+          parameters: [
+            {
+              name: 'token',
+              in: 'path',
+              required: true,
+              schema: toSchema(calendar.feedParamsSchema.shape.token),
+            },
+          ],
+          responses: {
+            200: icsResponse('iCalendar feed'),
+            404: errorResponse('Unknown, rotated or revoked token'),
+            429: errorResponse('Too many requests or malformed tokens from this IP'),
+            500: common[500],
+          },
         },
       },
       '/analytics/velocity': {
