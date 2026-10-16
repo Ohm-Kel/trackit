@@ -197,7 +197,7 @@ function Hero({ onGetStarted, onLearnMore }) {
                   {[
                     { t: 'Data Structures Assignment', d: '2 days', s: 'in_progress', c: '#4F46E5' },
                     { t: 'Linear Algebra Problem Set', d: 'Tomorrow', s: 'stuck', c: '#B91C1C' },
-                    { t: 'Physics Lab Report', d: '5 days', s: 'not_started', c: '#5E6E84' },
+                    { t: 'Physics Lab Report', d: '5 days', s: 'not_started', c: '#526075' },
                   ].map((task, i) => (
                     <div key={i} className={`flex items-center gap-3 py-2.5 px-2 ${i < 2 ? 'border-b border-[#E8ECF0]/60' : ''}`}>
                       <div className={`w-3 h-3 rounded-full border-2`} style={{ borderColor: task.c }} />

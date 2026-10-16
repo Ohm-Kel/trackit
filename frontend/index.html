@@ -2,35 +2,57 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- SEO -->
+    <!-- SEO. The site URL placeholder is replaced with VITE_SITE_URL by vite-plugins/site.js. -->
     <title>Trackit — AI-Powered Student Deadline Tracker</title>
-    <meta name="description" content="Never miss a deadline again. Trackit helps university students manage assignments, track exams, and plan study sessions with AI. Upload your timetable, chat with an AI study assistant, and stay organised." />
-    <meta name="keywords" content="student planner, deadline tracker, exam countdown, AI study assistant, university, assignment tracker, timetable" />
-    <meta name="author" content="Trackit" />
+    <meta name="description" content="Trackit turns your timetable into a prioritised study plan. Track assignments and exams, and plan your week with an AI assistant that knows your deadlines." />
+    <link rel="canonical" href="%SITE_URL%/landing" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <!-- Open Graph / Social Sharing -->
+    <!-- Open Graph / social sharing (absolute URLs, as scrapers require) -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Trackit — AI-Powered Student Deadline Master" />
-    <meta property="og:description" content="Master your semester with the most premium academic tracker ever built. AI-powered revision plans, subtask breakdown, and automatic grade tracking." />
-    <meta property="og:image" content="/trackit_og_image.png" />
-    <meta property="og:url" content="https://trackit.app" />
     <meta property="og:site_name" content="Trackit" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:url" content="%SITE_URL%/landing" />
+    <meta property="og:title" content="Trackit — AI-Powered Student Deadline Tracker" />
+    <meta property="og:description" content="Turn your timetable into a prioritised study plan, with an AI study assistant that knows your deadlines." />
+    <meta property="og:image" content="%SITE_URL%/trackit_og_image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Trackit calendar showing upcoming assignments and exams" />
 
-    <!-- Twitter -->
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Trackit — AI-Powered Student Deadline Master" />
-    <meta name="twitter:description" content="Master your semester with the most premium academic tracker ever built." />
-    <meta name="twitter:image" content="/trackit_og_image.png" />
+    <meta name="twitter:title" content="Trackit — AI-Powered Student Deadline Tracker" />
+    <meta name="twitter:description" content="Turn your timetable into a prioritised study plan, with an AI study assistant that knows your deadlines." />
+    <meta name="twitter:image" content="%SITE_URL%/trackit_og_image.jpg" />
+    <meta name="twitter:image:alt" content="The Trackit calendar showing upcoming assignments and exams" />
 
-    <!-- Theme Color -->
     <meta name="theme-color" content="#0F172A" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="#0F172A" />
+
+    <!-- Structured data. A JSON-LD block is data, not script: browsers never
+         run it, so script-src 'self' in the Content-Security-Policy allows it. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Trackit",
+        "url": "%SITE_URL%/landing",
+        "image": "%SITE_URL%/trackit_og_image.jpg",
+        "description": "An AI study planner that turns a student's timetable into a prioritised, deadline-aware workload, with an assistant grounded in their own tasks and exams.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>Trackit is an AI study planner for university students. Please enable JavaScript to use it.</noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
