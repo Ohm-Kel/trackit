@@ -62,7 +62,7 @@ export default function Dashboard() {
         </div>
         <button
           onClick={() => navigate('/add')}
-          className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer min-w-[44px] min-h-[44px] justify-center sm:min-w-0 sm:min-h-0"
         >
           <Plus className="w-[13px] h-[13px]" />
           <span className="sr-only sm:not-sr-only">Add Task</span>

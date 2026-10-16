@@ -97,7 +97,7 @@ export default function Tasks() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setShowExport(!showExport)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs min-w-[44px] min-h-[44px] justify-center sm:min-w-0 sm:min-h-0"
               >
                 <Download className="w-[13px] h-[13px]" />
                 <span className="sr-only sm:not-sr-only">Export</span>
@@ -112,7 +112,7 @@ export default function Tasks() {
           )}
           <button
             onClick={() => navigate('/add')}
-            className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer min-w-[44px] min-h-[44px] justify-center sm:min-w-0 sm:min-h-0"
           >
             <Plus className="w-[13px] h-[13px]" />
             <span className="sr-only sm:not-sr-only">Add Task</span>

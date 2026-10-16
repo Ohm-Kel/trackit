@@ -130,6 +130,24 @@ test('gives phone controls a 44px touch target', async ({ page, api, signIn }) =
   expect(Math.round(Math.min(taskTab.height, examTab.height))).toBeGreaterThanOrEqual(44);
 });
 
+test('gives the Tasks and Exams header and exam card controls a 44px target on phones', async ({ page, api, signIn }) => {
+  api.db.tasks.push(task({ title: 'Statistics assignment', due_date: inDays(2) }));
+  api.db.exams.push(exam({ subject: 'Calculus II', exam_date: inDays(10) }));
+  await signIn();
+  await page.setViewportSize({ width: 375, height: 740 });
+  for (const [path, names] of [
+    ['/tasks', ['Export', 'Add Task']],
+    ['/exams', ['Export', 'Add Exam', 'Show Revision Subtasks', 'Remove exam']],
+  ]) {
+    await page.goto(path);
+    for (const name of names) {
+      const control = page.getByRole('button', { name, exact: true });
+      await expect(control).toBeVisible();
+      expect(tapSize(await control.boundingBox()), `${path} ${name}`).toBeGreaterThanOrEqual(44);
+    }
+  }
+});
+
 for (const theme of ['light', 'dark']) {
   test(`shows a focus ring on keyboard focus in ${theme} mode`, async ({ page, api, signIn }) => {
     void api;
