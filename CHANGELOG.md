@@ -20,6 +20,9 @@ All notable changes to this project are documented here. The format follows
   - The sidebar drops the "Pro Edition" badge and asks to set up the profile only when it has no name or course; Settings shows the real version
   - The Analytics velocity chart shows each week's count and has a text alternative, and the exam preparation track is visible at 0%
   - On phones, sidebar links and the Add page's Task/Exam switch are 44px tall, the switch shows which side is selected, and dashboard stat labels are larger
+  - On phones, the Tasks, Exams and Dashboard header buttons and the exam card links are 44px tall
+  - The logo has a transparent background, so no grey square shows around it, and the phone header uses the same clock mark as the sidebar
+  - Analytics uses plain labels: "Analytics" and "Tasks Completed per Week"
 
 ### Added
 
