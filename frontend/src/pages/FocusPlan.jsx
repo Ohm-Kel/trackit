@@ -135,7 +135,7 @@ export default function FocusPlan() {
           <div className="absolute right-32 -bottom-16 w-32 h-32 bg-white opacity-[0.04] rounded-full blur-xl pointer-events-none"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6">
 
           {/* Timeline */}
           <div>

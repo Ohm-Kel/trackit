@@ -33,7 +33,7 @@ describe.each([
   ['/chat', 'AI Workload Chat', true],
   ['/upload', 'Upload Timetable', true],
   ['/focus', "Today's Focus Plan", true],
-  ['/analytics', 'Advanced Analytics', true],
+  ['/analytics', 'Analytics', true],
   ['/add', 'Add New', true],
   ['/settings', 'Settings', true],
   ['/landing', /./, false],

@@ -24,7 +24,7 @@ describe.each([
   ['/chat', 'AI Workload Chat'],
   ['/upload', 'Upload Timetable'],
   ['/focus', "Today's Focus Plan"],
-  ['/analytics', 'Advanced Analytics'],
+  ['/analytics', 'Analytics'],
   ['/add', 'Add New'],
   ['/settings', 'Settings'],
 ])('signed-in route %s', (path, heading) => {
