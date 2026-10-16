@@ -77,6 +77,9 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       exclude: ['e2e/**', 'node_modules/**'],
       setupFiles: ['./src/test/setup.js'],
+      // Above the 5s findBy*/waitFor timeout in setup.js, so a slow query on a
+      // busy CI runner gets its own clear error rather than a whole-test timeout.
+      testTimeout: 15_000,
       env: {
         VITE_SUPABASE_URL: 'https://test.supabase.co',
         VITE_SUPABASE_ANON_KEY: 'test-anon-key',
