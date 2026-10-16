@@ -13,9 +13,8 @@ export default function Layout() {
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 w-full h-[60px] bg-white border-b border-border flex items-center justify-between px-4 z-20">
         <div className="flex items-center gap-2">
-          <div className="w-[26px] h-[26px] bg-primary rounded-lg flex items-center justify-center">
-            <svg viewBox="0 0 16 16" className="w-[13px] h-[13px] fill-white"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/></svg>
-          </div>
+          {/* The clock mark from the sidebar logo, so phone and desktop match. */}
+          <img src="/logo-mark.png" alt="" className="w-[28px] h-[28px] mix-blend-multiply" />
           <span className="text-[15px] font-bold text-text-1 tracking-[-0.3px]">Trackit</span>
         </div>
         <button onClick={() => setSidebarOpen(true)} aria-label="Open menu" className="w-[44px] h-[44px] -mr-[10px] flex items-center justify-center text-text-2 bg-transparent border-none">
