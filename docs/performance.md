@@ -65,9 +65,9 @@ script (`/_vercel/insights/script.js`) only exists on Vercel and returns a
 | Not scored on `vite preview`: Vercel's default `Cache-Control` makes browsers revalidate hashed `/assets/` files on every visit. | vercel.json marks `/assets/` as `immutable` for a year, as nginx.conf already did. |
 
 `logo.png` (used on the sign-in, sign-up and sidebar, not on the landing
-page) went from 369 KB at 640 px to 69 KB at 360 px, which is still 2x its
-largest display size. A 360 px `logo.webp` (8 KB) is available for those
-pages.
+page) went from 369 KB at 640 px to 12 KB at 360 px (a 128-colour palette
+with a transparent background), which is still 2x its largest display size.
+A 360 px `logo.webp` (22 KB, with alpha) is available for those pages.
 
 ### Tried and not kept
 
