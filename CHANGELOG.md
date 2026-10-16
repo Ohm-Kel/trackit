@@ -8,6 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Real-database integration tests (`backend/tests/db`, `npm run test:db`): the API runs against Postgres, PostgREST and GoTrue from the Supabase CLI, with the repository's SQL files as migrations, real users and real JWTs. They cover every route's database path, the `completed_at` trigger, shared rate-limit counters across two app instances, and cross-user isolation through every endpoint and through PostgREST directly
+- `scripts/db/integration.sh` to run them locally in one command, and a CI job that runs it
+- `scripts/db/sync-migrations.sh`: links every `supabase_migrations_NNN.sql` into the local stack in order, and fails CI when a link is missing
+- ADR 0008 on running the API's tests against a real Supabase stack
+- Playwright tests that fail if any route scrolls sideways at 375px in light or dark mode, plus checks for tap targets, focus rings and on-screen menus
 - `VITE_SITE_URL` sets the public origin used for the canonical URL, social cards, structured data, `robots.txt` and `sitemap.xml` (default `https://trackit-app-smoky.vercel.app`)
 - `robots.txt`, `sitemap.xml`, `<link rel="canonical">` and WebApplication JSON-LD for the landing page
 - `X-Robots-Tag: noindex` on app routes (Vercel and Docker); only `/landing` is listed for search engines
@@ -15,7 +20,6 @@ All notable changes to this project are documented here. The format follows
 - Playwright checks for the landing page's SEO tags, social image size, structured data, image dimensions and layout shift
 - Lighthouse CI job for the landing page (mobile), with score, Core Web Vitals and byte-budget assertions
 - `docs/performance.md` with before and after Lighthouse scores
-- Playwright tests that fail if any route scrolls sideways at 375px in light or dark mode, plus checks for tap targets, focus rings and on-screen menus
 
 ### Changed
 
@@ -26,9 +30,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
-- `og:url` pointed at `https://trackit.app`, and social images used relative URLs, so shared links had no image
-- Page, Open Graph and Twitter titles and descriptions disagreed; the meta description is now under 160 characters
-- A hero preview label on the landing page failed WCAG AA contrast (4.49:1)
+- A malformed id in `/tasks/:id`, `/exams/:id`, `/subtasks/:id` or `/notifications/:id/read` returned 500; it now returns 404
+- Chat history could show a reply above the question it answered, because both turns are saved with the same `created_at`
 - UI and UX problems found in a screenshot audit of every route at 375, 768 and 1280px, in light and dark mode, with empty, realistic and long data ([docs/ui-audit.md](docs/ui-audit.md)):
   - The sign-in, sign-up and password pages scroll on short screens; the sign-up Google button and "Sign in instead" link were unreachable
   - The task table no longer hides task titles between 768 and 1023px, and the Dashboard, Focus Plan and Chat side columns no longer push the page sideways
@@ -44,6 +47,9 @@ All notable changes to this project are documented here. The format follows
   - On phones, the Tasks, Exams and Dashboard header buttons and the exam card links are 44px tall
   - The logo has a transparent background, so no grey square shows around it, and the phone header uses the same clock mark as the sidebar
   - Analytics uses plain labels: "Analytics" and "Tasks Completed per Week"
+- `og:url` pointed at `https://trackit.app`, and social images used relative URLs, so shared links had no image
+- Page, Open Graph and Twitter titles and descriptions disagreed; the meta description is now under 160 characters
+- A hero preview label on the landing page failed WCAG AA contrast (4.49:1)
 
 ## [1.2.0] - 2026-10-15
 

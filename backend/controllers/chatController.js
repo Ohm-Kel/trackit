@@ -183,6 +183,10 @@ exports.getHistory = async (req, res) => {
     .select('role, content, created_at')
     .eq('user_id', req.user.id)
     .order('created_at', { ascending: false })
+    // A question and its reply are saved in one insert, so they share
+    // created_at. 'assistant' sorts first here, so the question comes first
+    // once the list is reversed.
+    .order('role', { ascending: true })
     .limit(100);
 
   if (error) throw error;

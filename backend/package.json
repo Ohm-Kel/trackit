@@ -10,6 +10,7 @@
     "format:check": "prettier --check .",
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "test:db": "jest --config jest.db.config.js",
     "eval": "node eval/run.js"
   },
   "author": "Semanu Kwaku Sebuava",
@@ -45,6 +46,10 @@
     "testEnvironment": "node",
     "roots": [
       "<rootDir>/tests"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/tests/db/"
     ],
     "collectCoverageFrom": [
       "**/*.js",

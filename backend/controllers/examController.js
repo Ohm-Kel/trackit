@@ -1,6 +1,6 @@
 const { z } = require('zod');
 const { HttpError } = require('../lib/errors');
-const { validate, throwIfDbError } = require('../lib/validate');
+const { validate, throwIfDbError, parseId } = require('../lib/validate');
 const { optionalDate } = require('../lib/schemas');
 
 const CONFIDENCE_VALUES = ['low', 'medium', 'high'];
@@ -45,10 +45,11 @@ exports.getExams = async (req, res) => {
 
 /** GET /api/exams/:id */
 exports.getExamById = async (req, res) => {
+  const id = parseId(req.params.id, NOT_FOUND);
   const { data, error } = await req.db
     .from('exams')
     .select('*')
-    .eq('id', req.params.id)
+    .eq('id', id)
     .eq('user_id', req.user.id)
     .single();
 
@@ -71,11 +72,12 @@ exports.createExam = async (req, res) => {
 
 /** PATCH /api/exams/:id */
 exports.updateExam = async (req, res) => {
+  const id = parseId(req.params.id, NOT_FOUND);
   const body = validate(updateExamSchema, req.body);
   const { data, error } = await req.db
     .from('exams')
     .update(body)
-    .eq('id', req.params.id)
+    .eq('id', id)
     .eq('user_id', req.user.id)
     .select();
 
@@ -86,10 +88,11 @@ exports.updateExam = async (req, res) => {
 
 /** DELETE /api/exams/:id */
 exports.deleteExam = async (req, res) => {
+  const id = parseId(req.params.id, NOT_FOUND);
   const { data, error } = await req.db
     .from('exams')
     .delete()
-    .eq('id', req.params.id)
+    .eq('id', id)
     .eq('user_id', req.user.id)
     .select();
 

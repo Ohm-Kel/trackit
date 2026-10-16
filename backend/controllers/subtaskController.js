@@ -1,6 +1,6 @@
 const { z } = require('zod');
 const { HttpError } = require('../lib/errors');
-const { validate, throwIfDbError } = require('../lib/validate');
+const { validate, throwIfDbError, parseId } = require('../lib/validate');
 
 const createSubtaskSchema = z
   .object({
@@ -83,11 +83,12 @@ exports.createSubtask = async (req, res) => {
 
 /** PATCH /api/subtasks/:id */
 exports.updateSubtask = async (req, res) => {
+  const id = parseId(req.params.id, NOT_FOUND);
   const body = validate(updateSubtaskSchema, req.body);
   const { data, error } = await req.db
     .from('subtasks')
     .update(body)
-    .eq('id', req.params.id)
+    .eq('id', id)
     .eq('user_id', req.user.id)
     .select()
     .single();
@@ -98,10 +99,11 @@ exports.updateSubtask = async (req, res) => {
 
 /** DELETE /api/subtasks/:id */
 exports.deleteSubtask = async (req, res) => {
+  const id = parseId(req.params.id, NOT_FOUND);
   const { data, error } = await req.db
     .from('subtasks')
     .delete()
-    .eq('id', req.params.id)
+    .eq('id', id)
     .eq('user_id', req.user.id)
     .select('id');
 

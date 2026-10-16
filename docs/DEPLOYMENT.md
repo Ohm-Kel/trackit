@@ -5,8 +5,9 @@ back. Steps marked **once** only apply when upgrading to v1.2.0.
 
 ## Before you deploy
 
-1. CI is green on the commit: backend, frontend, end-to-end, database and
-   Docker jobs. GitGuardian has no open incidents.
+1. CI is green on the commit: backend, frontend, end-to-end, both database
+   jobs (SQL checks, and the API against a real Supabase stack) and Docker
+   jobs. GitGuardian has no open incidents.
 2. The changelog has an entry for the release.
 
 ## 1. Database (Supabase SQL editor)
@@ -22,7 +23,11 @@ and re-runnable.
 
 Migration 002 adds the shared rate-limit counters, `tasks.completed_at`, and
 two Row Level Security policies. Every migration is tested in CI against
-Postgres 16 (`scripts/db/test.sh`), including its rollback.
+Postgres 16 (`scripts/db/test.sh`), including its rollback, and the API's
+database tests run against the migrations on a local Supabase stack
+(`scripts/db/integration.sh`). That script links every
+`supabase_migrations_NNN.sql` into `supabase/migrations` in order, and CI
+checks the committed links.
 
 ## 2. Supabase Auth settings
 

@@ -117,3 +117,19 @@ describe('chat history API', () => {
     expect(res.body.reply).toBe('ok');
   });
 });
+
+describe('malformed ids', () => {
+  it.each([
+    ['get', '/api/tasks/not-a-uuid'],
+    ['patch', '/api/exams/not-a-uuid'],
+    ['delete', '/api/subtasks/123'],
+    ['patch', '/api/notifications/not-a-uuid/read'],
+  ])('%s %s returns 404 without querying the database', async (method, path) => {
+    const res = await ctx.api()[method](path).set(ctx.auth).send({ title: 'x' });
+    expect(res.status).toBe(404);
+    expect(ctx.supabase.queries('tasks')).toHaveLength(0);
+    expect(ctx.supabase.queries('exams')).toHaveLength(0);
+    expect(ctx.supabase.queries('subtasks')).toHaveLength(0);
+    expect(ctx.supabase.queries('notifications')).toHaveLength(0);
+  });
+});

@@ -153,10 +153,39 @@ jobs:
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
+      - name: Every root migration is linked into supabase/migrations
+        run: scripts/db/sync-migrations.sh --check
       - name: Apply schema and migrations, then run RLS checks
         run: scripts/db/test.sh
         env:
           DATABASE_URL: postgres://postgres@localhost:5432/postgres
+
+  database-api:
+    name: Database (API against a real Supabase stack)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+      - run: npm ci
+        working-directory: backend
+      - name: Start Postgres, PostgREST and GoTrue, then run the API's database tests
+        run: scripts/db/integration.sh
+      - name: Supabase container logs
+        if: failure()
+        run: |
+          for name in db rest auth kong; do
+            echo "::group::supabase_${name}_trackit"
+            docker logs "supabase_${name}_trackit" 2>&1 | tail -n 200 || true
+            echo "::endgroup::"
+          done
 
   docker:
     name: Docker images build

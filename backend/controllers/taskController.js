@@ -1,6 +1,6 @@
 const { z } = require('zod');
 const { HttpError } = require('../lib/errors');
-const { validate, throwIfDbError } = require('../lib/validate');
+const { validate, throwIfDbError, parseId } = require('../lib/validate');
 const { optionalDate } = require('../lib/schemas');
 
 const STATUS_VALUES = ['not_started', 'in_progress', 'stuck', 'done'];
@@ -46,10 +46,11 @@ exports.getTasks = async (req, res) => {
 
 /** GET /api/tasks/:id */
 exports.getTaskById = async (req, res) => {
+  const id = parseId(req.params.id, NOT_FOUND);
   const { data, error } = await req.db
     .from('tasks')
     .select('*')
-    .eq('id', req.params.id)
+    .eq('id', id)
     .eq('user_id', req.user.id)
     .single();
 
@@ -72,11 +73,12 @@ exports.createTask = async (req, res) => {
 
 /** PATCH /api/tasks/:id */
 exports.updateTask = async (req, res) => {
+  const id = parseId(req.params.id, NOT_FOUND);
   const body = validate(updateTaskSchema, req.body);
   const { data, error } = await req.db
     .from('tasks')
     .update(body)
-    .eq('id', req.params.id)
+    .eq('id', id)
     .eq('user_id', req.user.id)
     .select();
 
@@ -87,10 +89,11 @@ exports.updateTask = async (req, res) => {
 
 /** DELETE /api/tasks/:id */
 exports.deleteTask = async (req, res) => {
+  const id = parseId(req.params.id, NOT_FOUND);
   const { data, error } = await req.db
     .from('tasks')
     .delete()
-    .eq('id', req.params.id)
+    .eq('id', id)
     .eq('user_id', req.user.id)
     .select();
 

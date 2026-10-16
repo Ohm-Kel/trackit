@@ -66,7 +66,8 @@ Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 [rate limiting AI endpoints with shared counters](docs/adr/0002-rate-limit-ai-endpoints.md),
 [the API as the authorisation boundary, with RLS on API queries](docs/adr/0003-api-as-authorization-boundary.md),
 [streaming chat with server-sent events](docs/adr/0004-stream-chat-with-server-sent-events.md),
-[a Content-Security-Policy built from the Supabase URL](docs/adr/0005-frontend-content-security-policy.md).
+[a Content-Security-Policy built from the Supabase URL](docs/adr/0005-frontend-content-security-policy.md),
+[running the API's tests against a real Supabase stack](docs/adr/0008-real-database-integration-tests.md).
 Release and rollback steps are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 Landing page Lighthouse scores, before and after tuning, and the CI checks
 that keep them are in [`docs/performance.md`](docs/performance.md).
@@ -79,7 +80,7 @@ that keep them are in [`docs/performance.md`](docs/performance.md).
 | Backend | Node.js 22, Express 5, Zod 4, pino, helmet, express-rate-limit |
 | AI | Anthropic SDK (Claude Haiku 4.5 by default), vision and PDF input, forced tool use |
 | Data and auth | Supabase Postgres with Row Level Security, Supabase Auth and Realtime |
-| Quality | Jest and Supertest (121 backend tests, 95% line coverage), Vitest and React Testing Library (124 frontend tests, 77% line coverage), Playwright end-to-end and axe accessibility checks, SQL RLS checks, ESLint, Prettier, pre-commit, GitHub Actions |
+| Quality | Jest and Supertest (121 backend tests, 95% line coverage), Vitest and React Testing Library (124 frontend tests, 77% line coverage), Playwright end-to-end and axe accessibility checks, API tests against a real local Supabase stack, SQL RLS checks, ESLint, Prettier, pre-commit, GitHub Actions |
 | Delivery | Vercel (frontend and serverless API), Docker and Docker Compose |
 
 ## Getting started
@@ -158,6 +159,9 @@ npm run lint
 cd ..
 # Schema, migrations and RLS policies, against an empty Postgres database
 DATABASE_URL=postgres://postgres@localhost:5432/postgres scripts/db/test.sh
+
+# The API against a real local Supabase stack (Postgres, PostgREST, GoTrue); needs Docker
+scripts/db/integration.sh
 ```
 
 ## Usage examples
@@ -206,14 +210,15 @@ trackit/
 │   ├── lib/                  # Timetable parser, chat context, analytics, OpenAPI
 │   ├── middleware/           # Auth, rate limiting, error handling
 │   ├── routes/               # Express routers
-│   ├── tests/                # Jest unit and integration tests
+│   ├── tests/                # Jest unit and integration tests; db/ runs against real Supabase
 │   └── eval/                 # Evaluation dataset, scorer and runner
 ├── frontend/
 │   └── src/                  # Pages, components, hooks, API client
 ├── docs/                     # ADRs, the deployment guide and performance notes
 ├── frontend/e2e/             # Playwright end-to-end tests
 ├── frontend/vite-plugins/    # Build-time site metadata (SEO) and preloading
-├── scripts/                  # Repository checks; db/ holds the RLS test suite
+├── scripts/                  # Repository checks; db/ holds the RLS and real-database test runners
+├── supabase/                 # Local stack config for the real-database tests
 ├── supabase_schema.sql       # Tables, RLS policies, triggers
 ├── supabase_migrations.sql   # Later additions (subtasks, chat history, schedule)
 ├── supabase_migrations_002.sql # Rate-limit counters and RLS fixes (v1.2.0)
