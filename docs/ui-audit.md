@@ -64,9 +64,9 @@ confusing or below an accessibility bar, and **P3** is polish.
 | 19 | P3 | `/analytics` | all | both | The header is 28px extra-bold with hard-coded colours and its own padding; every other page uses 20 to 22px bold with the page padding. | Fixed |
 | 20 | P3 | `/tasks`, `/exams` | 375 | both | The icon-only Export and Add buttons in the header are 32px tall. | Not fixed |
 | 21 | P3 | `/exams` | 375 | both | "Show Revision Subtasks" and "Remove exam" are small text links (about 20px tall). | Not fixed |
-| 22 | P3 | all signed-in routes | 375 | both | Sidebar links are about 36px tall in the mobile drawer. | Not fixed |
-| 23 | P3 | `/` | 375 | both | The stat card labels are 10px. | Not fixed |
-| 24 | P3 | `/add` | 375 | both | The Assignment/Exam switch stacks vertically on phones and reads as two list items, not a switch. | Not fixed |
+| 22 | P3 | all signed-in routes | 375 | both | Sidebar links are about 36px tall in the mobile drawer. | Fixed: 44px tall on phones |
+| 23 | P3 | `/` | 375 | both | The stat card labels are 10px. | Fixed: 11px, with the icon above the label on phones so words don't split |
+| 24 | P3 | `/add` | 375 | both | The Assignment/Exam switch stacks vertically on phones and reads as two list items, not a switch. | Fixed: side by side, 44px tall, with `aria-pressed` |
 | 25 | P3 | all signed-in routes | all | light | The logo PNG's background is slightly off-white, so a faint grey square shows in the sidebar. | Not fixed |
 | 26 | P3 | `/analytics` | all | both | "Advanced Analytics" and "Mastery Velocity" are marketing copy rather than plain labels. | Not fixed |
 | 35 | P3 | all signed-in routes | 375 vs 768+ | both | The mobile header uses a grid-icon mark while the sidebar uses the raster logo, so branding differs by width. | Not fixed: needs a design decision |
@@ -101,7 +101,7 @@ it isn't, it opens the chat.
 
 ## Not fixed
 
-Items 20 to 26 and 35 are cosmetic or need a design decision. Items 20 and 21 are
+Items 20, 21, 25, 26 and 35 are cosmetic or need a design decision. Items 20 and 21 are
 left for now because parallel work (the PWA and calendar tracks) is editing
 the Tasks and Exams headers and actions, and changing them here would
 conflict. They are good candidates for a follow-up once those tracks merge.

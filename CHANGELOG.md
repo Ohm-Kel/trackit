@@ -19,6 +19,7 @@ All notable changes to this project are documented here. The format follows
   - Due dates are coloured by urgency on phone task rows and the dashboard queue, which no longer marks every task with a red dot
   - The sidebar drops the "Pro Edition" badge and asks to set up the profile only when it has no name or course; Settings shows the real version
   - The Analytics velocity chart shows each week's count and has a text alternative, and the exam preparation track is visible at 0%
+  - On phones, sidebar links and the Add page's Task/Exam switch are 44px tall, the switch shows which side is selected, and dashboard stat labels are larger
 
 ### Added
 
