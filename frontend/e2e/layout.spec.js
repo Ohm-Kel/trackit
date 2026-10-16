@@ -86,18 +86,25 @@ test('keeps the notification menu and toasts on a phone screen', async ({ page, 
   expect(box.x + box.width).toBeLessThanOrEqual(375);
 });
 
+// Rounded: the menu drawer slides in with a transform, which reports sizes
+// such as 43.99999px while it moves.
+const tapSize = (box) => Math.round(Math.min(box.width, box.height));
+
 test('gives phone controls a 44px touch target', async ({ page, api, signIn }) => {
   api.db.tasks.push(task({ title: 'Statistics assignment', due_date: inDays(2) }));
   await signIn();
   await page.setViewportSize({ width: 375, height: 740 });
   await page.goto('/tasks');
+  // boundingBox() doesn't wait, so wait for each element before measuring it.
+  await expect(page.getByText('Statistics assignment')).toBeVisible();
   const targets = [
     page.getByRole('button', { name: 'Open menu' }),
     page.getByRole('button', { name: 'Show details' }),
   ];
   for (const target of targets) {
+    await expect(target).toBeVisible();
     const box = await target.boundingBox();
-    expect(Math.min(box.width, box.height), await target.getAttribute('aria-label')).toBeGreaterThanOrEqual(44);
+    expect(tapSize(box), await target.getAttribute('aria-label')).toBeGreaterThanOrEqual(44);
   }
   // The 17px round checkbox takes taps beyond its edge.
   const checkbox = page.getByRole('button', { name: 'Mark "Statistics assignment" as done' });
@@ -106,18 +113,21 @@ test('gives phone controls a 44px touch target', async ({ page, api, signIn }) =
   await expect(page.getByRole('button', { name: 'Mark "Statistics assignment" as not done' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Open menu' }).click();
+  await expect(page.getByRole('button', { name: 'Close menu' })).toBeInViewport();
   const close = await page.getByRole('button', { name: 'Close menu' }).boundingBox();
-  expect(Math.min(close.width, close.height)).toBeGreaterThanOrEqual(44);
+  expect(tapSize(close)).toBeGreaterThanOrEqual(44);
+  await expect(page.getByRole('link', { name: 'Focus Plan' })).toBeInViewport();
   const navLink = await page.getByRole('link', { name: 'Focus Plan' }).boundingBox();
-  expect(navLink.height).toBeGreaterThanOrEqual(44);
+  expect(Math.round(navLink.height)).toBeGreaterThanOrEqual(44);
 
   // The Add page's Task/Exam switch sits side by side with full-height halves.
   await page.getByRole('link', { name: 'Add Task / Exam' }).click();
+  await expect(page.getByRole('button', { name: /Exam$/ })).toBeVisible();
   const taskTab = await page.getByRole('button', { name: /Assignment \/ Task/ }).boundingBox();
   const examTab = await page.getByRole('button', { name: /Exam$/ }).boundingBox();
   expect(Math.abs(taskTab.y - examTab.y)).toBeLessThan(5); // same row, mid fade-in
   expect(examTab.x).toBeGreaterThan(taskTab.x);
-  expect(Math.min(taskTab.height, examTab.height)).toBeGreaterThanOrEqual(44);
+  expect(Math.round(Math.min(taskTab.height, examTab.height))).toBeGreaterThanOrEqual(44);
 });
 
 for (const theme of ['light', 'dark']) {
