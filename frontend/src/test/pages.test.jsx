@@ -196,3 +196,17 @@ describe('charts and progress', () => {
     expect(chart).toHaveTextContent('2');
   });
 });
+
+describe('add page switch', () => {
+  it('marks the selected Task or Exam tab as pressed', async () => {
+    const user = userEvent.setup();
+    renderApp('/add');
+    const taskTab = await screen.findByRole('button', { name: /Assignment \/ Task/ });
+    const examTab = screen.getByRole('button', { name: /Exam$/ });
+    expect(taskTab).toHaveAttribute('aria-pressed', 'true');
+    expect(examTab).toHaveAttribute('aria-pressed', 'false');
+    await user.click(examTab);
+    expect(examTab).toHaveAttribute('aria-pressed', 'true');
+    expect(taskTab).toHaveAttribute('aria-pressed', 'false');
+  });
+});

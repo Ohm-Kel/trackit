@@ -108,6 +108,16 @@ test('gives phone controls a 44px touch target', async ({ page, api, signIn }) =
   await page.getByRole('button', { name: 'Open menu' }).click();
   const close = await page.getByRole('button', { name: 'Close menu' }).boundingBox();
   expect(Math.min(close.width, close.height)).toBeGreaterThanOrEqual(44);
+  const navLink = await page.getByRole('link', { name: 'Focus Plan' }).boundingBox();
+  expect(navLink.height).toBeGreaterThanOrEqual(44);
+
+  // The Add page's Task/Exam switch sits side by side with full-height halves.
+  await page.getByRole('link', { name: 'Add Task / Exam' }).click();
+  const taskTab = await page.getByRole('button', { name: /Assignment \/ Task/ }).boundingBox();
+  const examTab = await page.getByRole('button', { name: /Exam$/ }).boundingBox();
+  expect(Math.abs(taskTab.y - examTab.y)).toBeLessThan(5); // same row, mid fade-in
+  expect(examTab.x).toBeGreaterThan(taskTab.x);
+  expect(Math.min(taskTab.height, examTab.height)).toBeGreaterThanOrEqual(44);
 });
 
 for (const theme of ['light', 'dark']) {

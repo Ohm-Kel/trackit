@@ -72,31 +72,31 @@ export default function Dashboard() {
       <div className="px-4 md:px-8 pb-9">
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 md:gap-3.5 mb-5">
-          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex items-center gap-2 md:gap-3.5">
+          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex flex-col items-start md:flex-row md:items-center gap-2 md:gap-3.5">
             <div className="w-[32px] h-[32px] md:w-[38px] md:h-[38px] rounded-[10px] bg-primary-light flex items-center justify-center shrink-0 text-primary">
               <ListTodo className="w-[15px] h-[15px] md:w-[18px] md:h-[18px]" strokeWidth={1.6} />
             </div>
             <div>
               <div className="text-[22px] md:text-[26px] font-bold text-text-1 leading-none">{activeTasks.length}</div>
-              <div className="text-[10px] md:text-[12px] text-text-3 mt-0.5 font-medium">Active Tasks</div>
+              <div className="text-[11px] md:text-[12px] text-text-3 mt-0.5 font-medium">Active Tasks</div>
             </div>
           </div>
-          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex items-center gap-2 md:gap-3.5">
+          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex flex-col items-start md:flex-row md:items-center gap-2 md:gap-3.5">
             <div className="w-[32px] h-[32px] md:w-[38px] md:h-[38px] rounded-[10px] bg-primary-light flex items-center justify-center shrink-0 text-primary">
               <CalendarDays className="w-[15px] h-[15px] md:w-[18px] md:h-[18px]" strokeWidth={1.6} />
             </div>
             <div>
               <div className="text-[22px] md:text-[26px] font-bold text-text-1 leading-none">{dueThisWeek.length}</div>
-              <div className="text-[10px] md:text-[12px] text-text-3 mt-0.5 font-medium">Due This Week</div>
+              <div className="text-[11px] md:text-[12px] text-text-3 mt-0.5 font-medium">Due This Week</div>
             </div>
           </div>
-          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex items-center gap-2 md:gap-3.5">
+          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex flex-col items-start md:flex-row md:items-center gap-2 md:gap-3.5">
             <div className="w-[32px] h-[32px] md:w-[38px] md:h-[38px] rounded-[10px] bg-primary-light flex items-center justify-center shrink-0 text-primary">
               <GraduationCap className="w-[15px] h-[15px] md:w-[18px] md:h-[18px]" strokeWidth={1.6} />
             </div>
             <div>
               <div className="text-[22px] md:text-[26px] font-bold text-text-1 leading-none">{upcomingExams.length}</div>
-              <div className="text-[10px] md:text-[12px] text-text-3 mt-0.5 font-medium">Exams Upcoming</div>
+              <div className="text-[11px] md:text-[12px] text-text-3 mt-0.5 font-medium">Exams Upcoming</div>
             </div>
           </div>
         </div>
