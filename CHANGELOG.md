@@ -12,6 +12,7 @@ All notable changes to this project are documented here. The format follows
 - `GET /api/calendar/:token.ics` (the feed), `POST`/`GET`/`DELETE /api/calendar/feed` (manage the link) and `GET /api/calendar/export.ics` (one-off download), documented in the OpenAPI document. The feed has its own per-IP limit (`CALENDAR_FEED_RATE_LIMIT`, default 600 a minute); malformed tokens count towards the failed-auth limit, but unknown ones do not, so stale subscriptions polled from Google's or Microsoft's shared IPs cannot block those IPs
 - "Download .ics" in the Export menu of the Tasks and Exams pages
 - `supabase_migrations_003_rollback.sql`; CI applies, re-runs and rolls back migration 003 and checks its Row Level Security
+- Playwright tests that fail if any route scrolls sideways at 375px in light or dark mode, plus checks for tap targets, focus rings and on-screen menus
 
 ### Changed
 
@@ -19,7 +20,21 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
-- The toast dismiss button had no accessible name
+- UI and UX problems found in a screenshot audit of every route at 375, 768 and 1280px, in light and dark mode, with empty, realistic and long data ([docs/ui-audit.md](docs/ui-audit.md)):
+  - The sign-in, sign-up and password pages scroll on short screens; the sign-up Google button and "Sign in instead" link were unreachable
+  - The task table no longer hides task titles between 768 and 1023px, and the Dashboard, Focus Plan and Chat side columns no longer push the page sideways
+  - Long unbroken titles and course names wrap instead of overflowing
+  - The notification menu and toasts stay on a phone screen; toasts are readable in dark mode and announced to screen readers
+  - Analytics shows an error with a retry when it can't load, instead of reporting low burnout risk, and its "View Focus Plan" button works
+  - A visible keyboard focus ring on every control, and 44px tap targets for the mobile menu, task rows and toast close buttons
+  - The logo and auth-page dividers are readable in dark mode
+  - Due dates are coloured by urgency on phone task rows and the dashboard queue, which no longer marks every task with a red dot
+  - The sidebar drops the "Pro Edition" badge and asks to set up the profile only when it has no name or course; Settings shows the real version
+  - The Analytics velocity chart shows each week's count and has a text alternative, and the exam preparation track is visible at 0%
+  - On phones, sidebar links and the Add page's Task/Exam switch are 44px tall, the switch shows which side is selected, and dashboard stat labels are larger
+  - On phones, the Tasks, Exams and Dashboard header buttons and the exam card links are 44px tall
+  - The logo has a transparent background, so no grey square shows around it, and the phone header uses the same clock mark as the sidebar
+  - Analytics uses plain labels: "Analytics" and "Tasks Completed per Week"
 
 ## [1.2.0] - 2026-10-15
 

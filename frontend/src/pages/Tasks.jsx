@@ -2,7 +2,9 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { Plus, Search, Edit2, Trash2, Check, ChevronDown, ChevronRight, Loader2, AlertTriangle, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
-import { formatRelativeDate, getDueBadgeClass, formatStatus, daysUntil } from '../utils/dates';
+import { formatRelativeDate, getDueBadgeClass, getDueUrgency, formatStatus, daysUntil } from '../utils/dates';
+
+const URGENCY_TEXT = { urgent: 'text-error', soon: 'text-warning', later: 'text-text-3', none: 'text-text-3' };
 import { exportTasksCSV, exportTasksPDF } from '../utils/export';
 import { downloadCalendar } from '../api/calendar';
 import SubtaskList from '../components/SubtaskList';
@@ -96,7 +98,7 @@ export default function Tasks() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setShowExport(!showExport)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs min-w-[44px] min-h-[44px] justify-center sm:min-w-0 sm:min-h-0"
               >
                 <Download className="w-[13px] h-[13px]" />
                 <span className="sr-only sm:not-sr-only">Export</span>
@@ -120,7 +122,7 @@ export default function Tasks() {
           )}
           <button
             onClick={() => navigate('/add')}
-            className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer min-w-[44px] min-h-[44px] justify-center sm:min-w-0 sm:min-h-0"
           >
             <Plus className="w-[13px] h-[13px]" />
             <span className="sr-only sm:not-sr-only">Add Task</span>
@@ -187,14 +189,14 @@ export default function Tasks() {
         ) : (
           <div className="bg-white border border-border rounded-r shadow-xs overflow-hidden">
             {/* Table Header */}
-            <div className="grid grid-cols-[32px_1fr_36px] md:grid-cols-[32px_1fr_100px_80px_90px_90px_60px] py-2.5 px-3 md:px-4 bg-bg border-b border-border text-[11px] font-bold uppercase tracking-[0.06em] text-text-3 gap-2 items-center">
+            <div className="grid grid-cols-[32px_1fr_36px] lg:grid-cols-[32px_minmax(0,1fr)_100px_80px_90px_90px_60px] py-2.5 px-3 lg:px-4 bg-bg border-b border-border text-[11px] font-bold uppercase tracking-[0.06em] text-text-3 gap-2 items-center">
               <div></div>
               <div>Task</div>
-              <div className="hidden md:block">Due</div>
-              <div className="hidden md:block">Effort</div>
-              <div className="hidden md:block">Weight</div>
-              <div className="hidden md:block">Status</div>
-              <div className="hidden md:block"></div>
+              <div className="hidden lg:block">Due</div>
+              <div className="hidden lg:block">Effort</div>
+              <div className="hidden lg:block">Weight</div>
+              <div className="hidden lg:block">Status</div>
+              <div className="hidden lg:block"></div>
             </div>
 
             {/* Active Tasks */}
@@ -207,13 +209,13 @@ export default function Tasks() {
                 <div key={task.id}>
                   <div
                     onClick={() => setExpandedRow(expandedRow === task.id ? null : task.id)}
-                    className={`grid grid-cols-[32px_1fr_36px] md:grid-cols-[32px_1fr_100px_80px_90px_90px_60px] py-3 px-3 md:px-4 border-b border-border items-center gap-2 cursor-pointer transition-colors ${expandedRow === task.id ? 'bg-primary-faint' : 'hover:bg-bg'}`}
+                    className={`grid grid-cols-[32px_1fr_36px] lg:grid-cols-[32px_minmax(0,1fr)_100px_80px_90px_90px_60px] py-3 px-3 lg:px-4 border-b border-border items-center gap-2 cursor-pointer transition-colors ${expandedRow === task.id ? 'bg-primary-faint' : 'hover:bg-bg'}`}
                   >
                     <button
                       type="button"
                       aria-label={isDone ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
                       onClick={e => { e.stopPropagation(); toggleComplete(task); }}
-                      className={`w-[17px] h-[17px] p-0 rounded-full border-[1.5px] shrink-0 mt-[2px] flex items-center justify-center transition-colors cursor-pointer ${isDone ? 'border-primary bg-primary' : 'border-border2 bg-white hover:border-primary hover:bg-primary-light'}`}
+                      className={`relative before:absolute before:-inset-[14px] before:content-[''] w-[17px] h-[17px] p-0 rounded-full border-[1.5px] shrink-0 mt-[2px] flex items-center justify-center transition-colors cursor-pointer ${isDone ? 'border-primary bg-primary' : 'border-border2 bg-white hover:border-primary hover:bg-primary-light'}`}
                     >
                       {isDone && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
                     </button>
@@ -221,19 +223,19 @@ export default function Tasks() {
                       <div className={`text-[13.5px] font-semibold whitespace-nowrap overflow-hidden text-ellipsis ${isDone ? 'line-through text-text-3' : 'text-text-1'}`}>{task.title}</div>
                       <div className="text-[11.5px] text-text-3 mt-0.5">
                         {task.course_code && <span>{task.course_code}</span>}
-                        <span className="hidden md:inline">{task.subtasks_count > 0 ? ` · ${task.subtasks_count} subtasks` : ''}</span>
-                        <span className="md:hidden"> · <span className={`font-semibold ${dueBadge.includes('EF') ? 'text-[#B91C1C]' : dueBadge.includes('D97') ? 'text-[#B45309]' : 'text-text-3'}`}>{rel}</span></span>
+                        <span className="hidden lg:inline">{task.subtasks_count > 0 ? ` · ${task.subtasks_count} subtasks` : ''}</span>
+                        <span className="lg:hidden">{task.course_code ? ' · ' : ''}<span className={`font-semibold ${URGENCY_TEXT[getDueUrgency(task.due_date)]}`}>{rel}</span></span>
                       </div>
                     </div>
-                    <div className="hidden md:flex">
+                    <div className="hidden lg:flex">
                       <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full tracking-[0.01em] ${dueBadge}`}>{rel}</span>
                     </div>
-                    <div className="hidden md:block text-[12.5px] text-text-1 font-semibold">{task.estimated_hours ? `${task.estimated_hours} hrs` : '—'}</div>
-                    <div className="hidden md:block text-[12.5px] text-text-1 font-semibold">{task.grade_weight ? `${task.grade_weight}%` : '—'}</div>
-                    <div className="hidden md:flex">
+                    <div className="hidden lg:block text-[12.5px] text-text-1 font-semibold">{task.estimated_hours ? `${task.estimated_hours} hrs` : '—'}</div>
+                    <div className="hidden lg:block text-[12.5px] text-text-1 font-semibold">{task.grade_weight ? `${task.grade_weight}%` : '—'}</div>
+                    <div className="hidden lg:flex">
                       <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full tracking-[0.01em] ${statusBadge}`}>{formatStatus(task.status)}</span>
                     </div>
-                    <div className="hidden md:flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
+                    <div className="hidden lg:flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
                       <button
                         className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-primary-light hover:text-primary"
                         onClick={() => navigate(`/add?edit=${task.id}`)}
@@ -249,11 +251,11 @@ export default function Tasks() {
                         <Trash2 className="w-[13px] h-[13px]" />
                       </button>
                     </div>
-                    <div className="md:hidden flex justify-end" onClick={e => e.stopPropagation()}>
+                    <div className="lg:hidden flex justify-end" onClick={e => e.stopPropagation()}>
                       <button
                         aria-label={expandedRow === task.id ? 'Hide details' : 'Show details'}
                         aria-expanded={expandedRow === task.id}
-                        className="w-[28px] h-[28px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 hover:bg-primary-light hover:text-primary"
+                        className="w-[44px] h-[44px] shrink-0 -mr-2 rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 hover:bg-primary-light hover:text-primary"
                         onClick={() => setExpandedRow(expandedRow === task.id ? null : task.id)}
                       >
                         {expandedRow === task.id ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
@@ -309,35 +311,35 @@ export default function Tasks() {
                 {done.map(task => (
                   <div
                     key={task.id}
-                    className="grid grid-cols-[32px_1fr_36px] md:grid-cols-[32px_1fr_100px_80px_90px_90px_60px] py-3 px-3 md:px-4 border-b border-border items-center gap-2 cursor-pointer transition-colors hover:bg-bg opacity-[0.55]"
+                    className="grid grid-cols-[32px_1fr_36px] lg:grid-cols-[32px_minmax(0,1fr)_100px_80px_90px_90px_60px] py-3 px-3 lg:px-4 border-b border-border items-center gap-2 cursor-pointer transition-colors hover:bg-bg opacity-[0.55]"
                     onClick={() => toggleComplete(task)}
                   >
                     <button
                       type="button"
                       aria-label={`Mark "${task.title}" as not done`}
                       onClick={e => { e.stopPropagation(); toggleComplete(task); }}
-                      className="w-[17px] h-[17px] p-0 rounded-full border-[1.5px] border-primary bg-primary shrink-0 mt-[2px] flex items-center justify-center cursor-pointer"
+                      className="relative before:absolute before:-inset-[14px] before:content-[''] w-[17px] h-[17px] p-0 rounded-full border-[1.5px] border-primary bg-primary shrink-0 mt-[2px] flex items-center justify-center cursor-pointer"
                     >
                       <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                     </button>
                     <div className="min-w-0 pr-2">
                       <div className="text-[13.5px] font-semibold text-text-3 line-through whitespace-nowrap overflow-hidden text-ellipsis">{task.title}</div>
                       <div className="text-[11.5px] text-text-3 mt-0.5">
-                        {task.course_code && <span className="hidden md:inline">{task.course_code} · </span>}
-                        <span className="hidden md:inline">completed</span>
-                        <span className="md:hidden text-[#15803D] font-semibold">Done</span>
+                        {task.course_code && <span className="hidden lg:inline">{task.course_code} · </span>}
+                        <span className="hidden lg:inline">completed</span>
+                        <span className="lg:hidden text-[#15803D] font-semibold">Done</span>
                       </div>
                     </div>
-                    <div className="hidden md:flex text-[12.5px] text-text-3">{task.due_date ? new Date(task.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}</div>
-                    <div className="hidden md:block text-[12.5px] text-text-3">{task.estimated_hours ? `${task.estimated_hours} hrs` : '—'}</div>
-                    <div className="hidden md:block text-[12.5px] text-text-3">{task.grade_weight ? `${task.grade_weight}%` : '—'}</div>
-                    <div className="hidden md:flex">
+                    <div className="hidden lg:flex text-[12.5px] text-text-3">{task.due_date ? new Date(task.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}</div>
+                    <div className="hidden lg:block text-[12.5px] text-text-3">{task.estimated_hours ? `${task.estimated_hours} hrs` : '—'}</div>
+                    <div className="hidden lg:block text-[12.5px] text-text-3">{task.grade_weight ? `${task.grade_weight}%` : '—'}</div>
+                    <div className="hidden lg:flex">
                       <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F0FDF4] text-[#15803D] tracking-[0.01em]">Done</span>
                     </div>
-                    <div className="hidden md:flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
+                    <div className="hidden lg:flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
                       <button title="Delete" className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#B91C1C]" onClick={e => handleDelete(e, task.id)}><Trash2 className="w-[13px] h-[13px]" /></button>
                     </div>
-                    <div className="md:hidden"></div>
+                    <div className="lg:hidden"></div>
                   </div>
                 ))}
               </>

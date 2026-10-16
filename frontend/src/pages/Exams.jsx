@@ -58,7 +58,7 @@ export default function Exams() {
             <div className="relative" ref={exportRef}>
               <button
                 onClick={() => setShowExport(!showExport)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs min-w-[44px] min-h-[44px] justify-center sm:min-w-0 sm:min-h-0"
               >
                 <Download className="w-[13px] h-[13px]" />
                 <span className="sr-only sm:not-sr-only">Export</span>
@@ -82,7 +82,7 @@ export default function Exams() {
           )}
           <button
             onClick={() => navigate('/add?tab=exam')}
-            className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer min-w-[44px] min-h-[44px] justify-center sm:min-w-0 sm:min-h-0"
           >
             <Plus className="w-[13px] h-[13px]" />
             <span className="sr-only sm:not-sr-only">Add Exam</span>
@@ -126,13 +126,10 @@ export default function Exams() {
                         </div>
                       </div>
 
-                      <div className="h-[5px] bg-bg rounded-[3px] overflow-hidden my-2.5">
+                      <div className="h-[5px] bg-border2 rounded-[3px] overflow-hidden my-2.5">
                         <div className="h-full rounded-[3px] bg-primary transition-[width] duration-300" style={{ width: `${prep}%` }}></div>
                       </div>
-                      <div className="flex justify-between text-[11px] text-text-3 mb-3.5">
-                        <span>{prep}% prepared</span>
-                        <span>Exam day</span>
-                      </div>
+                      <div className="text-[11px] text-text-3 mb-3.5">Revision {prep}% done</div>
 
                       <div className="flex items-center justify-between mb-3.5 pb-3.5 border-b border-border">
                         <span className="text-[12px] font-semibold text-text-2">Confidence</span>
@@ -166,7 +163,7 @@ export default function Exams() {
                       {/* Subtasks toggle */}
                       <button
                         onClick={() => setExpandedExam(expandedExam === exam.id ? null : exam.id)}
-                        className="mt-2 w-full flex items-center justify-center gap-1 text-[11.5px] text-text-3 hover:text-primary transition-colors cursor-pointer bg-transparent border-none py-1"
+                        className="mt-1 w-full min-h-[44px] flex items-center justify-center gap-1 text-[11.5px] text-text-3 hover:text-primary transition-colors cursor-pointer bg-transparent border-none py-1"
                       >
                         {expandedExam === exam.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                         {expandedExam === exam.id ? 'Hide' : 'Show'} Revision Subtasks
@@ -176,7 +173,7 @@ export default function Exams() {
                         <SubtaskList parentId={exam.id} parentType="exam" />
                       )}
 
-                      <button onClick={e => handleDelete(e, exam.id)} className="mt-1 w-full text-[11.5px] text-text-3 hover:text-[#B91C1C] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
+                      <button onClick={e => handleDelete(e, exam.id)} className="w-full min-h-[44px] text-[11.5px] text-text-3 hover:text-[#B91C1C] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
                     </div>
                   );
                 })}
