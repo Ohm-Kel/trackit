@@ -3,20 +3,24 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
 import { renderApp } from '../test/renderApp';
+import { UPDATE_CHECK_INTERVAL_MS } from './updateChecks';
 import { inDays, task } from '../test/fakeApi';
 
 vi.mock('../lib/supabaseClient', () => import('../test/fakeSupabase'));
 
 // The service worker registration hook, driven by each test.
-const sw = vi.hoisted(() => ({ needRefresh: false, updateServiceWorker: null }));
+const sw = vi.hoisted(() => ({ needRefresh: false, updateServiceWorker: null, options: null }));
 vi.mock('virtual:pwa-register/react', async () => {
   const { useState } = await import('react');
   return {
-    useRegisterSW: () => ({
-      needRefresh: useState(sw.needRefresh),
-      offlineReady: useState(false),
-      updateServiceWorker: sw.updateServiceWorker,
-    }),
+    useRegisterSW: (options) => {
+      sw.options = options;
+      return {
+        needRefresh: useState(sw.needRefresh),
+        offlineReady: useState(false),
+        updateServiceWorker: sw.updateServiceWorker,
+      };
+    },
   };
 });
 
@@ -53,4 +57,28 @@ describe('update prompt', () => {
     await screen.findByText('Statistics assignment');
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
+
+  it('checks for a new version every hour while online, for apps left open', async () => {
+    sw.needRefresh = false;
+    renderApp('/tasks', { setup: seed });
+    await screen.findByText('Statistics assignment');
+
+    vi.useFakeTimers();
+    const onLine = vi.spyOn(navigator, 'onLine', 'get');
+    try {
+      const registration = { update: vi.fn(async () => {}) };
+      sw.options.onRegisteredSW('/sw.js', registration);
+      vi.advanceTimersByTime(UPDATE_CHECK_INTERVAL_MS);
+      expect(registration.update).toHaveBeenCalledTimes(1);
+
+      onLine.mockReturnValue(false);
+      vi.advanceTimersByTime(UPDATE_CHECK_INTERVAL_MS);
+      expect(registration.update).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+      onLine.mockRestore();
+    }
+  });
 });
+

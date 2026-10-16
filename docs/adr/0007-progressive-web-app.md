@@ -40,6 +40,9 @@ shown to the next person who opens the app.
   `clientsClaim`). When a new version is waiting, `UpdatePrompt.jsx` offers
   "Reload" or "Later". Swapping code under an open page could mix chunk
   versions or lose a half-written task.
+- Browsers check for a new service worker when the app is navigated to. An
+  installed app can stay open for days without a navigation, so the app
+  also checks every hour while online.
 
 ### Signed-in data offline
 

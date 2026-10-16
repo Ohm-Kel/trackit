@@ -1,5 +1,6 @@
 import { RefreshCw } from 'lucide-react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { checkForUpdatesPeriodically } from './updateChecks';
 
 /**
  * Registers the service worker and, when a new version has been downloaded,
@@ -10,7 +11,7 @@ export default function UpdatePrompt() {
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
-  } = useRegisterSW();
+  } = useRegisterSW({ onRegisteredSW: checkForUpdatesPeriodically });
 
   if (!needRefresh) return null;
   return (
