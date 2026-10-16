@@ -1,8 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import 'fake-indexeddb/auto';
 import { afterEach, vi } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { onlineManager } from '@tanstack/react-query';
+
+// Pages are lazy-loaded, so the first test to open one waits for Vite to
+// compile it. The 1s default for findBy*/waitFor is too tight on a cold run.
+configure({ asyncUtilTimeout: 5000 });
 
 afterEach(async () => {
   cleanup();
