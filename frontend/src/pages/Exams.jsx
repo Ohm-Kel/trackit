@@ -6,6 +6,7 @@ import { daysUntil } from '../utils/dates';
 import { exportExamsCSV, exportExamsPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
 import { ExamsSkeleton } from '../components/Skeleton';
+import { useToast } from '../components/Toast';
 
 function confidenceStyle(level) {
   const l = (level || '').toLowerCase();
@@ -15,6 +16,7 @@ function confidenceStyle(level) {
 }
 
 export default function Exams() {
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const { data: exams = [], isLoading } = useExams();
   const updateExam = useUpdateExam();
@@ -36,7 +38,7 @@ export default function Exams() {
 
   function handleDelete(e, id) {
     e.stopPropagation();
-    if (window.confirm('Remove this exam?')) deleteExam.mutate(id);
+    if (window.confirm('Remove this exam?')) deleteExam.mutate(id, { onError: err => addToast(err.message, { type: 'error', title: "Couldn't remove the exam" }) });
   }
 
   if (isLoading) return <ExamsSkeleton />;
@@ -58,7 +60,7 @@ export default function Exams() {
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
               >
                 <Download className="w-[13px] h-[13px]" />
-                <span className="hidden sm:inline">Export</span>
+                <span className="sr-only sm:not-sr-only">Export</span>
               </button>
               {showExport && (
                 <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-rs shadow-md z-10 py-1 min-w-[140px]">
@@ -73,7 +75,7 @@ export default function Exams() {
             className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
           >
             <Plus className="w-[13px] h-[13px]" />
-            <span className="hidden sm:inline">Add Exam</span>
+            <span className="sr-only sm:not-sr-only">Add Exam</span>
           </button>
         </div>
       </div>
@@ -143,7 +145,7 @@ export default function Exams() {
                         <button
                           onClick={() => {
                             const newPrep = Math.min(100, prep + 10);
-                            updateExam.mutate({ id: exam.id, updates: { preparation_percent: newPrep } });
+                            updateExam.mutate({ id: exam.id, updates: { preparation_percent: newPrep } }, { onError: err => addToast(err.message, { type: 'error', title: "Couldn't update the exam" }) });
                           }}
                           className="flex-1 bg-primary text-white border-none px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-primary-hover transition-colors"
                         >
@@ -164,7 +166,7 @@ export default function Exams() {
                         <SubtaskList parentId={exam.id} parentType="exam" />
                       )}
 
-                      <button onClick={e => handleDelete(e, exam.id)} className="mt-1 w-full text-[11.5px] text-text-3 hover:text-[#EF4444] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
+                      <button onClick={e => handleDelete(e, exam.id)} className="mt-1 w-full text-[11.5px] text-text-3 hover:text-[#B91C1C] transition-colors text-center cursor-pointer bg-transparent border-none py-1">Remove exam</button>
                     </div>
                   );
                 })}

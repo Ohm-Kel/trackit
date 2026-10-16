@@ -5,7 +5,10 @@
 
 function escapeCSV(value) {
   if (value == null) return '';
-  const str = String(value);
+  let str = String(value);
+  // Text starting with these characters runs as a formula in Excel and
+  // Sheets; prefix it so it stays text (OWASP CSV injection guidance).
+  if (typeof value === 'string' && /^[=+\-@\t\r]/.test(str)) str = `'${str}`;
   if (str.includes(',') || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`;
   }
@@ -64,6 +67,27 @@ export function exportExamsCSV(exams) {
 
 // ─── PDF Export (print-based, no dependencies) ───
 
+/**
+ * Escape text for HTML. The print window shares this page's origin, so any
+ * unescaped task or exam text (which can come from an uploaded timetable)
+ * would run as script with access to the user's session.
+ */
+function escapeHTML(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[ch]);
+}
+
+function openPrintWindow(html) {
+  const win = window.open('', '_blank');
+  if (!win) return; // Pop-up blocked.
+  win.document.write(html);
+  win.document.close();
+  win.print();
+}
+
+const STATUS_CLASSES = ['not_started', 'in_progress', 'stuck', 'done'];
+
 function buildPrintHTML(title, tableHeaders, tableRows) {
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   return `
@@ -112,43 +136,38 @@ function buildPrintHTML(title, tableHeaders, tableRows) {
 export function exportTasksPDF(tasks) {
   const headers = ['Title', 'Status', 'Due Date', 'Course', 'Weight', 'Hours'];
   const rows = tasks.map(t => {
-    const status = t.status || 'not_started';
+    const status = STATUS_CLASSES.includes(t.status) ? t.status : 'not_started';
     const statusLabel = status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const description = t.description
+      ? `${t.description.substring(0, 60)}${t.description.length > 60 ? '…' : ''}`
+      : '';
     return `<tr>
-      <td><strong>${t.title || ''}</strong>${t.description ? `<br><span style="color:#94A3B8;font-size:10px">${t.description.substring(0, 60)}${t.description.length > 60 ? '…' : ''}</span>` : ''}</td>
+      <td><strong>${escapeHTML(t.title)}</strong>${description ? `<br><span style="color:#94A3B8;font-size:10px">${escapeHTML(description)}</span>` : ''}</td>
       <td><span class="status status-${status}">${statusLabel}</span></td>
       <td>${formatDate(t.due_date) || '—'}</td>
-      <td>${t.course_code || '—'}</td>
-      <td>${t.grade_weight ? `${t.grade_weight}%` : '—'}</td>
-      <td>${t.estimated_hours ? `${t.estimated_hours}h` : '—'}</td>
+      <td>${escapeHTML(t.course_code) || '—'}</td>
+      <td>${t.grade_weight ? `${escapeHTML(t.grade_weight)}%` : '—'}</td>
+      <td>${t.estimated_hours ? `${escapeHTML(t.estimated_hours)}h` : '—'}</td>
     </tr>`;
   });
 
-  const html = buildPrintHTML('My Tasks', headers, rows);
-  const win = window.open('', '_blank');
-  win.document.write(html);
-  win.document.close();
-  win.print();
+  openPrintWindow(buildPrintHTML('My Tasks', headers, rows));
 }
 
 export function exportExamsPDF(exams) {
   const headers = ['Subject', 'Course Code', 'Exam Date', 'Confidence', 'Preparation', 'Topics'];
   const rows = exams.map(e => {
-    const conf = (e.confidence_level || 'medium').toLowerCase();
+    const conf = ['low', 'medium', 'high'].includes(e.confidence_level) ? e.confidence_level : 'medium';
     const confClass = conf === 'high' ? 'status-done' : conf === 'low' ? 'status-stuck' : 'status-in_progress';
     return `<tr>
-      <td><strong>${e.subject || ''}</strong></td>
-      <td>${e.course_code || '—'}</td>
+      <td><strong>${escapeHTML(e.subject)}</strong></td>
+      <td>${escapeHTML(e.course_code) || '—'}</td>
       <td>${formatDate(e.exam_date) || '—'}</td>
       <td><span class="status ${confClass}">${conf.charAt(0).toUpperCase() + conf.slice(1)}</span></td>
-      <td>${e.preparation_percent ?? 0}%</td>
-      <td>${Array.isArray(e.topics) && e.topics.length ? e.topics.join(', ') : '—'}</td>
+      <td>${escapeHTML(e.preparation_percent ?? 0)}%</td>
+      <td>${Array.isArray(e.topics) && e.topics.length ? escapeHTML(e.topics.join(', ')) : '—'}</td>
     </tr>`;
   });
 
-  const html = buildPrintHTML('My Exams', headers, rows);
-  const win = window.open('', '_blank');
-  win.document.write(html);
-  win.document.close();
-  win.print();
+  openPrintWindow(buildPrintHTML('My Exams', headers, rows));
 }

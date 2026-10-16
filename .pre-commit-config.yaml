@@ -28,9 +28,15 @@ repos:
         pass_filenames: false
       - id: frontend-eslint
         name: frontend eslint
-        entry: bash -c 'cd frontend && npx eslint .'
+        entry: bash -c 'cd frontend && npx eslint --max-warnings=0 .'
         language: system
         files: ^frontend/src/.*\.(js|jsx)$
+        pass_filenames: false
+      - id: frontend-tests
+        name: frontend tests
+        entry: bash -c 'cd frontend && npx vitest run'
+        language: system
+        files: ^frontend/src/
         pass_filenames: false
       - id: deps-sync
         name: root/backend dependency sync

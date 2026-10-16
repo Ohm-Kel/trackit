@@ -1,4 +1,3 @@
-const supabase = require('../supabaseClient');
 const { HttpError } = require('../lib/errors');
 
 const URGENT_WINDOW_MS = 4 * 24 * 60 * 60 * 1000;
@@ -41,7 +40,7 @@ function buildSuggestion(userId, openTasks, now = new Date()) {
 
 /** GET /api/notifications */
 exports.getNotifications = async (req, res) => {
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('notifications')
     .select('*')
     .eq('user_id', req.user.id)
@@ -54,7 +53,7 @@ exports.getNotifications = async (req, res) => {
 
 /** PATCH /api/notifications/:id/read */
 exports.markAsRead = async (req, res) => {
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('notifications')
     .update({ read_status: true })
     .eq('id', req.params.id)
@@ -68,7 +67,7 @@ exports.markAsRead = async (req, res) => {
 
 /** PATCH /api/notifications/read-all */
 exports.markAllAsRead = async (req, res) => {
-  const { error } = await supabase
+  const { error } = await req.db
     .from('notifications')
     .update({ read_status: true })
     .eq('user_id', req.user.id)
@@ -81,7 +80,7 @@ exports.markAllAsRead = async (req, res) => {
 /** POST /api/notifications/generate-suggestions */
 exports.generateSuggestions = async (req, res) => {
   const userId = req.user.id;
-  const { data: tasks, error } = await supabase
+  const { data: tasks, error } = await req.db
     .from('tasks')
     .select('title, due_date')
     .eq('user_id', userId)
@@ -94,7 +93,7 @@ exports.generateSuggestions = async (req, res) => {
   if (!suggestion) return res.json({ message: 'No new suggestions needed at this time' });
 
   // Avoid stacking identical unread suggestions.
-  const { data: existing, error: existingError } = await supabase
+  const { data: existing, error: existingError } = await req.db
     .from('notifications')
     .select('id')
     .eq('user_id', userId)
@@ -105,7 +104,7 @@ exports.generateSuggestions = async (req, res) => {
   if (existingError) throw existingError;
   if (existing.length > 0) return res.json({ message: 'No new suggestions needed at this time' });
 
-  const { error: insertError } = await supabase.from('notifications').insert(suggestion);
+  const { error: insertError } = await req.db.from('notifications').insert(suggestion);
   if (insertError) throw insertError;
   return res.json({ message: 'Suggestion generated', suggestion });
 };

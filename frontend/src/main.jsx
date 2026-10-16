@@ -5,6 +5,7 @@ import { inject } from '@vercel/analytics'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { ToastProvider } from './components/Toast'
+import '@fontsource-variable/inter'
 import './index.css'
 import App from './App.jsx'
 

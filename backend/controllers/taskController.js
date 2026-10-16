@@ -1,5 +1,4 @@
 const { z } = require('zod');
-const supabase = require('../supabaseClient');
 const { HttpError } = require('../lib/errors');
 const { validate, throwIfDbError } = require('../lib/validate');
 const { optionalDate } = require('../lib/schemas');
@@ -35,7 +34,7 @@ const NOT_FOUND = 'Task not found';
 
 /** GET /api/tasks */
 exports.getTasks = async (req, res) => {
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('tasks')
     .select('*')
     .eq('user_id', req.user.id)
@@ -47,7 +46,7 @@ exports.getTasks = async (req, res) => {
 
 /** GET /api/tasks/:id */
 exports.getTaskById = async (req, res) => {
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('tasks')
     .select('*')
     .eq('id', req.params.id)
@@ -61,7 +60,7 @@ exports.getTaskById = async (req, res) => {
 /** POST /api/tasks */
 exports.createTask = async (req, res) => {
   const body = validate(createTaskSchema, req.body);
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('tasks')
     .insert([{ ...body, user_id: req.user.id }])
     .select()
@@ -74,7 +73,7 @@ exports.createTask = async (req, res) => {
 /** PATCH /api/tasks/:id */
 exports.updateTask = async (req, res) => {
   const body = validate(updateTaskSchema, req.body);
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('tasks')
     .update(body)
     .eq('id', req.params.id)
@@ -88,7 +87,7 @@ exports.updateTask = async (req, res) => {
 
 /** DELETE /api/tasks/:id */
 exports.deleteTask = async (req, res) => {
-  const { data, error } = await supabase
+  const { data, error } = await req.db
     .from('tasks')
     .delete()
     .eq('id', req.params.id)

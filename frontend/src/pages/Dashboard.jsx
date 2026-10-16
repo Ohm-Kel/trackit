@@ -62,7 +62,7 @@ export default function Dashboard() {
           className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
         >
           <Plus className="w-[13px] h-[13px]" />
-          <span className="hidden sm:inline">Add Task</span>
+          <span className="sr-only sm:not-sr-only">Add Task</span>
         </button>
       </div>
 
@@ -101,13 +101,13 @@ export default function Dashboard() {
         {/* Focus Plan Banner */}
         <div className="bg-primary rounded-r p-5 px-5 md:px-6 mb-5 flex flex-col md:flex-row gap-4 justify-between md:items-center shadow-sm">
           <div>
-            <div className="text-[10px] font-semibold tracking-[0.08em] uppercase text-primary-mid mb-1.5">Today's Focus Plan</div>
+            <div className="text-[10px] font-semibold tracking-[0.08em] uppercase text-[#E0E7FF] mb-1.5">Today's Focus Plan</div>
             <div className="text-[15px] md:text-[17px] font-bold text-white mb-1">
               {priorityQueue.length > 0
                 ? `${priorityQueue.length} task${priorityQueue.length !== 1 ? 's' : ''} recommended today`
                 : "You're all caught up! 🎉"}
             </div>
-            <div className="text-[12px] text-primary-mid leading-relaxed">
+            <div className="text-[12px] text-[#E0E7FF] leading-relaxed">
               {priorityQueue.length > 0
                 ? `Start with: ${priorityQueue[0]?.title ?? '—'}`
                 : 'No urgent tasks — add something to get started.'}

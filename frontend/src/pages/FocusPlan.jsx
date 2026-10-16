@@ -4,92 +4,19 @@ import { useTasks, useUpdateTask } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
 import { useProfile } from '../hooks/useProfile';
 import { daysUntil } from '../utils/dates';
+import { DAY_NAMES, computeFreeSlots } from '../utils/schedule';
+import { useToast } from '../components/Toast';
 
 function blockColor(task) {
   const d = daysUntil(task.due_date);
   if (d !== null && d < 0) return { border: '#991B1B', bg: 'bg-[#FEF2F2]', text: 'text-[#991B1B]', badgeBg: 'bg-[#FEF2F2]', label: 'OVERDUE', labelClass: 'text-[#991B1B]' };
-  if (d !== null && d <= 1) return { border: '#EF4444', bg: 'bg-[#FEF2F2]', text: 'text-[#EF4444]', badgeBg: 'bg-[#FEF2F2]', label: 'Due Today/Tomorrow', labelClass: 'text-[#EF4444]' };
-  if (d !== null && d <= 4) return { border: '#D97706', bg: 'bg-[#FFFBEB]', text: 'text-[#D97706]', badgeBg: 'bg-[#FFFBEB]', label: `Due in ${d} days`, labelClass: 'text-[#D97706]' };
+  if (d !== null && d <= 1) return { border: '#EF4444', bg: 'bg-[#FEF2F2]', text: 'text-[#B91C1C]', badgeBg: 'bg-[#FEF2F2]', label: 'Due Today/Tomorrow', labelClass: 'text-[#B91C1C]' };
+  if (d !== null && d <= 4) return { border: '#D97706', bg: 'bg-[#FFFBEB]', text: 'text-[#B45309]', badgeBg: 'bg-[#FFFBEB]', label: `Due in ${d} days`, labelClass: 'text-[#B45309]' };
   return { border: null, bg: 'bg-white', text: 'text-primary', badgeBg: 'bg-primary-light', label: `Due in ${d ?? '—'} days`, labelClass: 'text-primary' };
 }
 
-// Default time slots when no schedule is uploaded
-const DEFAULT_SLOTS = [
-  { label: 'Morning', time: '9:00 AM – 11:00 AM', start: 9, end: 11 },
-  { label: 'Afternoon', time: '2:00 PM – 4:00 PM', start: 14, end: 16 },
-  { label: 'Evening', time: '6:00 PM – 8:00 PM', start: 18, end: 20 },
-];
-
-const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
-/**
- * Compute free time slots for today based on the user's uploaded weekly schedule.
- * If no schedule exists, falls back to DEFAULT_SLOTS.
- */
-function computeFreeSlots(schedule) {
-  if (!schedule) return DEFAULT_SLOTS;
-
-  const today = DAY_NAMES[new Date().getDay()];
-  const classes = schedule[today];
-
-  if (!classes || !Array.isArray(classes) || classes.length === 0) {
-    // Free all day
-    return DEFAULT_SLOTS;
-  }
-
-  // Parse class times into numbers
-  const busy = classes
-    .map(c => ({
-      start: parseTime(c.start),
-      end: parseTime(c.end),
-      subject: c.subject || '',
-    }))
-    .filter(c => c.start !== null && c.end !== null)
-    .sort((a, b) => a.start - b.start);
-
-  // Find free windows between 8:00 and 21:00
-  const FREE_START = 8;
-  const FREE_END = 21;
-  const MIN_SLOT_HOURS = 1.5;
-  const freeSlots = [];
-
-  let cursor = FREE_START;
-  for (const block of busy) {
-    if (block.start > cursor && (block.start - cursor) >= MIN_SLOT_HOURS) {
-      freeSlots.push({ start: cursor, end: block.start });
-    }
-    cursor = Math.max(cursor, block.end);
-  }
-  if (cursor < FREE_END && (FREE_END - cursor) >= MIN_SLOT_HOURS) {
-    freeSlots.push({ start: cursor, end: FREE_END });
-  }
-
-  if (freeSlots.length === 0) return DEFAULT_SLOTS;
-
-  return freeSlots.slice(0, 4).map(slot => ({
-    label: slot.start < 12 ? 'Morning' : slot.start < 17 ? 'Afternoon' : 'Evening',
-    time: `${formatHour(slot.start)} – ${formatHour(slot.end)}`,
-    start: slot.start,
-    end: slot.end,
-  }));
-}
-
-function parseTime(str) {
-  if (!str) return null;
-  const parts = str.split(':');
-  if (parts.length < 2) return null;
-  return parseInt(parts[0], 10) + parseInt(parts[1], 10) / 60;
-}
-
-function formatHour(h) {
-  const hr = Math.floor(h);
-  const min = Math.round((h - hr) * 60);
-  const suffix = hr >= 12 ? 'PM' : 'AM';
-  const display = hr > 12 ? hr - 12 : hr === 0 ? 12 : hr;
-  return `${display}:${String(min).padStart(2, '0')} ${suffix}`;
-}
-
 export default function FocusPlan() {
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const { data: tasks = [], isLoading } = useTasks();
   const { data: exams = [] } = useExams();
@@ -131,7 +58,10 @@ export default function FocusPlan() {
 
   function toggleDone(task) {
     const isDone = task.status === 'done';
-    updateTask.mutate({ id: task.id, updates: { status: isDone ? 'not_started' : 'done' } });
+    updateTask.mutate(
+      { id: task.id, updates: { status: isDone ? 'not_started' : 'done' } },
+      { onError: err => addToast(err.message, { type: 'error', title: "Couldn't update the task" }) },
+    );
   }
 
   return (
@@ -231,6 +161,11 @@ export default function FocusPlan() {
                   <Plus className="w-3 h-3" /> Add Task
                 </button>
               </div>
+            ) : freeSlots.length === 0 ? (
+              <div className="bg-white border border-border rounded-r p-6 text-center shadow-xs">
+                <div className="text-[14px] font-semibold text-text-1">No free study window today</div>
+                <div className="text-[12.5px] text-text-3 mt-1">Your classes fill the day. Your tasks are still listed on the right; plan them for tomorrow.</div>
+              </div>
             ) : (
               <div className="relative border-l-2 border-border ml-3 pl-6 pb-4">
                 {plannedTasks.map((task, idx) => {
@@ -249,19 +184,24 @@ export default function FocusPlan() {
                         style={border ? { borderColor: `${border}33`, borderLeftColor: border, borderLeftWidth: '3px' } : {}}
                       >
                         <div className="flex items-start gap-3">
-                          <div onClick={() => toggleDone(task)} className="cursor-pointer mt-0.5 shrink-0">
+                          <button
+                            type="button"
+                            aria-label={isDone ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
+                            onClick={() => toggleDone(task)}
+                            className="p-0 bg-transparent border-none cursor-pointer mt-0.5 shrink-0"
+                          >
                             {isDone
                               ? <CheckCircle2 className="w-[18px] h-[18px] text-primary" />
                               : <Circle className="w-[18px] h-[18px] text-text-3 hover:text-primary transition-colors hover:fill-primary-faint" />
                             }
-                          </div>
+                          </button>
                           <div className="flex-1 min-w-0">
                             <div className={`text-[14px] font-bold ${isDone ? 'text-text-3' : 'text-text-1'}`}>{task.title}</div>
                             <div className={`text-[12px] text-text-3 mb-2 flex gap-2 flex-wrap`}>
                               <span className={`font-semibold ${labelClass}`}>{label}</span>
                               {task.course_code && <span>· {task.course_code}</span>}
                               {task.estimated_hours && <span>· {task.estimated_hours} hrs</span>}
-                              {task.status === 'stuck' && <span className="text-[#EF4444] font-semibold">· Stuck</span>}
+                              {task.status === 'stuck' && <span className="text-[#B91C1C] font-semibold">· Stuck</span>}
                             </div>
                             {task.description && !isDone && (
                               <div className={`text-[13px] text-text-2 px-3 py-2 rounded-rs border ${border ? 'bg-white border-border2' : 'bg-bg border-border2'}`}>
@@ -318,7 +258,7 @@ export default function FocusPlan() {
                 <>
                   <div className="text-[13px] text-text-2 leading-relaxed mb-3">
                     You have <strong>{activeTasks.length} active task{activeTasks.length !== 1 ? 's' : ''}</strong>.
-                    {overdueTasks.length > 0 && <span className="text-[#EF4444] font-semibold"> {overdueTasks.length} overdue!</span>}
+                    {overdueTasks.length > 0 && <span className="text-[#B91C1C] font-semibold"> {overdueTasks.length} overdue!</span>}
                     {' '}Most urgent: <strong>{activeTasks[0]?.title}</strong>.
                   </div>
                   <button onClick={() => navigate('/chat')} className="w-full bg-primary text-white text-[12px] font-semibold py-1.5 rounded-[6px] border-none shadow-xs hover:bg-primary-hover transition-colors cursor-pointer">Chat with AI →</button>
@@ -354,7 +294,7 @@ export default function FocusPlan() {
                   return (
                     <div key={exam.id} className="flex items-center justify-between py-1.5 border-b border-border last:border-b-0 text-[12.5px]">
                       <span className="font-medium text-text-1 truncate mr-2">{exam.subject}</span>
-                      <span className={`font-bold shrink-0 ${days <= 3 ? 'text-[#EF4444]' : 'text-primary'}`}>{days}d</span>
+                      <span className={`font-bold shrink-0 ${days <= 3 ? 'text-[#B91C1C]' : 'text-primary'}`}>{days}d</span>
                     </div>
                   );
                 })}

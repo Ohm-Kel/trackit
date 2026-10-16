@@ -40,7 +40,7 @@ export default function NotFound() {
           </button>
         </div>
 
-        <div className="mt-16 text-[12px] text-[#94A3B8] font-semibold uppercase tracking-widest opacity-50">
+        <div className="mt-16 text-[12px] text-[#5E6E84] font-semibold uppercase tracking-widest opacity-50">
           Trackit · AI Deadline Master
         </div>
       </div>

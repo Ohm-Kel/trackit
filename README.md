@@ -23,7 +23,7 @@ Trackit closes that gap in three steps:
 ## Features
 
 - **Timetable extraction**: PDF, PNG, JPG or WebP to exams or a weekly schedule, with row-level validation and a review step before import
-- **Grounded study assistant**: chat with Claude, using the student's tasks and exams as context, with prompt-injection hardening
+- **Grounded study assistant**: chat with Claude, using the student's tasks and exams as context; replies stream in as they are generated, with prompt-injection hardening
 - **Tasks and exams**: due dates, grade weights, effort estimates, confidence levels and subtasks
 - **Focus plan**: a schedule-aware daily plan built around class times
 - **Analytics**: completion velocity, deadline-cluster ("burnout") detection and workload by grade weight
@@ -52,28 +52,32 @@ flowchart LR
     UI -- sign-in --> AUTH
     RT -- notifications --> UI
     API -- verify token --> AUTH
-    API -- queries scoped to user_id --> DB
-    API -- chat and forced tool use --> CLAUDE
+    API -- queries as the user, RLS applies --> DB
+    API -- streamed chat and forced tool use --> CLAUDE
 ```
 
 - The **frontend** signs in with Supabase Auth and calls the API with the user's access token. It reads notifications directly through Supabase Realtime, protected by Row Level Security.
-- The **API** verifies every token, validates every request with Zod, scopes every query to the signed-in user, and is the only component holding the Anthropic and Supabase service keys.
-- **AI calls** are rate-limited per user. Chat history sent to the model is capped, and token usage is logged.
+- The **API** verifies every token, validates every request with Zod, and queries Supabase as the signed-in user, so Row Level Security applies on top of explicit `user_id` filters. It is the only component holding the Anthropic and Supabase service keys.
+- The **frontend** is served with a strict Content-Security-Policy, and CI audits production dependencies, with Dependabot proposing updates weekly.
+- **AI calls** are rate-limited per user, with counters shared across serverless instances in Postgres. Every other route has a generous per-user limit, and failed authentication is limited per IP. Chat history sent to the model is capped, and token usage is logged.
 
 Key decisions are recorded as ADRs in [`docs/adr`](docs/adr):
 [structured output through tool use](docs/adr/0001-structured-output-via-tool-use.md),
-[rate limiting AI endpoints](docs/adr/0002-rate-limit-ai-endpoints.md),
-[the API as the authorisation boundary](docs/adr/0003-api-as-authorization-boundary.md).
+[rate limiting AI endpoints with shared counters](docs/adr/0002-rate-limit-ai-endpoints.md),
+[the API as the authorisation boundary, with RLS on API queries](docs/adr/0003-api-as-authorization-boundary.md),
+[streaming chat with server-sent events](docs/adr/0004-stream-chat-with-server-sent-events.md),
+[a Content-Security-Policy built from the Supabase URL](docs/adr/0005-frontend-content-security-policy.md).
+Release and rollback steps are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Tech stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 19, Vite 7, Tailwind CSS 4, TanStack React Query 5, React Router 7, Recharts |
+| Frontend | React 19, Vite 7, Tailwind CSS 4, TanStack React Query 5, React Router 7 |
 | Backend | Node.js 22, Express 5, Zod 4, pino, helmet, express-rate-limit |
 | AI | Anthropic SDK (Claude Haiku 4.5 by default), vision and PDF input, forced tool use |
 | Data and auth | Supabase Postgres with Row Level Security, Supabase Auth and Realtime |
-| Quality | Jest and Supertest (102 tests, 95% line coverage), ESLint, Prettier, pre-commit, GitHub Actions |
+| Quality | Jest and Supertest (121 backend tests, 95% line coverage), Vitest and React Testing Library (124 frontend tests, 77% line coverage), Playwright end-to-end and axe accessibility checks, SQL RLS checks, ESLint, Prettier, pre-commit, GitHub Actions |
 | Delivery | Vercel (frontend and serverless API), Docker and Docker Compose |
 
 ## Getting started
@@ -96,7 +100,7 @@ cd trackit
 
 ### 2. Set up the database
 
-In the Supabase SQL editor, run `supabase_schema.sql`, then `supabase_migrations.sql`. They create the tables, Row Level Security policies and the trigger that creates a profile on sign-up.
+In the Supabase SQL editor, run `supabase_schema.sql`, then `supabase_migrations.sql`, then `supabase_migrations_002.sql` (see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for Auth settings and rollback). They create the tables, Row Level Security policies, the trigger that creates a profile on sign-up, and the shared rate-limit counters.
 
 ### 3. Configure environment variables
 
@@ -107,11 +111,14 @@ cp frontend/.env.example frontend/.env   # Supabase URL and anon key
 
 | Variable | Where | Purpose |
 |---|---|---|
-| `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | backend | Database access (service role; server only) |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` | backend | Token verification and rate-limit counters (service role; server only) |
+| `SUPABASE_ANON_KEY` | backend | Queries run as the signed-in user so Row Level Security applies |
 | `ANTHROPIC_API_KEY` | backend | Claude API |
 | `ANTHROPIC_MODEL` | backend | Optional model override |
 | `ALLOWED_ORIGINS` | backend | Comma-separated CORS allowlist |
 | `AI_CHAT_RATE_LIMIT`, `AI_UPLOAD_RATE_LIMIT` | backend | Requests per user per hour (defaults 30 and 10) |
+| `API_RATE_LIMIT_PER_MINUTE`, `AUTH_FAILURE_LIMIT` | backend | General per-user limit (300/min) and failed-auth limit per IP (50 per 15 min) |
+| `RATE_LIMIT_STORE` | backend | `supabase` (default, shared across instances) or `memory` |
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | frontend | Public Supabase client config |
 | `VITE_API_URL` | frontend | API base URL in development |
 
@@ -138,6 +145,15 @@ npm test                 # unit and integration tests
 npm run test:coverage    # with coverage (85% line gate)
 npm run lint && npm run format:check
 npm run eval -- --oracle # evaluation harness self-check (no API calls)
+
+cd ../frontend
+npm test                 # Vitest and React Testing Library, including axe
+npm run test:e2e         # Playwright, production build in Chromium (npx playwright install chromium once)
+npm run lint
+
+cd ..
+# Schema, migrations and RLS policies, against an empty Postgres database
+DATABASE_URL=postgres://postgres@localhost:5432/postgres scripts/db/test.sh
 ```
 
 ## Usage examples
@@ -149,6 +165,11 @@ TOKEN=<supabase-access-token>
 
 # Ask the study assistant
 curl -X POST http://localhost:3001/api/chat \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"message": "What should I work on first this week?"}'
+
+# Same question, with the reply streamed as server-sent events
+curl -N -X POST http://localhost:3001/api/chat/stream \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"message": "What should I work on first this week?"}'
 
@@ -185,20 +206,18 @@ trackit/
 │   └── eval/                 # Evaluation dataset, scorer and runner
 ├── frontend/
 │   └── src/                  # Pages, components, hooks, API client
-├── docs/adr/                 # Architecture decision records
-├── scripts/                  # Repository checks
+├── docs/                     # ADRs and the deployment guide
+├── frontend/e2e/             # Playwright end-to-end tests
+├── scripts/                  # Repository checks; db/ holds the RLS test suite
 ├── supabase_schema.sql       # Tables, RLS policies, triggers
 ├── supabase_migrations.sql   # Later additions (subtasks, chat history, schedule)
+├── supabase_migrations_002.sql # Rate-limit counters and RLS fixes (v1.2.0)
 └── docker-compose.yml
 ```
 
 ## Roadmap
 
 - Add anonymised real-world timetables (scans, photos, multi-page PDFs) as evaluation set v2
-- Move rate-limit counters to a shared store so limits hold across serverless instances
-- Forward the user's JWT to Supabase so Row Level Security also applies to API queries
-- Stream chat replies for faster perceived response time
-- Frontend component tests with Vitest and React Testing Library
 
 ## Contributors
 

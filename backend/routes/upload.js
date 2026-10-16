@@ -1,10 +1,10 @@
 const express = require('express');
 const uploadController = require('../controllers/uploadController');
-const authMiddleware = require('../middleware/authMiddleware');
+const requireUser = require('../middleware/requireUser');
 const { uploadLimiter } = require('../middleware/rateLimit');
 
 const router = express.Router();
-router.use(authMiddleware);
+router.use(requireUser);
 
 router.post('/parse', uploadLimiter, uploadController.parseUpload);
 router.post('/import-exams', uploadController.importExams);

@@ -161,6 +161,27 @@ function buildOpenApiDocument() {
           },
         },
       },
+      '/chat/stream': {
+        post: {
+          tags: ['AI'],
+          summary: 'Ask the study assistant and stream the reply as server-sent events',
+          description: [
+            'Same request as `POST /chat`. The reply arrives as server-sent events:',
+            '`delta` with `{ text }` for each fragment, then `done` with `{ reply }` once it',
+            'has been saved, or `error` with `{ error }` if the model fails mid-reply.',
+            'Failures before the first fragment are JSON error responses.',
+          ].join(' '),
+          requestBody: jsonBody(chat.chatRequestSchema),
+          responses: {
+            200: {
+              description: 'Event stream',
+              content: { 'text/event-stream': { schema: { type: 'string' } } },
+            },
+            ...common,
+            ...aiErrors,
+          },
+        },
+      },
       '/chat/history': {
         get: {
           tags: ['AI'],

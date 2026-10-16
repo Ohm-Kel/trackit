@@ -1,7 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Bell, Check, Trash2, Info, AlertTriangle, Sparkles, Loader2, X } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
+import {
+  fetchNotifications,
+  generateSuggestions,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from '../../api/notifications';
 
 export default function NotificationCenter() {
   const { session } = useAuth();
@@ -10,33 +16,21 @@ export default function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const fetchNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
+    if (!session?.access_token) return;
     try {
-      if (!session?.access_token) return;
-      
-      const res = await fetch('/api/notifications', {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data);
-      }
-
-      // Proactively trigger AI suggestion analysis
-      await fetch('/api/notifications/generate-suggestions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
+      setNotifications(await fetchNotifications());
+      // Proactively trigger AI suggestion analysis.
+      await generateSuggestions();
     } catch (err) {
       console.error('Error fetching notifications:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [session]);
 
   useEffect(() => {
-    fetchNotifications();
+    loadNotifications();
 
     // Set up real-time subscription
     if (session?.user?.id) {
@@ -56,17 +50,12 @@ export default function NotificationCenter() {
         supabase.removeChannel(channel);
       };
     }
-  }, [session]);
+  }, [session, loadNotifications]);
 
   const markAsRead = async (id) => {
     try {
-      const res = await fetch(`/api/notifications/${id}/read`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
-      if (res.ok) {
-        setNotifications(prev => prev.map(n => n.id === id ? { ...n, read_status: true } : n));
-      }
+      await markNotificationRead(id);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read_status: true } : n));
     } catch (err) {
       console.error('Error marking read:', err);
     }
@@ -74,13 +63,8 @@ export default function NotificationCenter() {
 
   const markAllAsRead = async () => {
     try {
-      const res = await fetch('/api/notifications/read-all', {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
-      if (res.ok) {
-        setNotifications(prev => prev.map(n => ({ ...n, read_status: true })));
-      }
+      await markAllNotificationsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, read_status: true })));
     } catch (err) {
       console.error('Error marking all read:', err);
     }
@@ -109,7 +93,9 @@ export default function NotificationCenter() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button 
+      <button
+        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+        aria-expanded={isOpen} 
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full hover:bg-bg transition-colors border-none bg-transparent cursor-pointer group"
       >

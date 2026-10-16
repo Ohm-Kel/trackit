@@ -32,6 +32,26 @@ Treat the API as the authorisation boundary for everything it does:
   explicitly; removing the filter from a handler makes the suite fail.
 - RLS remains a second layer for any client-side access.
 - Alternative considered: forward the user's JWT to Supabase so RLS applies
-  to API queries too. This is stronger defence in depth and is on the
-  roadmap; it needs a per-request Supabase client and a review of the
-  profile auto-repair path, which currently relies on the service role.
+  to API queries too. Adopted in v1.2.0; see the amendment below.
+
+## Amendment (v1.2.0): RLS also applies to API queries
+
+`authMiddleware` now attaches `req.db`, a Supabase client created per request
+with the anon key and the user's access token. Handlers query through it, so
+Postgres applies RLS to every API query as well as the explicit `user_id`
+filters. The service role is kept only for verifying tokens and for the
+rate-limit counters.
+
+- The profile auto-repair path did not need the service role after all: the
+  `users` table already allows a user to insert their own row.
+- Running as the user exposed two policy gaps, fixed in
+  `supabase_migrations_002.sql`: notifications had no INSERT policy, and a
+  subtask could reference another user's task or exam (now blocked by a
+  restrictive policy).
+- `scripts/db/rls-test.sql` runs in CI against Postgres 16 and checks each
+  operation the API performs, plus cross-user reads and writes that must fail.
+- A unit test fails if a controller imports the service-role client.
+- Without `SUPABASE_ANON_KEY` the API falls back to the service role and logs a
+  warning, so existing deployments keep working until the key is added.
+- Cost: one extra client object per request. Creating it makes no network
+  call.

@@ -23,8 +23,9 @@ function errorHandler(err, req, res, _next) {
     return res.status(400).json({ error: 'Request body must be valid JSON' });
   }
 
-  logger.error({ err, method: req.method, path: req.path }, 'Unhandled error');
-  return res.status(500).json({ error: 'Internal server error' });
+  logger.error({ err, requestId: req.id, method: req.method, path: req.path }, 'Unhandled error');
+  // The request ID lets a user's bug report be matched to the server log.
+  return res.status(500).json({ error: 'Internal server error', requestId: req.id });
 }
 
 module.exports = { notFound, errorHandler };

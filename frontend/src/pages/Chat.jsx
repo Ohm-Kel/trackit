@@ -3,7 +3,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
 import { daysUntil } from '../utils/dates';
-import { sendChatMessage, fetchChatHistory, clearChatHistory } from '../api/chat';
+import { streamChatMessage, fetchChatHistory, clearChatHistory } from '../api/chat';
 
 function daysLabel(dateStr) {
   const diff = daysUntil(dateStr);
@@ -21,6 +21,8 @@ function dotColor(task) {
   return '#22C55E';
 }
 
+const clockTime = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
 const INITIAL_GREETING = { role: 'ai', text: 'Hey! I can see your full schedule and workload.\n\nAsk me anything about your tasks, exams, or what to work on next — I\'ll give you the most strategic advice based on deadlines and grade weights.' };
 
 export default function Chat() {
@@ -31,6 +33,10 @@ export default function Chat() {
   const [sending, setSending] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const messagesEndRef = useRef(null);
+  const abortRef = useRef(null);
+
+  // Stop an in-flight reply when leaving the page.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   // Load persisted history on mount
   useEffect(() => {
@@ -69,11 +75,14 @@ export default function Chat() {
   const sendMessage = useCallback(async () => {
     if (!input.trim() || sending) return;
     const userMsg = input;
-    const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const now = clockTime();
     setInput('');
     const userEntry = { role: 'user', text: userMsg, time: now };
     setMessages(m => [...m, userEntry]);
     setSending(true);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
       // Prior turns only: skip the static greeting and local error notices.
@@ -82,12 +91,29 @@ export default function Chat() {
         .filter((m, i) => i > 0 && !m.isError)
         .map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text }));
 
-      const { reply } = await sendChatMessage(userMsg, history);
-      const replyTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-      setMessages(m => [...m, { role: 'ai', text: reply, time: replyTime }]);
+      // Grow a single reply bubble as fragments arrive.
+      const { reply } = await streamChatMessage(userMsg, history, {
+        signal: controller.signal,
+        onDelta: text => setMessages(m => {
+          const last = m[m.length - 1];
+          if (last?.streaming) return [...m.slice(0, -1), { ...last, text: last.text + text }];
+          return [...m, { role: 'ai', text, time: clockTime(), streaming: true }];
+        }),
+      });
+      setMessages(m => {
+        const last = m[m.length - 1];
+        const final = { role: 'ai', text: reply, time: last?.streaming ? last.time : clockTime() };
+        return last?.streaming ? [...m.slice(0, -1), final] : [...m, final];
+      });
     } catch (err) {
-      setMessages(m => [...m, { role: 'ai', text: `Sorry, I couldn't get a response right now. ${err.message}`, time: now, isError: true }]);
+      if (err.name === 'AbortError') return;
+      setMessages(m => {
+        // A partial reply was not saved, so keep it out of future history.
+        const kept = m.map(msg => (msg.streaming ? { ...msg, streaming: false, isError: true } : msg));
+        return [...kept, { role: 'ai', text: `Sorry, I couldn't get a response right now. ${err.message}`, time: now, isError: true }];
+      });
     } finally {
+      if (abortRef.current === controller) abortRef.current = null;
       setSending(false);
     }
   }, [input, sending, messages]);
@@ -126,7 +152,7 @@ export default function Chat() {
         {messages.length > 1 && (
           <button
             onClick={handleClearHistory}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border2 text-text-3 hover:text-[#EF4444] hover:border-[#FCA5A5] rounded-rs text-[11px] font-semibold cursor-pointer transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-border2 text-text-3 hover:text-[#B91C1C] hover:border-[#FCA5A5] rounded-rs text-[11px] font-semibold cursor-pointer transition-all"
             title="Clear chat history"
           >
             <Trash2 className="w-3 h-3" /> Clear
@@ -165,7 +191,7 @@ export default function Chat() {
                 </div>
               ))
             )}
-            {sending && (
+            {sending && !messages[messages.length - 1]?.streaming && (
               <div className="flex gap-2.5 items-start">
                 <div className="w-[30px] h-[30px] rounded-full shrink-0 flex items-center justify-center text-[11px] font-bold bg-primary text-white">T</div>
                 <div className="bg-white border border-border rounded-xl rounded-tl-sm shadow-xs p-3 px-3.5 flex items-center gap-2 text-[13px] text-text-3">
@@ -193,6 +219,7 @@ export default function Chat() {
           {/* Input */}
           <div className="bg-white border-[1.5px] border-border rounded-r p-3 px-3.5 transition-colors focus-within:border-primary shadow-xs">
             <textarea
+              aria-label="Message"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -203,7 +230,7 @@ export default function Chat() {
             />
             <div className="flex justify-between items-center mt-2">
               <span className="text-[11px] text-text-3 hidden sm:block">Enter to send · Shift+Enter for new line</span>
-              <button onClick={sendMessage} disabled={sending || !input.trim()} className="bg-primary hover:bg-primary-hover disabled:opacity-50 border-none w-[30px] h-[30px] rounded-[7px] cursor-pointer flex items-center justify-center transition-colors shrink-0 ml-auto">
+              <button onClick={sendMessage} aria-label="Send message" disabled={sending || !input.trim()} className="bg-primary hover:bg-primary-hover disabled:opacity-50 border-none w-[30px] h-[30px] rounded-[7px] cursor-pointer flex items-center justify-center transition-colors shrink-0 ml-auto">
                 <Send className="w-3 h-3 text-white" />
               </button>
             </div>

@@ -1,58 +1,45 @@
-import { supabase } from '../lib/supabaseClient';
-
-const API_URL = import.meta.env.PROD
-  ? '/api'
-  : import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-
-async function getAuthHeader() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return {};
-  return { Authorization: `Bearer ${session.access_token}` };
-}
+import { apiJson, apiRequest } from './http';
+import { readEvents } from './sse';
 
 /**
- * Send a chat message to the AI and receive a reply.
+ * Send a chat message and stream the reply as it is generated.
  *
  * @param {string} message - The user's current message.
  * @param {Array<{role: 'user'|'assistant', content: string}>} history - Prior turns, excluding `message`.
- * @returns {Promise<{reply: string}>}
+ * @param {{ onDelta?: (text: string) => void, signal?: AbortSignal }} [options]
+ *   `onDelta` receives each fragment of the reply in order.
+ * @returns {Promise<{reply: string}>} The complete reply, once it has been saved.
  */
-export async function sendChatMessage(message, history = []) {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/chat`, {
+export async function streamChatMessage(message, history = [], { onDelta, signal } = {}) {
+  const res = await apiRequest('/chat/stream', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers,
-    },
-    body: JSON.stringify({ message, history }),
+    body: { message, history },
+    headers: { Accept: 'text/event-stream' },
+    signal,
+    fallbackError: 'Failed to get AI response',
   });
+  if (!res.body) throw new Error('Failed to get AI response');
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || 'Failed to get AI response');
+  for await (const { event, data } of readEvents(res.body)) {
+    if (event === 'delta') onDelta?.(data.text);
+    else if (event === 'done') return { reply: data.reply };
+    else if (event === 'error') throw new Error(data.error || 'The AI response was interrupted');
   }
-
-  return res.json();
+  throw new Error('The AI response was interrupted');
 }
 
 /**
- * Load persisted chat history from the database.
+ * Load persisted chat history from the database. Returns [] if it cannot be
+ * loaded, so the chat still opens.
  * @returns {Promise<Array<{role: string, content: string, created_at: string}>>}
  */
-export async function fetchChatHistory() {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/chat/history`, { headers });
-  if (!res.ok) return [];
-  return res.json();
+export function fetchChatHistory() {
+  return apiJson('/chat/history').catch(() => []);
 }
 
 /**
  * Clear all persisted chat history.
  */
-export async function clearChatHistory() {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/chat/history`, { method: 'DELETE', headers });
-  if (!res.ok) throw new Error('Failed to clear history');
-  return res.json();
+export function clearChatHistory() {
+  return apiJson('/chat/history', { method: 'DELETE', fallbackError: 'Failed to clear history' });
 }

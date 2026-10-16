@@ -1,51 +1,17 @@
-import { supabase } from '../lib/supabaseClient';
+import { apiJson } from './http';
 
-const API_URL = import.meta.env.PROD
-  ? '/api'
-  : import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-
-async function getAuthHeader() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return {};
-  return { Authorization: `Bearer ${session.access_token}` };
-}
-
-export async function fetchSubtasks(parentId, parentType = 'task') {
-  const headers = await getAuthHeader();
-  const param = parentType === 'task' ? `task_id=${parentId}` : `exam_id=${parentId}`;
-  const res = await fetch(`${API_URL}/subtasks?${param}`, { headers });
-  if (!res.ok) throw new Error('Failed to fetch subtasks');
-  return res.json();
-}
-
-export async function createSubtask(data) {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/subtasks`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...headers },
-    body: JSON.stringify(data),
+export function fetchSubtasks(parentId, parentType = 'task') {
+  const param = parentType === 'task' ? 'task_id' : 'exam_id';
+  return apiJson(`/subtasks?${param}=${encodeURIComponent(parentId)}`, {
+    fallbackError: 'Failed to fetch subtasks',
   });
-  if (!res.ok) throw new Error('Failed to create subtask');
-  return res.json();
 }
 
-export async function updateSubtask(id, updates) {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/subtasks/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...headers },
-    body: JSON.stringify(updates),
-  });
-  if (!res.ok) throw new Error('Failed to update subtask');
-  return res.json();
-}
+export const createSubtask = (data) =>
+  apiJson('/subtasks', { method: 'POST', body: data, fallbackError: 'Failed to create subtask' });
 
-export async function deleteSubtask(id) {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/subtasks/${id}`, {
-    method: 'DELETE',
-    headers,
-  });
-  if (!res.ok) throw new Error('Failed to delete subtask');
-  return res.json();
-}
+export const updateSubtask = (id, updates) =>
+  apiJson(`/subtasks/${id}`, { method: 'PATCH', body: updates, fallbackError: 'Failed to update subtask' });
+
+export const deleteSubtask = (id) =>
+  apiJson(`/subtasks/${id}`, { method: 'DELETE', fallbackError: 'Failed to delete subtask' });

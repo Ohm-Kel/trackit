@@ -35,6 +35,7 @@ const config = Object.freeze({
 
   supabaseUrl: process.env.SUPABASE_URL,
   supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
+  supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
 
   anthropicApiKey: process.env.ANTHROPIC_API_KEY,
   anthropicModel: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
@@ -45,9 +46,15 @@ const config = Object.freeze({
   allowedOrigins: parseList(process.env.ALLOWED_ORIGINS || 'http://localhost:5173'),
 
   rateLimit: Object.freeze({
+    // 'supabase' shares counters across instances (needs supabase_migrations_002.sql);
+    // 'memory' counts per process. Tests default to memory.
+    store: process.env.RATE_LIMIT_STORE || (nodeEnv === 'test' ? 'memory' : 'supabase'),
     windowMs: parsePositiveInt(process.env.AI_RATE_LIMIT_WINDOW_MS, 60 * 60 * 1000),
     chatMax: parsePositiveInt(process.env.AI_CHAT_RATE_LIMIT, 30),
     uploadMax: parsePositiveInt(process.env.AI_UPLOAD_RATE_LIMIT, 10),
+    apiPerMinute: parsePositiveInt(process.env.API_RATE_LIMIT_PER_MINUTE, 300),
+    authFailuresPerIp: parsePositiveInt(process.env.AUTH_FAILURE_LIMIT, 50),
+    authFailureWindowMs: 15 * 60 * 1000,
   }),
 
   chat: Object.freeze({

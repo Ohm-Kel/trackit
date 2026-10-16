@@ -16,6 +16,16 @@ function formatSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/** Rows the parser could not read and skipped, so the student can check them. */
+function ParseWarnings({ warnings }) {
+  if (!warnings.length) return null;
+  return (
+    <div role="status" className="bg-[#FFFBEB] border border-[#FDE68A] rounded-rs p-3 mb-4 text-[12.5px] text-[#92400E]">
+      {warnings.map(w => <div key={w}>{w} Check the original and add anything missing by hand.</div>)}
+    </div>
+  );
+}
+
 function DayRow({ day, classes }) {
   if (!classes || classes.length === 0) {
     return (
@@ -45,6 +55,7 @@ export default function Upload() {
   const [examError, setExamError] = useState(null);
   const [examImporting, setExamImporting] = useState(false);
   const [examImported, setExamImported] = useState(false);
+  const [examWarnings, setExamWarnings] = useState([]);
   const examInputRef = useRef(null);
 
   // Schedule upload state
@@ -54,6 +65,7 @@ export default function Upload() {
   const [schedError, setSchedError] = useState(null);
   const [schedSaving, setSchedSaving] = useState(false);
   const [schedSaved, setSchedSaved] = useState(false);
+  const [schedWarnings, setSchedWarnings] = useState([]);
   const schedInputRef = useRef(null);
 
   function validateFile(file) {
@@ -74,10 +86,12 @@ export default function Upload() {
     setExamError(null);
     setExamResults(null);
     setExamImported(false);
+    setExamWarnings([]);
     setExamParsing(true);
     try {
       const result = await parseUpload(file, 'exam');
       setExamResults(Array.isArray(result.data) ? result.data : []);
+      setExamWarnings(Array.isArray(result.warnings) ? result.warnings : []);
     } catch (e) {
       setExamError(e.message);
     } finally {
@@ -104,6 +118,7 @@ export default function Upload() {
     setExamResults(null);
     setExamError(null);
     setExamImported(false);
+    setExamWarnings([]);
     if (examInputRef.current) examInputRef.current.value = '';
   }
 
@@ -116,10 +131,12 @@ export default function Upload() {
     setSchedError(null);
     setSchedResults(null);
     setSchedSaved(false);
+    setSchedWarnings([]);
     setSchedParsing(true);
     try {
       const result = await parseUpload(file, 'schedule');
       setSchedResults(result.data && typeof result.data === 'object' ? result.data : null);
+      setSchedWarnings(Array.isArray(result.warnings) ? result.warnings : []);
     } catch (e) {
       setSchedError(e.message);
     } finally {
@@ -145,6 +162,7 @@ export default function Upload() {
     setSchedResults(null);
     setSchedError(null);
     setSchedSaved(false);
+    setSchedWarnings([]);
     if (schedInputRef.current) schedInputRef.current.value = '';
   }
 
@@ -169,6 +187,7 @@ export default function Upload() {
 
             <input
               ref={examInputRef}
+              aria-label="Exam timetable file"
               type="file"
               accept={ACCEPTED}
               className="hidden"
@@ -201,7 +220,7 @@ export default function Upload() {
             ) : examImported ? (
               <div className="animate-[fadeIn_0.2s_ease]">
                 <div className="flex items-center gap-3 bg-[#F0FDF4] p-4 rounded-rs border border-[#BBF7D0] mb-4">
-                  <CheckCircle2 className="w-5 h-5 text-[#16A34A] shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-[#15803D] shrink-0" />
                   <div>
                     <div className="text-[13px] font-bold text-[#166534]">{examResults.length} exam{examResults.length !== 1 ? 's' : ''} imported successfully!</div>
                     <div className="text-[12px] text-[#15803D]">Countdown cards are now live on your Exams page.</div>
@@ -222,7 +241,7 @@ export default function Upload() {
                     <div className="text-[13px] font-bold text-text-1 truncate">{examFile.name}</div>
                     <div className="text-[11px] text-text-3">{formatSize(examFile.size)}</div>
                   </div>
-                  <button onClick={resetExam} className="p-1 text-text-3 hover:text-[#EF4444] bg-transparent border-none cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={resetExam} className="p-1 text-text-3 hover:text-[#B91C1C] bg-transparent border-none cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
 
                 {examResults.length === 0 ? (
@@ -244,6 +263,8 @@ export default function Upload() {
                   </div>
                 )}
 
+                <ParseWarnings warnings={examWarnings} />
+
                 <div className="flex gap-2.5">
                   {examResults.length > 0 && (
                     <button
@@ -262,7 +283,7 @@ export default function Upload() {
 
             {examError && (
               <div className="mt-3 bg-[#FEF2F2] border border-[#FCA5A5] rounded-rs p-3 text-[12.5px] text-[#991B1B] flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#EF4444]" />
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#B91C1C]" />
                 <div>{examError} <button onClick={resetExam} className="text-primary underline bg-transparent border-none cursor-pointer ml-1">Try again</button></div>
               </div>
             )}
@@ -275,6 +296,7 @@ export default function Upload() {
 
             <input
               ref={schedInputRef}
+              aria-label="Class schedule file"
               type="file"
               accept={ACCEPTED}
               className="hidden"
@@ -307,7 +329,7 @@ export default function Upload() {
             ) : schedSaved ? (
               <div className="animate-[fadeIn_0.2s_ease]">
                 <div className="flex items-center gap-3 bg-[#F0FDF4] p-4 rounded-rs border border-[#BBF7D0] mb-4">
-                  <CheckCircle2 className="w-5 h-5 text-[#16A34A] shrink-0" />
+                  <CheckCircle2 className="w-5 h-5 text-[#15803D] shrink-0" />
                   <div>
                     <div className="text-[13px] font-bold text-[#166534]">Schedule saved!</div>
                     <div className="text-[12px] text-[#15803D]">Your free windows are now visible in the Focus Plan.</div>
@@ -328,7 +350,7 @@ export default function Upload() {
                     <div className="text-[13px] font-bold text-text-1 truncate">{schedFile.name}</div>
                     <div className="text-[11px] text-text-3">{formatSize(schedFile.size)}</div>
                   </div>
-                  <button onClick={resetSched} className="p-1 text-text-3 hover:text-[#EF4444] bg-transparent border-none cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={resetSched} className="p-1 text-text-3 hover:text-[#B91C1C] bg-transparent border-none cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
 
                 <div className="bg-primary-faint border border-primary-mid rounded-rs p-4 mb-4">
@@ -337,6 +359,8 @@ export default function Upload() {
                     <DayRow key={day} day={day} classes={schedResults[day]} />
                   ))}
                 </div>
+
+                <ParseWarnings warnings={schedWarnings} />
 
                 <div className="flex gap-2.5">
                   <button
@@ -354,7 +378,7 @@ export default function Upload() {
 
             {schedError && (
               <div className="mt-3 bg-[#FEF2F2] border border-[#FCA5A5] rounded-rs p-3 text-[12.5px] text-[#991B1B] flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#EF4444]" />
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#B91C1C]" />
                 <div>{schedError} <button onClick={resetSched} className="text-primary underline bg-transparent border-none cursor-pointer ml-1">Try again</button></div>
               </div>
             )}

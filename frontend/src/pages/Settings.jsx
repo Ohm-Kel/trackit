@@ -108,8 +108,7 @@ export default function Settings() {
         setTimeout(() => setSaved(false), 2000);
       },
       onError: (err) => {
-        console.error('Error saving profile:', err);
-        addToast('Failed to save profile. Please try again.', { type: 'error' });
+        addToast(err.message, { type: 'error', title: 'Failed to save profile' });
       }
     });
   }
@@ -220,25 +219,25 @@ export default function Settings() {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Full Name</label>
-                      <input type="text" className={inputClass} placeholder="e.g. Kwame Mensah" value={localProfile.name} onChange={e => setLocalProfile(p => ({ ...p, name: e.target.value }))} />
+                      <label htmlFor="settings-full-name" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Full Name</label>
+                      <input id="settings-full-name" type="text" className={inputClass} placeholder="e.g. Kwame Mensah" value={localProfile.name} onChange={e => setLocalProfile(p => ({ ...p, name: e.target.value }))} />
                     </div>
                     <div>
-                      <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Email Address</label>
-                      <input type="email" disabled className={`${inputClass} opacity-60 cursor-not-allowed`} placeholder="you@university.edu" value={localProfile.email} />
+                      <label htmlFor="settings-email-address" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Email Address</label>
+                      <input id="settings-email-address" type="email" disabled className={`${inputClass} opacity-60 cursor-not-allowed`} placeholder="you@university.edu" value={localProfile.email} />
                       <p className="text-[10px] text-text-3 mt-1 italic">Email is managed via your login provider</p>
                     </div>
                     <div>
-                      <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">University / Institution</label>
-                      <input type="text" className={inputClass} placeholder="e.g. University of Ghana" value={localProfile.university} onChange={e => setLocalProfile(p => ({ ...p, university: e.target.value}))} />
+                      <label htmlFor="settings-university-institution" className="text-[12px] font-semibold text-text-2 mb-1.5 block">University / Institution</label>
+                      <input id="settings-university-institution" type="text" className={inputClass} placeholder="e.g. University of Ghana" value={localProfile.university} onChange={e => setLocalProfile(p => ({ ...p, university: e.target.value}))} />
                     </div>
                     <div>
-                      <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course / Program</label>
-                      <input type="text" className={inputClass} placeholder="e.g. BSc Computer Science" value={localProfile.course} onChange={e => setLocalProfile(p => ({ ...p, course: e.target.value }))} />
+                      <label htmlFor="settings-course-program" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Course / Program</label>
+                      <input id="settings-course-program" type="text" className={inputClass} placeholder="e.g. BSc Computer Science" value={localProfile.course} onChange={e => setLocalProfile(p => ({ ...p, course: e.target.value }))} />
                     </div>
                     <div>
-                      <label className="text-[12px] font-semibold text-text-2 mb-1.5 block">Year / Level</label>
-                      <select className={inputClass} value={localProfile.year} onChange={e => setLocalProfile(p => ({ ...p, year: e.target.value }))}>
+                      <label htmlFor="settings-year-level" className="text-[12px] font-semibold text-text-2 mb-1.5 block">Year / Level</label>
+                      <select id="settings-year-level" className={inputClass} value={localProfile.year} onChange={e => setLocalProfile(p => ({ ...p, year: e.target.value }))}>
                         <option value="">Select year…</option>
                         <option>Year 1 / Freshman</option>
                         <option>Year 2 / Sophomore</option>
@@ -261,7 +260,7 @@ export default function Settings() {
                     Save Profile
                   </button>
                   {saved && (
-                    <div className="flex items-center gap-1.5 text-[13px] text-[#16A34A] font-semibold animate-[fadeIn_0.2s_ease]">
+                    <div className="flex items-center gap-1.5 text-[13px] text-[#15803D] font-semibold animate-[fadeIn_0.2s_ease]">
                       <Check className="w-4 h-4" /> Saved!
                     </div>
                   )}
@@ -300,10 +299,10 @@ export default function Settings() {
                   <div className="text-[12px] text-text-3 leading-relaxed">
                     💡 Notification settings are stored on this device. Browser notifications require your browser's permission — you'll be prompted when you enable them.
                     {typeof Notification !== 'undefined' && Notification.permission === 'granted' && (
-                      <span className="block mt-1 text-[#16A34A] font-semibold">✓ Browser notification permission granted</span>
+                      <span className="block mt-1 text-[#15803D] font-semibold">✓ Browser notification permission granted</span>
                     )}
                     {typeof Notification !== 'undefined' && Notification.permission === 'denied' && (
-                      <span className="block mt-1 text-[#EF4444] font-semibold">✗ Browser notifications blocked — update in browser settings</span>
+                      <span className="block mt-1 text-[#B91C1C] font-semibold">✗ Browser notifications blocked — update in browser settings</span>
                     )}
                   </div>
                 </div>
@@ -436,7 +435,7 @@ export default function Settings() {
                           setNotif(DEFAULT_NOTIF);
                         }
                       }}
-                      className="px-3 py-1.5 bg-white border border-[#FCA5A5] text-[#EF4444] rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all shrink-0 ml-3"
+                      className="px-3 py-1.5 bg-white border border-[#FCA5A5] text-[#B91C1C] rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all shrink-0 ml-3"
                     >
                       Clear
                     </button>

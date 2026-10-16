@@ -62,13 +62,27 @@ export default function OnboardingTour() {
   const location = useLocation();
 
   useEffect(() => {
+    // Start the tour the first time the user reaches the dashboard.
     const done = localStorage.getItem(TOUR_KEY);
     if (!done && location.pathname === '/') {
       // Small delay so dashboard loads first
       const t = setTimeout(() => setShow(true), 800);
       return () => clearTimeout(t);
     }
-  }, []);
+  }, [location.pathname]);
+
+  // Escape closes the tour, as it does any dialog.
+  useEffect(() => {
+    if (!show) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        localStorage.setItem(TOUR_KEY, 'true');
+        setShow(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [show]);
 
   if (!show) return null;
 
@@ -114,7 +128,12 @@ export default function OnboardingTour() {
       <div className="fixed inset-0 bg-black/40 z-[100] animate-[fadeIn_0.3s_ease]" />
 
       {/* Tour Card */}
-      <div className="fixed inset-0 z-[101] flex items-center justify-center p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-title"
+        className="fixed inset-0 z-[101] flex items-center justify-center p-4"
+      >
         <div className="bg-white rounded-r shadow-md max-w-[420px] w-full animate-[scaleIn_0.25s_ease] overflow-hidden">
           {/* Progress bar */}
           <div className="h-1 bg-bg">
@@ -132,6 +151,7 @@ export default function OnboardingTour() {
               </span>
               <button
                 onClick={skip}
+                aria-label="Close tour"
                 className="text-text-3 hover:text-text-1 bg-transparent border-none cursor-pointer p-1 -mr-1 transition-colors"
               >
                 <X className="w-4 h-4" />
@@ -150,7 +170,7 @@ export default function OnboardingTour() {
             </div>
 
             {/* Content */}
-            <h2 className="text-[18px] font-bold text-text-1 mb-2 tracking-[-0.2px]">{current.title}</h2>
+            <h2 id="onboarding-title" className="text-[18px] font-bold text-text-1 mb-2 tracking-[-0.2px]">{current.title}</h2>
             <p className="text-[13px] text-text-2 leading-relaxed mb-6">{current.description}</p>
 
             {/* Navigation */}
@@ -175,6 +195,8 @@ export default function OnboardingTour() {
               </div>
               <button
                 onClick={next}
+                // Move keyboard focus into the dialog when it opens.
+                autoFocus
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12.5px] font-semibold border-none cursor-pointer transition-colors shadow-xs"
               >
                 {isLast ? 'Get Started' : 'Next'}

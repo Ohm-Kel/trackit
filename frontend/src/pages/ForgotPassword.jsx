@@ -64,18 +64,18 @@ export default function ForgotPassword() {
               )}
 
               <div className="space-y-2">
-                <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">
+                <label htmlFor="forgotpassword-email-address" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">
                   Email Address
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#5E6E84] group-focus-within:text-primary transition-colors">
                     <Mail className="w-[18px] h-[18px]" />
                   </div>
-                  <input
+                  <input id="forgotpassword-email-address"
                     type="email"
                     required
                     placeholder="name@example.com"
-                    className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
+                    className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#5E6E84] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />

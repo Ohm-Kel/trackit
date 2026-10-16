@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { PASSWORD_HINT, validatePassword } from '../utils/password';
 import { Mail, Lock, UserPlus, Chrome, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 const Signup = () => {
@@ -11,13 +12,6 @@ const Signup = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp, signInWithGoogle } = useAuth();
-
-  const validatePassword = (pass) => {
-    if (pass.length < 8) return 'Password must be at least 8 characters long';
-    if (!/[0-9]/.test(pass)) return 'Password must contain at least one number';
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return 'Password must contain at least one special character';
-    return null;
-  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -99,16 +93,16 @@ const Signup = () => {
                 )}
 
                 <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Email Address</label>
+                  <label htmlFor="signup-email-address" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Email Address</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
+                    <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#5E6E84] group-focus-within:text-primary transition-colors">
                       <Mail className="w-[18px] h-[18px]" />
                     </div>
-                    <input
+                    <input id="signup-email-address"
                       type="email"
                       required
                       placeholder="name@example.com"
-                      className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
+                      className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#5E6E84] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                     />
@@ -116,16 +110,16 @@ const Signup = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Password</label>
+                  <label htmlFor="signup-password" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Password</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
+                    <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#5E6E84] group-focus-within:text-primary transition-colors">
                       <Lock className="w-[18px] h-[18px]" />
                     </div>
-                    <input
+                    <input id="signup-password"
                       type="password"
                       required
-                      placeholder="8+ chars, number, special char"
-                      className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
+                      placeholder={PASSWORD_HINT}
+                      className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#5E6E84] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
@@ -136,16 +130,16 @@ const Signup = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Confirm Password</label>
+                  <label htmlFor="signup-confirm-password" className="text-[13px] font-bold text-[#334155] ml-1 uppercase tracking-wider">Confirm Password</label>
                   <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#94A3B8] group-focus-within:text-primary transition-colors">
+                    <div className="absolute inset-y-0 left-0 pl-4.5 flex items-center pointer-events-none text-[#5E6E84] group-focus-within:text-primary transition-colors">
                       <Lock className="w-[18px] h-[18px]" />
                     </div>
-                    <input
+                    <input id="signup-confirm-password"
                       type="password"
                       required
                       placeholder="Re-type password"
-                      className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#94A3B8] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
+                      className="block w-full pl-12 pr-4 py-3.5 bg-white border-[1.5px] border-border rounded-rs text-[#0F172A] text-[14px] font-medium placeholder:text-[#5E6E84] focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                     />
@@ -167,7 +161,7 @@ const Signup = () => {
               <div className="w-full border-t border-[#F1F5F9]" />
             </div>
             <div className="relative flex justify-center text-[12px]">
-              <span className="px-5 bg-white text-[#94A3B8] font-bold uppercase tracking-widest">Or sign up with</span>
+              <span className="px-5 bg-white text-[#5E6E84] font-bold uppercase tracking-widest">Or sign up with</span>
             </div>
           </div>
 

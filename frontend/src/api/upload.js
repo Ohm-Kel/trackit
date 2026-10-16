@@ -1,14 +1,4 @@
-import { supabase } from '../lib/supabaseClient';
-
-const API_URL = import.meta.env.PROD
-  ? '/api'
-  : import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-
-async function getAuthHeader() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return {};
-  return { Authorization: `Bearer ${session.access_token}` };
-}
+import { apiJson } from './http';
 
 /**
  * Read a File as base64 string (without the data: prefix).
@@ -31,54 +21,27 @@ export function fileToBase64(file) {
  * Upload and parse a timetable file with AI.
  * @param {File} file
  * @param {'exam'|'schedule'} type
+ * @returns {Promise<{ type: string, data: unknown, warnings: string[] }>}
  */
 export async function parseUpload(file, type) {
   const base64 = await fileToBase64(file);
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/upload/parse`, {
+  return apiJson('/upload/parse', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...headers },
-    body: JSON.stringify({ file: base64, mimeType: file.type, type }),
+    body: { file: base64, mimeType: file.type, type },
+    fallbackError: 'Failed to parse document',
   });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || 'Failed to parse document');
-  }
-  return res.json();
 }
 
 /**
  * Bulk-import parsed exams.
  * @param {Array} exams
  */
-export async function importExams(exams) {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/upload/import-exams`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...headers },
-    body: JSON.stringify({ exams }),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || 'Failed to import exams');
-  }
-  return res.json();
-}
+export const importExams = (exams) =>
+  apiJson('/upload/import-exams', { method: 'POST', body: { exams }, fallbackError: 'Failed to import exams' });
 
 /**
  * Save parsed weekly schedule.
  * @param {Object} schedule
  */
-export async function saveSchedule(schedule) {
-  const headers = await getAuthHeader();
-  const res = await fetch(`${API_URL}/upload/save-schedule`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...headers },
-    body: JSON.stringify({ schedule }),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || 'Failed to save schedule');
-  }
-  return res.json();
-}
+export const saveSchedule = (schedule) =>
+  apiJson('/upload/save-schedule', { method: 'POST', body: { schedule }, fallbackError: 'Failed to save schedule' });

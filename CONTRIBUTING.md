@@ -37,13 +37,16 @@ cd backend
 npm run lint && npm run format:check && npm test
 npm run eval -- --oracle
 cd ../frontend
-npm run lint && npm run build
+npm run lint && npm test && npm run build
+cd ..
+DATABASE_URL=postgres://postgres@localhost:5432/postgres scripts/db/test.sh  # empty database
 ```
 
 ## Code conventions
 
 - Validate every request body with a Zod schema exported from its controller; the OpenAPI document is generated from these schemas.
-- Every database query in the API must filter by `req.user.id`. The service role key bypasses Row Level Security (see [ADR 0003](docs/adr/0003-api-as-authorization-boundary.md)). Add a test that asserts the filter.
+- Query the database through `req.db`, which acts as the signed-in user so Row Level Security applies, and still filter every query by `req.user.id` (see [ADR 0003](docs/adr/0003-api-as-authorization-boundary.md)). Add a test that asserts the filter. Never import the service-role client into a controller.
+- A new table or a new kind of write needs an RLS policy, and a check in `scripts/db/rls-test.sql`.
 - Throw `HttpError` for client-facing errors. Let anything else reach the central error handler, which logs it and returns a generic message.
 - Log with the shared pino logger, never `console`.
 - Runtime dependencies added to `backend/package.json` must also be added to the root `package.json`, which Vercel uses for the API function. `npm run check:deps` enforces this.

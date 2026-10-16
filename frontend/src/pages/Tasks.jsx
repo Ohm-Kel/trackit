@@ -6,6 +6,7 @@ import { formatRelativeDate, getDueBadgeClass, formatStatus, daysUntil } from '.
 import { exportTasksCSV, exportTasksPDF } from '../utils/export';
 import SubtaskList from '../components/SubtaskList';
 import { TasksSkeleton } from '../components/Skeleton';
+import { useToast } from '../components/Toast';
 
 function getStatusClass(status) {
   if (status === 'in_progress') return 'bg-primary-light text-primary';
@@ -15,6 +16,7 @@ function getStatusClass(status) {
 }
 
 export default function Tasks() {
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const { data: tasks = [], isLoading } = useTasks();
   const updateTask = useUpdateTask();
@@ -62,12 +64,15 @@ export default function Tasks() {
 
   function toggleComplete(task) {
     const isDone = task.status === 'done';
-    updateTask.mutate({ id: task.id, updates: { status: isDone ? 'not_started' : 'done' } });
+    updateTask.mutate(
+      { id: task.id, updates: { status: isDone ? 'not_started' : 'done' } },
+      { onError: err => addToast(err.message, { type: 'error', title: "Couldn't update the task" }) },
+    );
   }
 
   function handleDelete(e, taskId) {
     e.stopPropagation();
-    if (window.confirm('Delete this task?')) deleteTask.mutate(taskId);
+    if (window.confirm('Delete this task?')) deleteTask.mutate(taskId, { onError: err => addToast(err.message, { type: 'error', title: "Couldn't delete the task" }) });
   }
 
   const totalCount = tasks.length;
@@ -93,7 +98,7 @@ export default function Tasks() {
                 className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-border text-text-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary transition-all shadow-xs"
               >
                 <Download className="w-[13px] h-[13px]" />
-                <span className="hidden sm:inline">Export</span>
+                <span className="sr-only sm:not-sr-only">Export</span>
               </button>
               {showExport && (
                 <div className="absolute right-0 top-full mt-1 bg-white border border-border rounded-rs shadow-md z-10 py-1 min-w-[140px]">
@@ -108,7 +113,7 @@ export default function Tasks() {
             className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
           >
             <Plus className="w-[13px] h-[13px]" />
-            <span className="hidden sm:inline">Add Task</span>
+            <span className="sr-only sm:not-sr-only">Add Task</span>
           </button>
         </div>
       </div>
@@ -121,7 +126,7 @@ export default function Tasks() {
             <span className="text-error font-semibold">{overdueCount} task{overdueCount !== 1 ? 's' : ''} overdue</span>
             <button
               onClick={() => setFilterStatus('overdue')}
-              className="ml-auto text-[11.5px] font-semibold text-[#EF4444] hover:underline bg-transparent border-none cursor-pointer"
+              className="ml-auto text-[11.5px] font-semibold text-[#B91C1C] hover:underline bg-transparent border-none cursor-pointer"
             >
               Show overdue
             </button>
@@ -194,18 +199,20 @@ export default function Tasks() {
                     onClick={() => setExpandedRow(expandedRow === task.id ? null : task.id)}
                     className={`grid grid-cols-[32px_1fr_36px] md:grid-cols-[32px_1fr_100px_80px_90px_90px_60px] py-3 px-3 md:px-4 border-b border-border items-center gap-2 cursor-pointer transition-colors ${expandedRow === task.id ? 'bg-primary-faint' : 'hover:bg-bg'}`}
                   >
-                    <div
+                    <button
+                      type="button"
+                      aria-label={isDone ? `Mark "${task.title}" as not done` : `Mark "${task.title}" as done`}
                       onClick={e => { e.stopPropagation(); toggleComplete(task); }}
-                      className={`w-[17px] h-[17px] rounded-full border-[1.5px] shrink-0 mt-[2px] flex items-center justify-center transition-colors cursor-pointer ${isDone ? 'border-primary bg-primary' : 'border-border2 bg-white hover:border-primary hover:bg-primary-light'}`}
+                      className={`w-[17px] h-[17px] p-0 rounded-full border-[1.5px] shrink-0 mt-[2px] flex items-center justify-center transition-colors cursor-pointer ${isDone ? 'border-primary bg-primary' : 'border-border2 bg-white hover:border-primary hover:bg-primary-light'}`}
                     >
                       {isDone && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
-                    </div>
+                    </button>
                     <div className="min-w-0 pr-2">
                       <div className={`text-[13.5px] font-semibold whitespace-nowrap overflow-hidden text-ellipsis ${isDone ? 'line-through text-text-3' : 'text-text-1'}`}>{task.title}</div>
                       <div className="text-[11.5px] text-text-3 mt-0.5">
                         {task.course_code && <span>{task.course_code}</span>}
                         <span className="hidden md:inline">{task.subtasks_count > 0 ? ` · ${task.subtasks_count} subtasks` : ''}</span>
-                        <span className="md:hidden"> · <span className={`font-semibold ${dueBadge.includes('EF') ? 'text-[#EF4444]' : dueBadge.includes('D97') ? 'text-[#D97706]' : 'text-text-3'}`}>{rel}</span></span>
+                        <span className="md:hidden"> · <span className={`font-semibold ${dueBadge.includes('EF') ? 'text-[#B91C1C]' : dueBadge.includes('D97') ? 'text-[#B45309]' : 'text-text-3'}`}>{rel}</span></span>
                       </div>
                     </div>
                     <div className="hidden md:flex">
@@ -225,7 +232,7 @@ export default function Tasks() {
                         <Edit2 className="w-[13px] h-[13px]" />
                       </button>
                       <button
-                        className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#EF4444]"
+                        className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#B91C1C]"
                         onClick={e => handleDelete(e, task.id)}
                         title="Delete"
                       >
@@ -234,6 +241,8 @@ export default function Tasks() {
                     </div>
                     <div className="md:hidden flex justify-end" onClick={e => e.stopPropagation()}>
                       <button
+                        aria-label={expandedRow === task.id ? 'Hide details' : 'Show details'}
+                        aria-expanded={expandedRow === task.id}
                         className="w-[28px] h-[28px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 hover:bg-primary-light hover:text-primary"
                         onClick={() => setExpandedRow(expandedRow === task.id ? null : task.id)}
                       >
@@ -272,7 +281,7 @@ export default function Tasks() {
                       )}
                       <div className="flex gap-2">
                         <button onClick={() => navigate(`/add?edit=${task.id}`)} className="flex-1 bg-white text-text-2 border border-border2 px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:border-primary hover:text-primary hover:bg-primary-faint transition-all">Edit</button>
-                        <button onClick={e => handleDelete(e, task.id)} className="flex-1 bg-white text-[#EF4444] border border-[#FCA5A5] px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all">Delete</button>
+                        <button onClick={e => handleDelete(e, task.id)} className="flex-1 bg-white text-[#B91C1C] border border-[#FCA5A5] px-3 py-1.5 rounded-rs text-[12px] font-semibold cursor-pointer shadow-xs hover:bg-[#FEF2F2] transition-all">Delete</button>
                       </div>
                       <SubtaskList parentId={task.id} parentType="task" />
                     </div>
@@ -293,25 +302,30 @@ export default function Tasks() {
                     className="grid grid-cols-[32px_1fr_36px] md:grid-cols-[32px_1fr_100px_80px_90px_90px_60px] py-3 px-3 md:px-4 border-b border-border items-center gap-2 cursor-pointer transition-colors hover:bg-bg opacity-[0.55]"
                     onClick={() => toggleComplete(task)}
                   >
-                    <div className="w-[17px] h-[17px] rounded-full border-[1.5px] border-primary bg-primary shrink-0 mt-[2px] flex items-center justify-center">
+                    <button
+                      type="button"
+                      aria-label={`Mark "${task.title}" as not done`}
+                      onClick={e => { e.stopPropagation(); toggleComplete(task); }}
+                      className="w-[17px] h-[17px] p-0 rounded-full border-[1.5px] border-primary bg-primary shrink-0 mt-[2px] flex items-center justify-center cursor-pointer"
+                    >
                       <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                    </div>
+                    </button>
                     <div className="min-w-0 pr-2">
                       <div className="text-[13.5px] font-semibold text-text-3 line-through whitespace-nowrap overflow-hidden text-ellipsis">{task.title}</div>
                       <div className="text-[11.5px] text-text-3 mt-0.5">
                         {task.course_code && <span className="hidden md:inline">{task.course_code} · </span>}
                         <span className="hidden md:inline">completed</span>
-                        <span className="md:hidden text-[#16A34A] font-semibold">Done</span>
+                        <span className="md:hidden text-[#15803D] font-semibold">Done</span>
                       </div>
                     </div>
                     <div className="hidden md:flex text-[12.5px] text-text-3">{task.due_date ? new Date(task.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}</div>
                     <div className="hidden md:block text-[12.5px] text-text-3">{task.estimated_hours ? `${task.estimated_hours} hrs` : '—'}</div>
                     <div className="hidden md:block text-[12.5px] text-text-3">{task.grade_weight ? `${task.grade_weight}%` : '—'}</div>
                     <div className="hidden md:flex">
-                      <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F0FDF4] text-[#16A34A] tracking-[0.01em]">Done</span>
+                      <span className="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#F0FDF4] text-[#15803D] tracking-[0.01em]">Done</span>
                     </div>
                     <div className="hidden md:flex gap-1 justify-end" onClick={e => e.stopPropagation()}>
-                      <button className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#EF4444]" onClick={e => handleDelete(e, task.id)}><Trash2 className="w-[13px] h-[13px]" /></button>
+                      <button title="Delete" className="w-[26px] h-[26px] rounded-md border-none bg-transparent cursor-pointer flex items-center justify-center text-text-3 transition-colors hover:bg-[#FEF2F2] hover:text-[#B91C1C]" onClick={e => handleDelete(e, task.id)}><Trash2 className="w-[13px] h-[13px]" /></button>
                     </div>
                     <div className="md:hidden"></div>
                   </div>
