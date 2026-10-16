@@ -63,8 +63,8 @@ export default function Analytics() {
     <div className="pt-5 md:pt-7 px-4 md:px-8 pb-9 max-w-7xl animate-fade-in">
       {/* Header */}
       <div className="mb-4 md:mb-6">
-        <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Advanced Analytics</h1>
-        <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Deep insights into your academic performance and study patterns</p>
+        <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Analytics</h1>
+        <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Your completion rate, weekly progress and deadline clusters</p>
       </div>
 
       {/* Without this, a failed load read as "Low risk, workload is balanced". */}
@@ -110,7 +110,7 @@ export default function Analytics() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Study Velocity Chart (Simplified Visual) */}
-        <ContentCard icon={BarChart2} title="Mastery Velocity" subtitle="Recent task completion output">
+        <ContentCard icon={BarChart2} title="Tasks Completed per Week" subtitle="The last four weeks">
           <div
             role="img"
             aria-label={`Tasks completed per week: ${velocity.map(v => `${v.name}, ${v.tasks}`).join('; ')}`}
