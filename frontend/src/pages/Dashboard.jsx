@@ -4,7 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../hooks/useTasks';
 import { useExams } from '../hooks/useExams';
 import { useProfile } from '../hooks/useProfile';
-import { daysUntil, formatRelativeDate, getDueBadgeClass, formatStatus } from '../utils/dates';
+import { daysUntil, formatRelativeDate, getDueBadgeClass, getDueUrgency, formatStatus } from '../utils/dates';
+
+// The dot beside each queued task matches its due badge.
+const URGENCY_DOT = { urgent: 'bg-[#EF4444]', soon: 'bg-[#F59E0B]', later: 'bg-border2', none: 'bg-border2' };
 import { DashboardSkeleton } from '../components/Skeleton';
 
 export default function Dashboard() {
@@ -59,7 +62,7 @@ export default function Dashboard() {
         </div>
         <button
           onClick={() => navigate('/add')}
-          className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-rs text-[12px] md:text-[13px] font-semibold transition-all shadow-xs border-none cursor-pointer min-w-[44px] min-h-[44px] justify-center sm:min-w-0 sm:min-h-0"
         >
           <Plus className="w-[13px] h-[13px]" />
           <span className="sr-only sm:not-sr-only">Add Task</span>
@@ -69,31 +72,31 @@ export default function Dashboard() {
       <div className="px-4 md:px-8 pb-9">
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 md:gap-3.5 mb-5">
-          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex items-center gap-2 md:gap-3.5">
+          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex flex-col items-start md:flex-row md:items-center gap-2 md:gap-3.5">
             <div className="w-[32px] h-[32px] md:w-[38px] md:h-[38px] rounded-[10px] bg-primary-light flex items-center justify-center shrink-0 text-primary">
               <ListTodo className="w-[15px] h-[15px] md:w-[18px] md:h-[18px]" strokeWidth={1.6} />
             </div>
             <div>
               <div className="text-[22px] md:text-[26px] font-bold text-text-1 leading-none">{activeTasks.length}</div>
-              <div className="text-[10px] md:text-[12px] text-text-3 mt-0.5 font-medium">Active Tasks</div>
+              <div className="text-[11px] md:text-[12px] text-text-3 mt-0.5 font-medium">Active Tasks</div>
             </div>
           </div>
-          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex items-center gap-2 md:gap-3.5">
+          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex flex-col items-start md:flex-row md:items-center gap-2 md:gap-3.5">
             <div className="w-[32px] h-[32px] md:w-[38px] md:h-[38px] rounded-[10px] bg-primary-light flex items-center justify-center shrink-0 text-primary">
               <CalendarDays className="w-[15px] h-[15px] md:w-[18px] md:h-[18px]" strokeWidth={1.6} />
             </div>
             <div>
               <div className="text-[22px] md:text-[26px] font-bold text-text-1 leading-none">{dueThisWeek.length}</div>
-              <div className="text-[10px] md:text-[12px] text-text-3 mt-0.5 font-medium">Due This Week</div>
+              <div className="text-[11px] md:text-[12px] text-text-3 mt-0.5 font-medium">Due This Week</div>
             </div>
           </div>
-          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex items-center gap-2 md:gap-3.5">
+          <div className="bg-white border border-border rounded-r p-3 md:p-[18px] md:px-5 shadow-xs hover:shadow-sm transition-shadow flex flex-col items-start md:flex-row md:items-center gap-2 md:gap-3.5">
             <div className="w-[32px] h-[32px] md:w-[38px] md:h-[38px] rounded-[10px] bg-primary-light flex items-center justify-center shrink-0 text-primary">
               <GraduationCap className="w-[15px] h-[15px] md:w-[18px] md:h-[18px]" strokeWidth={1.6} />
             </div>
             <div>
               <div className="text-[22px] md:text-[26px] font-bold text-text-1 leading-none">{upcomingExams.length}</div>
-              <div className="text-[10px] md:text-[12px] text-text-3 mt-0.5 font-medium">Exams Upcoming</div>
+              <div className="text-[11px] md:text-[12px] text-text-3 mt-0.5 font-medium">Exams Upcoming</div>
             </div>
           </div>
         </div>
@@ -122,7 +125,7 @@ export default function Dashboard() {
         </div>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_290px] gap-5 md:gap-7">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_290px] gap-5 md:gap-7">
 
           {/* Priority Queue */}
           <div>
@@ -152,7 +155,7 @@ export default function Dashboard() {
                 return (
                   <div key={task.id} className={`flex items-start gap-3 p-3.5 px-4 ${idx < priorityQueue.length - 1 ? 'border-b border-border' : ''} hover:bg-bg transition-colors cursor-pointer group`} onClick={() => navigate('/tasks')}>
                     <div className="w-[17px] h-[17px] rounded-full border-[1.5px] border-border2 bg-white shrink-0 mt-0.5 group-hover:border-primary group-hover:bg-primary-light transition-colors"></div>
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#EF4444] shrink-0 mt-[5px]"></div>
+                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 mt-[5px] ${URGENCY_DOT[getDueUrgency(task.due_date)]}`}></div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[13.5px] font-semibold text-text-1 mb-[3px] whitespace-nowrap overflow-hidden text-ellipsis">{task.title}</div>
                       <div className="text-[11.5px] text-text-3 flex gap-2.5 flex-wrap">

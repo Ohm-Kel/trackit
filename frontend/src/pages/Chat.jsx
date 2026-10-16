@@ -160,7 +160,7 @@ export default function Chat() {
         )}
       </div>
 
-      <div className="flex-1 px-4 md:px-8 pb-4 md:pb-6 grid grid-cols-1 md:grid-cols-[1fr_256px] gap-5 min-h-0 overflow-hidden">
+      <div className="flex-1 px-4 md:px-8 pb-4 md:pb-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_256px] gap-5 min-h-0 overflow-hidden">
 
         {/* Chat Main Area */}
         <div className="flex flex-col min-h-0">
@@ -238,7 +238,7 @@ export default function Chat() {
         </div>
 
         {/* Context Sidebar — hidden on mobile */}
-        <div className="hidden md:flex flex-col gap-3.5 py-1 pb-3.5 overflow-y-auto custom-scrollbar">
+        <div className="hidden lg:flex flex-col gap-3.5 py-1 pb-3.5 overflow-y-auto custom-scrollbar">
 
           <div className="bg-white border border-border rounded-r p-[15px] shadow-xs">
             <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-text-3 mb-2.5">Tasks in Context</div>

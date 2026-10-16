@@ -39,12 +39,25 @@ export function formatRelativeDate(dateStr) {
  * Returns a Tailwind class string for a due-date urgency badge.
  */
 export function getDueBadgeClass(dateStr) {
-  if (!dateStr) return 'bg-bg text-text-3 border border-border';
+  return {
+    none: 'bg-bg text-text-3 border border-border',
+    urgent: 'bg-error-bg text-error',
+    soon: 'bg-warning-bg text-warning',
+    later: 'bg-success-bg text-success',
+  }[getDueUrgency(dateStr)];
+}
+
+/**
+ * How pressing a due date is: 'urgent' (overdue, today or tomorrow), 'soon'
+ * (within 4 days), 'later', or 'none' without a date. Pages colour by this
+ * rather than by reading class names.
+ */
+export function getDueUrgency(dateStr) {
   const days = daysUntil(dateStr);
-  if (days < 0) return 'bg-error-bg text-error';
-  if (days <= 1) return 'bg-error-bg text-error';
-  if (days <= 4) return 'bg-warning-bg text-warning';
-  return 'bg-success-bg text-success';
+  if (days === null) return 'none';
+  if (days <= 1) return 'urgent';
+  if (days <= 4) return 'soon';
+  return 'later';
 }
 
 /**
