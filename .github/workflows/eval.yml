@@ -51,7 +51,7 @@ jobs:
         run: cat eval/results/*.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
       - name: Upload full report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: eval-report-${{ github.run_number }}
           path: backend/eval/results/
