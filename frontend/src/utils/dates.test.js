@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { daysUntil, formatRelativeDate, formatStatus, getDueBadgeClass } from './dates';
+import { daysUntil, formatRelativeDate, formatStatus, getDueBadgeClass, getDueUrgency } from './dates';
 
 // Fixed "now": Wednesday 15 October 2026, mid-afternoon local time.
 beforeEach(() => {
@@ -52,5 +52,20 @@ describe('formatStatus', () => {
     expect(formatStatus('in_progress')).toBe('In Progress');
     expect(formatStatus('archived')).toBe('archived');
     expect(formatStatus(undefined)).toBe('Not Started');
+  });
+});
+
+describe('getDueUrgency', () => {
+  it('ranks overdue, today and tomorrow as urgent, then soon, later and none', () => {
+    const inDays = (n) => {
+      const d = new Date();
+      d.setDate(d.getDate() + n);
+      return d.toISOString();
+    };
+    expect(getDueUrgency(inDays(-3))).toBe('urgent');
+    expect(getDueUrgency(inDays(1))).toBe('urgent');
+    expect(getDueUrgency(inDays(3))).toBe('soon');
+    expect(getDueUrgency(inDays(10))).toBe('later');
+    expect(getDueUrgency(null)).toBe('none');
   });
 });

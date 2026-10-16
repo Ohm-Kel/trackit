@@ -241,6 +241,37 @@ describe('other pages', () => {
     expect(within(card).getByText('3')).toBeInTheDocument();
   });
 
+  it('says so when analytics fail to load, instead of reporting low risk, and retries', async () => {
+    const { api } = renderApp('/analytics', {
+      setup: (fake) => {
+        fake.db.tasks.push(task({ status: 'done' }));
+        fake.on('GET /analytics/burnout', () => fake.json({ error: 'Something went wrong' }, 500));
+      },
+    });
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't load your analytics");
+    expect(screen.queryByText('Low')).not.toBeInTheDocument();
+    expect(screen.queryByText('No Danger Zones Detected')).not.toBeInTheDocument();
+    expect(screen.getByText('1 task completed')).toBeInTheDocument();
+
+    api.on('GET /analytics/burnout', () => api.json([]));
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(await screen.findByText('No Danger Zones Detected')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('opens the Focus Plan from the Analytics recommendation', async () => {
+    renderApp('/analytics', { setup: (fake) => fake.db.tasks.push(task({ title: 'Lab report' })) });
+    await user.click(await screen.findByRole('button', { name: /view focus plan/i }));
+    expect(await screen.findByRole('heading', { name: "Today's Focus Plan" })).toBeInTheDocument();
+  });
+
+  it('points an empty Analytics page at adding a task', async () => {
+    renderApp('/analytics');
+    expect(await screen.findByText(/recommendations will be based on your real deadlines/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /add a task/i }));
+    expect(await screen.findByLabelText('Task Name *')).toBeInTheDocument();
+  });
+
   it('saves profile changes from Settings', async () => {
     const { api } = renderApp('/settings');
     const name = await screen.findByDisplayValue('Ama Owusu');

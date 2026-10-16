@@ -48,8 +48,8 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] p-4 transition-colors duration-300">
-      <div className="max-w-[420px] w-full animate-fade-in">
+    <div className="h-dvh overflow-y-auto flex bg-[#F8FAFC] p-4 transition-colors duration-300">
+      <div className="max-w-[420px] w-full m-auto animate-fade-in">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-[72px] h-[72px] rounded-2xl bg-primary/10 mb-5 shadow-sm">
             <Lock className="w-8 h-8 text-primary" />

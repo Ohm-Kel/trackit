@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   BarChart2, 
   TrendingUp, 
@@ -20,11 +21,15 @@ export default function Analytics() {
   const [velocity, setVelocity] = useState([]);
   const [burnout, setBurnout] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [attempt, setAttempt] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
         if (!session?.access_token) return;
+        setError(null);
         
         const [vel, burn] = await Promise.all([
           apiJson('/analytics/velocity'),
@@ -34,13 +39,14 @@ export default function Analytics() {
         setBurnout(burn);
       } catch (err) {
         console.error('Error fetching analytics:', err);
+        setError(err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchAnalytics();
-  }, [session]);
+  }, [session, attempt]);
 
   const completedCount = tasks.filter(t => t.status === 'done').length;
   const completionRate = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
@@ -54,12 +60,28 @@ export default function Analytics() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto animate-fade-in">
+    <div className="pt-5 md:pt-7 px-4 md:px-8 pb-9 max-w-7xl animate-fade-in">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-[28px] font-extrabold text-[#0F172A] tracking-tight mb-2">Advanced Analytics</h1>
-        <p className="text-[#64748B] text-[15px] font-medium">Deep insights into your academic performance and study patterns</p>
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-[20px] md:text-[22px] font-bold text-text-1 tracking-[-0.3px]">Analytics</h1>
+        <p className="text-[12px] md:text-[13px] text-text-3 mt-[3px]">Your completion rate, weekly progress and deadline clusters</p>
       </div>
+
+      {/* Without this, a failed load read as "Low risk, workload is balanced". */}
+      {error && (
+        <div role="alert" className="bg-error-bg border border-error-border rounded-r p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+          <div>
+            <div className="text-[13px] font-bold text-error">Couldn't load your analytics</div>
+            <div className="text-[12.5px] text-text-2">Velocity and burnout zones are unavailable. Check your connection and try again.</div>
+          </div>
+          <button
+            onClick={() => { setLoading(true); setAttempt(a => a + 1); }}
+            className="bg-white border border-border2 text-text-2 px-3 py-2 rounded-rs text-[12px] font-semibold cursor-pointer hover:border-primary hover:text-primary shrink-0"
+          >
+            Try again
+          </button>
+        </div>
+      )}
 
       {/* Primary Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -67,7 +89,7 @@ export default function Analytics() {
           icon={TrendingUp} 
           title="Completion Rate" 
           value={`${completionRate}%`} 
-          description={`${completedCount} tasks mastered`}
+          description={`${completedCount} task${completedCount === 1 ? '' : 's'} completed`}
           color="primary"
         />
         <StatCard 
@@ -80,27 +102,28 @@ export default function Analytics() {
         <StatCard 
           icon={AlertTriangle} 
           title="Burnout Risk" 
-          value={burnout.length > 0 ? 'High' : 'Low'} 
-          description={burnout.length > 0 ? `${burnout.length} danger zones detected` : 'Workload is balanced'}
+          value={error ? '—' : burnout.length > 0 ? 'High' : 'Low'}
+          description={error ? 'Not available' : burnout.length > 0 ? `${burnout.length} danger zone${burnout.length === 1 ? '' : 's'} detected` : 'Workload is balanced'}
           color={burnout.length > 0 ? 'red' : 'green'}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Study Velocity Chart (Simplified Visual) */}
-        <ContentCard icon={BarChart2} title="Mastery Velocity" subtitle="Recent task completion output">
-          <div className="h-64 flex items-end justify-between gap-4 mt-8 px-4">
+        <ContentCard icon={BarChart2} title="Tasks Completed per Week" subtitle="The last four weeks">
+          <div
+            role="img"
+            aria-label={`Tasks completed per week: ${velocity.map(v => `${v.name}, ${v.tasks}`).join('; ')}`}
+            className="h-64 flex items-end justify-between gap-4 mt-8 px-4"
+          >
             {velocity.map((v, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center group">
-                <div className="w-full relative">
-                   <div 
-                    className="w-full bg-primary/20 hover:bg-primary/40 transition-all rounded-t-lg relative group-hover:block"
+              <div key={i} className="flex-1 flex flex-col items-center">
+                <div className="text-[12px] font-bold text-text-1 mb-1.5">{v.tasks}</div>
+                <div className="w-full">
+                  <div
+                    className="w-full min-h-[2px] bg-primary/60 rounded-t-lg"
                     style={{ height: `${(v.tasks / (Math.max(...velocity.map(v=>v.tasks)) || 1)) * 160}px` }}
-                   >
-                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#0F172A] text-white text-[10px] font-bold px-2 py-1 rounded hidden group-hover:block shrink-0 whitespace-nowrap">
-                        {v.tasks} tasks
-                     </div>
-                   </div>
+                  />
                 </div>
                 <div className="text-[10px] text-text-3 font-bold mt-3 transform -rotate-45 md:rotate-0 text-center uppercase tracking-wider">
                   {v.name.replace('Week of ', '')}
@@ -113,7 +136,9 @@ export default function Analytics() {
         {/* Burnout Analysis */}
         <ContentCard icon={AlertTriangle} title="Burnout Zones" subtitle="Overlapping high-pressure deadlines">
           <div className="space-y-4 mt-6">
-            {burnout.length === 0 ? (
+            {error ? (
+              <p className="p-8 text-center text-[13px] text-text-3">Burnout zones couldn't be loaded.</p>
+            ) : burnout.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-8 text-center bg-green-50/50 rounded-2xl border border-green-100">
                 <CheckCircle2 className="w-10 h-10 text-green-500 mb-3" />
                 <p className="text-[14px] font-bold text-green-800">No Danger Zones Detected</p>
@@ -155,13 +180,20 @@ export default function Analytics() {
           <div className="flex-1 text-center md:text-left">
             <h2 className="text-xl font-bold mb-1">AI Recommendation</h2>
             <p className="text-white/70 text-[14px]">
-              {burnout.length > 0 
+              {tasks.length === 0
+                ? 'Add your tasks and exams, and recommendations will be based on your real deadlines.'
+                : error
+                ? "Analytics are unavailable right now. Your Focus Plan still orders today's work by deadline and weight."
+                : burnout.length > 0
                 ? "Your workload is peaking. We recommend postponing non-critical tasks and using the 'Focus Plan' to tackle one priority at a time."
                 : "You're in a great flow state! This is the perfect time to start researching your future assignments to stay ahead of the curve."}
             </p>
           </div>
-          <button className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-rs font-bold text-[14px] transition-all border-none cursor-pointer flex items-center gap-2">
-            View Focus Plan <ArrowRight className="w-4 h-4" />
+          <button
+            onClick={() => navigate(tasks.length === 0 ? '/add' : '/focus')}
+            className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-rs font-bold text-[14px] transition-all border-none cursor-pointer flex items-center gap-2"
+          >
+            {tasks.length === 0 ? 'Add a task' : 'View Focus Plan'} <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>

@@ -15,12 +15,13 @@ All notable changes to this project are documented here. The format follows
 - Playwright checks for the landing page's SEO tags, social image size, structured data, image dimensions and layout shift
 - Lighthouse CI job for the landing page (mobile), with score, Core Web Vitals and byte-budget assertions
 - `docs/performance.md` with before and after Lighthouse scores
+- Playwright tests that fail if any route scrolls sideways at 375px in light or dark mode, plus checks for tap targets, focus rings and on-screen menus
 
 ### Changed
 
 - The landing page's chunk is preloaded with the entry: mobile LCP 3.9 s to 2.3 s, Lighthouse performance 86 to 96
 - Landing page transfer is 168 KB instead of 528 KB: the favicon was the 369 KB logo
-- `logo.png` is 360 px and 69 KB instead of 640 px and 369 KB; a WebP copy is added
+- `logo.png` is 360 px and 12 KB instead of 640 px and 369 KB, with a transparent background; a WebP copy is added
 - Hashed `/assets/` files are cached as immutable on Vercel
 
 ### Fixed
@@ -28,6 +29,21 @@ All notable changes to this project are documented here. The format follows
 - `og:url` pointed at `https://trackit.app`, and social images used relative URLs, so shared links had no image
 - Page, Open Graph and Twitter titles and descriptions disagreed; the meta description is now under 160 characters
 - A hero preview label on the landing page failed WCAG AA contrast (4.49:1)
+- UI and UX problems found in a screenshot audit of every route at 375, 768 and 1280px, in light and dark mode, with empty, realistic and long data ([docs/ui-audit.md](docs/ui-audit.md)):
+  - The sign-in, sign-up and password pages scroll on short screens; the sign-up Google button and "Sign in instead" link were unreachable
+  - The task table no longer hides task titles between 768 and 1023px, and the Dashboard, Focus Plan and Chat side columns no longer push the page sideways
+  - Long unbroken titles and course names wrap instead of overflowing
+  - The notification menu and toasts stay on a phone screen; toasts are readable in dark mode and announced to screen readers
+  - Analytics shows an error with a retry when it can't load, instead of reporting low burnout risk, and its "View Focus Plan" button works
+  - A visible keyboard focus ring on every control, and 44px tap targets for the mobile menu, task rows and toast close buttons
+  - The logo and auth-page dividers are readable in dark mode
+  - Due dates are coloured by urgency on phone task rows and the dashboard queue, which no longer marks every task with a red dot
+  - The sidebar drops the "Pro Edition" badge and asks to set up the profile only when it has no name or course; Settings shows the real version
+  - The Analytics velocity chart shows each week's count and has a text alternative, and the exam preparation track is visible at 0%
+  - On phones, sidebar links and the Add page's Task/Exam switch are 44px tall, the switch shows which side is selected, and dashboard stat labels are larger
+  - On phones, the Tasks, Exams and Dashboard header buttons and the exam card links are 44px tall
+  - The logo has a transparent background, so no grey square shows around it, and the phone header uses the same clock mark as the sidebar
+  - Analytics uses plain labels: "Analytics" and "Tasks Completed per Week"
 
 ## [1.2.0] - 2026-10-15
 

@@ -190,16 +190,18 @@ export default function Add() {
       <div className="px-4 md:px-8 pb-9">
         {/* Tabs — disabled in edit mode */}
         {!isEditMode && (
-          <div className="flex flex-col sm:flex-row gap-1 bg-bg p-1 rounded-[10px] mb-5.5 w-full sm:w-max border border-border">
+          <div className="flex gap-1 bg-bg p-1 rounded-[10px] mb-5.5 w-full sm:w-max border border-border">
             <button
               onClick={() => setActiveTab('task')}
-              className={`px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'task' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
+              aria-pressed={activeTab === 'task'}
+              className={`flex-1 sm:flex-none min-h-[44px] sm:min-h-0 px-3 sm:px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'task' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
             >
               📋 Assignment / Task
             </button>
             <button
               onClick={() => setActiveTab('exam')}
-              className={`px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'exam' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
+              aria-pressed={activeTab === 'exam'}
+              className={`flex-1 sm:flex-none min-h-[44px] sm:min-h-0 px-3 sm:px-5 py-2 sm:py-1.5 rounded-[7px] text-[13px] font-semibold cursor-pointer transition-all border-none ${activeTab === 'exam' ? 'bg-white text-primary shadow-xs' : 'bg-transparent text-text-3'}`}
             >
               📝 Exam
             </button>
@@ -254,7 +256,7 @@ export default function Add() {
                     </div>
                   )}
 
-                  <div className="text-center text-[11.5px] text-text-3 my-3 mb-4.5 relative before:content-[''] before:absolute before:top-1/2 before:w-[42%] before:h-px before:bg-border before:left-0 after:content-[''] after:absolute after:top-1/2 after:w-[42%] after:h-px after:bg-border after:right-0">
+                  <div className="flex items-center gap-3 text-[11.5px] text-text-3 my-3 mb-4.5 before:content-[''] before:flex-1 before:h-px before:bg-border after:content-[''] after:flex-1 after:h-px after:bg-border">
                     or fill in manually
                   </div>
                 </>

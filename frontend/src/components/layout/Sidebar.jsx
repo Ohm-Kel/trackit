@@ -64,10 +64,9 @@ export default function Sidebar({ isOpen, onClose }) {
           <img src="/logo.png" alt="Trackit Logo" className="w-[140px] h-auto object-contain mix-blend-multiply" />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold tracking-[0.1em] text-primary uppercase bg-primary-light px-2 py-0.5 rounded-full">Pro Edition</span>
           <div className="ml-auto flex items-center gap-1">
             <NotificationCenter />
-            <button onClick={onClose} aria-label="Close menu" className="md:hidden p-1 text-text-3 border-none bg-transparent">
+            <button onClick={onClose} aria-label="Close menu" className="md:hidden w-[44px] h-[44px] -my-3 flex items-center justify-center text-text-3 border-none bg-transparent">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -98,7 +97,7 @@ export default function Sidebar({ isOpen, onClose }) {
               key={item.path}
               to={item.path}
               onClick={onClose}
-              className={`flex items-center gap-[9px] px-2.5 py-2 rounded-rs cursor-pointer transition-all duration-150 text-[13.5px] font-medium mb-[1px] no-underline border border-transparent ${isActive ? 'bg-primary-light text-primary' : 'text-text-2 hover:bg-bg hover:text-text-1'}`}
+              className={`flex items-center gap-[9px] px-2.5 py-[12px] md:py-2 rounded-rs cursor-pointer transition-all duration-150 text-[13.5px] font-medium mb-[1px] no-underline border border-transparent ${isActive ? 'bg-primary-light text-primary' : 'text-text-2 hover:bg-bg hover:text-text-1'}`}
             >
               <Icon className={`w-4 h-4 shrink-0 transition-colors duration-150 ${isActive ? 'text-primary' : 'text-text-3'}`} />
               {item.name}
@@ -140,7 +139,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 {name}
               </div>
               <div className="text-[11px] text-text-3 truncate font-medium">
-                {course || 'Set up profile'}
+                {course || (profile?.display_name ? user?.email : 'Set up profile')}
               </div>
             </div>
           </Link>

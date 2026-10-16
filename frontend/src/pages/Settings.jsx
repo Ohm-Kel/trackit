@@ -453,7 +453,7 @@ export default function Settings() {
 
             {/* Version */}
             <div className="text-center text-[11px] text-text-3 mt-6">
-              Trackit v0.1.0 — BETA · Data Structures Student Edition
+              Trackit v{import.meta.env.VITE_APP_VERSION}
             </div>
           </div>
         </div>

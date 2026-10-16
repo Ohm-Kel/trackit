@@ -136,3 +136,77 @@ describe('onboarding tour', () => {
     expect(localStorage.getItem('trackit_onboarding_done')).toBe('true');
   });
 });
+
+describe('due-date urgency', () => {
+  it('colours the phone task row by urgency, without a stray separator', async () => {
+    renderApp('/tasks', {
+      setup: (fake) =>
+        fake.db.tasks.push(
+          task({ title: 'Lab report', due_date: inDays(-1) }),
+          task({ title: 'Essay', course_code: 'ENG101', due_date: inDays(10) }),
+        ),
+    });
+    const lab = (await screen.findByText('Lab report')).nextElementSibling;
+    const phoneDue = lab.querySelector('.lg\\:hidden');
+    expect(phoneDue.textContent).toBe('Overdue');
+    expect(phoneDue.firstElementChild).toHaveClass('text-error');
+
+    const essay = screen.getByText('Essay').nextElementSibling.querySelector('.lg\\:hidden');
+    expect(essay.textContent).toMatch(/^ · \S/);
+    expect(essay.firstElementChild).toHaveClass('text-text-3');
+  });
+
+  it('marks only urgent tasks with a red dot in the Dashboard queue', async () => {
+    renderApp('/', {
+      setup: (fake) =>
+        fake.db.tasks.push(task({ title: 'Lab report', due_date: inDays(0) }), task({ title: 'Essay', due_date: inDays(10) })),
+    });
+    const dot = (title) => screen.getByText(title).parentElement.previousElementSibling;
+    await screen.findByText('Essay');
+    expect(dot('Lab report')).toHaveClass('bg-[#EF4444]');
+    expect(dot('Essay')).toHaveClass('bg-border2');
+  });
+});
+
+describe('sidebar and settings copy', () => {
+  it('shows the email, not "Set up profile", for a named profile without a course', async () => {
+    renderApp('/');
+    const footer = await screen.findByRole('link', { name: /Ama Owusu/ });
+    await waitFor(() => expect(footer).toHaveTextContent('ama@example.edu'));
+    expect(footer).not.toHaveTextContent('Set up profile');
+    expect(screen.queryByText(/pro edition/i)).not.toBeInTheDocument();
+  });
+
+  it('asks a new user without a name or course to set up their profile', async () => {
+    renderApp('/', { setup: (fake) => Object.assign(fake.db.profile, { display_name: null }) });
+    expect(await screen.findByText('Set up profile')).toBeInTheDocument();
+  });
+
+  it('shows the release version in Settings', async () => {
+    renderApp('/settings');
+    expect(await screen.findByText('Trackit v1.2.0')).toBeInTheDocument();
+  });
+});
+
+describe('charts and progress', () => {
+  it('labels each Analytics velocity bar and describes the chart in text', async () => {
+    renderApp('/analytics');
+    const chart = await screen.findByRole('img', { name: /tasks completed per week/i });
+    expect(chart).toHaveAccessibleName(/Week of 8 Oct, 2/);
+    expect(chart).toHaveTextContent('2');
+  });
+});
+
+describe('add page switch', () => {
+  it('marks the selected Task or Exam tab as pressed', async () => {
+    const user = userEvent.setup();
+    renderApp('/add');
+    const taskTab = await screen.findByRole('button', { name: /Assignment \/ Task/ });
+    const examTab = screen.getByRole('button', { name: /Exam$/ });
+    expect(taskTab).toHaveAttribute('aria-pressed', 'true');
+    expect(examTab).toHaveAttribute('aria-pressed', 'false');
+    await user.click(examTab);
+    expect(examTab).toHaveAttribute('aria-pressed', 'true');
+    expect(taskTab).toHaveAttribute('aria-pressed', 'false');
+  });
+});
