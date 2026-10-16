@@ -58,6 +58,7 @@ Variables). A change applies to the next deployment.
 | `ANTHROPIC_API_KEY` | API only |
 | `ALLOWED_ORIGINS` | Only needed for a frontend on another origin |
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Frontend; the build fails without the URL, because the Content-Security-Policy is generated from it |
+| `VITE_SITE_URL` | Frontend, optional. The public origin (no path), used for the canonical URL, Open Graph and Twitter cards, structured data, `robots.txt` and `sitemap.xml`. Defaults to `https://trackit-app-smoky.vercel.app`; set it in **Production** when moving to a custom domain. Previews can keep the default, because Vercel sends `X-Robots-Tag: noindex` on preview deployments. |
 
 Optional tuning variables are listed in `backend/.env.example`.
 
@@ -73,6 +74,14 @@ task list and chat before merging.
 - Sign in, open Tasks, Exams and Analytics, and send one chat message.
 - In the browser's developer tools, the page has a `Content-Security-Policy`
   `<meta>` tag and no CSP errors in the console.
+- `/robots.txt` and `/sitemap.xml` name the production domain, and the
+  page source of `/landing` has absolute `og:image` and canonical URLs
+  on the same domain. A social-card validator (for example, LinkedIn Post
+  Inspector) shows the 1200×630 image.
+- `curl -sI <production>/tasks` includes `X-Robots-Tag: noindex`, and
+  `curl -sI <production>/landing` does not.
+- After a domain change, submit the new `sitemap.xml` in Google Search
+  Console.
 - In Vercel → Logs, look for `Shared rate-limit store unavailable` (means
   migration 002 is missing) or `SUPABASE_ANON_KEY is not set`.
 

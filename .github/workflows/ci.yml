@@ -109,6 +109,36 @@ jobs:
           path: frontend/test-results
           retention-days: 7
 
+  lighthouse:
+    name: Lighthouse (landing page, mobile)
+    runs-on: ubuntu-latest
+    needs: [frontend]
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_ANON_KEY: ci-placeholder
+      # Thresholds and byte budgets are in lighthouserc.json; the runner's
+      # preinstalled Chrome is used.
+      - run: npm run test:lighthouse
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: frontend/.lighthouseci/reports
+          retention-days: 7
+
   database:
     name: Database (schema, migrations, RLS)
     runs-on: ubuntu-latest

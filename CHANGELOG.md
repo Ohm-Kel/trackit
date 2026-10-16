@@ -13,6 +13,20 @@ All notable changes to this project are documented here. The format follows
 - `scripts/db/sync-migrations.sh`: links every `supabase_migrations_NNN.sql` into the local stack in order, and fails CI when a link is missing
 - ADR 0008 on running the API's tests against a real Supabase stack
 - Playwright tests that fail if any route scrolls sideways at 375px in light or dark mode, plus checks for tap targets, focus rings and on-screen menus
+- `VITE_SITE_URL` sets the public origin used for the canonical URL, social cards, structured data, `robots.txt` and `sitemap.xml` (default `https://trackit-app-smoky.vercel.app`)
+- `robots.txt`, `sitemap.xml`, `<link rel="canonical">` and WebApplication JSON-LD for the landing page
+- `X-Robots-Tag: noindex` on app routes (Vercel and Docker); only `/landing` is listed for search engines
+- A 1200×630 social card, `favicon.ico` and `apple-touch-icon.png`
+- Playwright checks for the landing page's SEO tags, social image size, structured data, image dimensions and layout shift
+- Lighthouse CI job for the landing page (mobile), with score, Core Web Vitals and byte-budget assertions
+- `docs/performance.md` with before and after Lighthouse scores
+
+### Changed
+
+- The landing page's chunk is preloaded with the entry: mobile LCP 3.9 s to 2.3 s, Lighthouse performance 86 to 96
+- Landing page transfer is 168 KB instead of 528 KB: the favicon was the 369 KB logo
+- `logo.png` is 360 px and 12 KB instead of 640 px and 369 KB, with a transparent background; a WebP copy is added
+- Hashed `/assets/` files are cached as immutable on Vercel
 
 ### Fixed
 
@@ -33,6 +47,9 @@ All notable changes to this project are documented here. The format follows
   - On phones, the Tasks, Exams and Dashboard header buttons and the exam card links are 44px tall
   - The logo has a transparent background, so no grey square shows around it, and the phone header uses the same clock mark as the sidebar
   - Analytics uses plain labels: "Analytics" and "Tasks Completed per Week"
+- `og:url` pointed at `https://trackit.app`, and social images used relative URLs, so shared links had no image
+- Page, Open Graph and Twitter titles and descriptions disagreed; the meta description is now under 160 characters
+- A hero preview label on the landing page failed WCAG AA contrast (4.49:1)
 
 ## [1.2.0] - 2026-10-15
 
@@ -138,7 +155,6 @@ See `docs/DEPLOYMENT.md` for the full checklist.
 
 - Initial release: tasks, exams, subtasks, AI chat, timetable upload, focus plan, analytics, notifications, export, dark mode and onboarding
 
-[Unreleased]: https://github.com/Ohm-Kel/trackit/compare/v1.2.0...HEAD
 [1.2.0]: https://github.com/Ohm-Kel/trackit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Ohm-Kel/trackit/compare/5b4e017...v1.1.0
 [1.0.0]: https://github.com/Ohm-Kel/trackit/tree/5b4e017
