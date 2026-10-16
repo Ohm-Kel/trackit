@@ -7,6 +7,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
+# Keep in step with backend/tests/db/stack.js and the CI workflow.
 SUPABASE_CLI_VERSION=2.121.0
 if command -v supabase >/dev/null 2>&1; then
   supabase() { command supabase "$@"; }

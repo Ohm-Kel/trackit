@@ -7,6 +7,8 @@ const { execFileSync } = require('child_process');
 const path = require('path');
 
 const REPO_ROOT = path.join(__dirname, '..', '..', '..');
+// Keep in step with scripts/db/integration.sh and the CI workflow.
+const SUPABASE_CLI = 'supabase@2.121.0';
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', 'host.docker.internal']);
 
 function fromSupabaseStatus() {
@@ -21,7 +23,7 @@ function fromSupabaseStatus() {
     output = run('supabase', ['status', '-o', 'env']);
   } catch {
     try {
-      output = run('npx', ['--yes', 'supabase', 'status', '-o', 'env']);
+      output = run('npx', ['--yes', SUPABASE_CLI, 'status', '-o', 'env']);
     } catch {
       return {};
     }
