@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, Check, Trash2, Info, AlertTriangle, Sparkles, Loader2, X } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
@@ -11,51 +12,51 @@ import {
 
 export default function NotificationCenter() {
   const { session } = useAuth();
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const userId = session?.user?.id;
+  const queryClient = useQueryClient();
+  const queryKey = ['notifications', userId];
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const loadNotifications = useCallback(async () => {
-    if (!session?.access_token) return;
-    try {
-      setNotifications(await fetchNotifications());
-      // Proactively trigger AI suggestion analysis.
-      await generateSuggestions();
-    } catch (err) {
-      console.error('Error fetching notifications:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [session]);
+  const { data: notifications = [], isPending: loading } = useQuery({
+    queryKey,
+    queryFn: fetchNotifications,
+    enabled: !!session?.access_token,
+  });
+
+  const updateCache = (update) => queryClient.setQueryData(queryKey, (prev = []) => update(prev));
 
   useEffect(() => {
-    loadNotifications();
+    if (!userId) return undefined;
 
-    // Set up real-time subscription
-    if (session?.user?.id) {
-      const channel = supabase
-        .channel(`public:notifications:user_id=eq.${session.user.id}`)
-        .on('postgres_changes', { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'notifications',
-          filter: `user_id=eq.${session.user.id}`
-        }, (payload) => {
-          setNotifications(prev => [payload.new, ...prev]);
-        })
-        .subscribe();
+    // Proactively trigger AI suggestion analysis; new rows arrive through the
+    // subscription below, and the refetch covers a missed realtime event.
+    generateSuggestions()
+      .then(() => queryClient.invalidateQueries({ queryKey: ['notifications', userId] }))
+      .catch((err) => console.error('Error generating suggestions:', err));
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [session, loadNotifications]);
+    const channel = supabase
+      .channel(`public:notifications:user_id=eq.${userId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `user_id=eq.${userId}`
+      }, (payload) => {
+        queryClient.setQueryData(['notifications', userId], (prev = []) =>
+          prev.some((n) => n.id === payload.new.id) ? prev : [payload.new, ...prev]);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, queryClient]);
 
   const markAsRead = async (id) => {
     try {
       await markNotificationRead(id);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read_status: true } : n));
+      updateCache((prev) => prev.map(n => n.id === id ? { ...n, read_status: true } : n));
     } catch (err) {
       console.error('Error marking read:', err);
     }
@@ -64,7 +65,7 @@ export default function NotificationCenter() {
   const markAllAsRead = async () => {
     try {
       await markAllNotificationsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, read_status: true })));
+      updateCache((prev) => prev.map(n => ({ ...n, read_status: true })));
     } catch (err) {
       console.error('Error marking all read:', err);
     }
